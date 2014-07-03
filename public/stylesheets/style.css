@@ -1,0 +1,140 @@
+body {
+    margin: 0px;
+    padding: 50px;
+    font: 1.5em "Lucida Grande", Helvetica, Arial, sans-serif;
+    color: #ECE9E9;
+    background-color: #343434;
+}
+
+a {
+    color: #00B7FF;
+}
+
+.restartGameButton {
+    font-size: 4em;
+    background-color: #4fff4f;
+}
+.rerollButton {
+    font-size: 4em;
+    background-color: #4f4fff;
+}
+.acceptCombinationButton {
+    font-size: 4em;
+    background-color: #ff4f4f;
+}
+.testButton {
+    font-size: 4em;
+    background-color: #ff4fff;
+}
+
+.combination.selected {
+    background-color: #4f4fff;
+}
+.combination.used {
+    background-color: #4f4f4f;
+}
+
+.dicesHolder {
+    display: inline-block;
+    height: 128px;
+}
+.dice1 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/1-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice1.selected {
+    background-color: #ffff4f;
+}
+.dice2 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/2-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice2.selected {
+    background-color: #ffff4f;
+}
+.dice3 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/3-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice3.selected {
+    background-color: #ffff4f;
+}
+.dice4 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/4-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice4.selected {
+    background-color: #ffff4f;
+}
+.dice5 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/5-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice5.selected {
+    background-color: #ffff4f;
+}
+.dice6 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/6-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice6.selected {
+    background-color: #ffff4f;
+}
+
+
+.dice0 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/0-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice7 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/7-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice8 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/8-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
+.dice9 {
+    display: inline-block;
+    height: 128px;
+    width: 128px;
+    background: url("/images/dices/9-128.png");
+    -moz-border-radius: 30px;
+    border-radius: 30px;
+}
