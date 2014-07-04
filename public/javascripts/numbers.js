@@ -312,10 +312,12 @@
             if ($.numbers.networking == false) {
                 for (var i = 0; i < 6; i++) ans[i] = generateDice();
             } else {
-                this.fetch({success: function(mdl, directValues){
-                    ans = directValues;
-                    callback(ans);
-                }});
+                this.fetch({
+                    success: function(mdl, directValues){
+                        ans = directValues;
+                        callback(ans);
+                    }
+                });
                 //console.error("we need some code here");
             }
             return ans;
@@ -627,13 +629,24 @@
                 };
                 if (used) mdl.value = $.numbers.app.getCombination(i).points;
 
-                var combo =  new $.numbers.CombinationView({model: mdl});
+                var combo = new $.numbers.CombinationView({model: mdl});
                 //element.append( combo.render().el );
-                combosElements.push(combo);
+                combosElements.push(combo.render().el);
 
                 this.combinationsViews.push(combo);
             }
 
+            for (var i = 0; i < 7; i++){
+                var $tr = $('<tr/>');
+                var $td1 = $('<td width="50%" style="padding: 0px"/>');
+                var $td2 = $('<td width="50%" style="padding: 0px"/>');
+                if (i!=6) $td1.append(combosElements[0 + i]);
+                $td2.append(combosElements[6 + i]);
+                $tr.append($td1);
+                $tr.append($td2);
+                $table.append($tr);
+            }
+            element.append($table);
 
         },
         render: function() {

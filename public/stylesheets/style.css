@@ -33,16 +33,16 @@ table {
 
 .restartGameButton {
     text-align: right;
-    font-size: 4em;
+    font-size: 2em;
     background-color: #ff4f4f;
 }
 .rerollButton {
     text-align: left;
-    font-size: 4em;
+    font-size: 2em;
     background-color: #4f4fff;
 }
 .acceptCombinationButton {
-    font-size: 4em;
+    font-size: 2em;
     background-color: #4fff4f;
 }
 .testButton {
