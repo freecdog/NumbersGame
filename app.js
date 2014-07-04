@@ -365,6 +365,16 @@ app.get('/play', function(req,res){
     res.render("play");
 });
 
+app.get('/onlineStatistics', function(req, res){
+    removeExpiredConnections();
+
+    res.render("onlineStatistics", {
+        serverTime: new Date(),
+        connected: connectedCookies,
+        games: games
+    });
+});
+
 app.get('/api/dices', function(req, res){
     var combo = [generateDice(), generateDice(), generateDice(), generateDice(), generateDice(), generateDice()];
     //var combinationString = ""; for (var i =0; i<6; i++) combinationString += combo[i].toString();
@@ -386,13 +396,7 @@ app.get('/api/dices/:dicesindexes', function(req, res){
     res.send(combo);
 });
 
-app.post("/api/connectPlayer", function(req, res){
-
-    connectedCookies[req.sessionID] = {};
-    connectedCookies[req.sessionID].time = new Date();
-    connectedCookies[req.sessionID].status = 1; // connected
-
-    console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
+function collectOnlineStatistics(){
     var data = {};
     data.playersOnline = Object.keys(connectedCookies).length;
     data.playersSearching = 0;
@@ -409,22 +413,32 @@ app.post("/api/connectPlayer", function(req, res){
             if (games[game].status == 1) data.activeGames++;
         }
     }
+    return data;
+}
+app.get("/api/connectPlayer", function(req, res){
 
-    res.send(data);
+    if (connectedCookies.hasOwnProperty(req.sessionID)){
+        connectedCookies[req.sessionID].time = new Date();
+    } else {
+        connectedCookies[req.sessionID] = {};
+        connectedCookies[req.sessionID].time = new Date();
+        connectedCookies[req.sessionID].status = 1; // connected
+    }
+    console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
+    var data = collectOnlineStatistics();
 
-    removeExpiredConnections();
+    res.send(data);removeExpiredConnections();
 });
-app.post("/api/disconnectPlayer", function(req, res){
-
+app.get("/api/disconnectPlayer", function(req, res){
     if (connectedCookies[req.sessionID]) {
         connectedCookies[req.sessionID].time = 0;
     }
-
     removeExpiredConnections();
 
     console.log(req._remoteAddress + ", disconnected, onliners: " + Object.keys(connectedCookies).length.toString());
     res.send(Object.keys(connectedCookies).length.toString());
 });
+
 
 app.get("/api/findGame", function(req, res){
 

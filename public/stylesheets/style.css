@@ -1,6 +1,6 @@
 body {
     margin: 0px;
-    padding: 50px;
+    /*padding: 50px*/
     font: 1.5em "Lucida Grande", Helvetica, Arial, sans-serif;
     color: #ECE9E9;
     background-color: #343434;
@@ -10,17 +10,40 @@ a {
     color: #00B7FF;
 }
 
+#pad1 {
+    padding-left: 40px;
+}
+
+#pad2 {
+    padding-left: 80px;
+}
+
+#pad3 {
+    padding-left: 120px;
+}
+
+table {
+    border: 0;
+    margin: 0px;
+    padding: 0px;
+    width: 100%;
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
 .restartGameButton {
+    text-align: right;
     font-size: 4em;
-    background-color: #4fff4f;
+    background-color: #ff4f4f;
 }
 .rerollButton {
+    text-align: left;
     font-size: 4em;
     background-color: #4f4fff;
 }
 .acceptCombinationButton {
     font-size: 4em;
-    background-color: #ff4f4f;
+    background-color: #4fff4f;
 }
 .testButton {
     font-size: 4em;
@@ -35,7 +58,6 @@ a {
 }
 
 .dicesHolder {
-    display: inline-block;
     height: 128px;
 }
 .dice1 {

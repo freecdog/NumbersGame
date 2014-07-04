@@ -357,6 +357,20 @@
         }
     });
 
+    $.numbers.ModelConnection = Backbone.Model.extend({
+        urlRoot: '/api/connectPlayer',
+        initialize: function(callback) {
+            //console.error("we need some code here");
+            var self = this;
+            this.fetch({
+                success: function(mdl, values){
+                    console.log("connection fetched", mdl, values);
+                    if (callback != null) callback();
+                }
+            });
+        }
+    });
+
     // Views
     $.numbers.RestartButton = Backbone.View.extend({
         tagName: 'div',
@@ -564,6 +578,36 @@
                 "Vierer Pasch", "Full House", "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
             this.combinationsViews = [];
             var usedCombinations = $.numbers.app.getCombinations();
+
+            var $table = $('<table/>');
+            // #TODO WORK FROM HERE
+            /*var $tr = $('<tr/>');
+            var $td1 = $('<td width="50%" style="padding: 0px"/>');
+            var $td2 = $('<td width="50%" style="padding: 0px"/>');
+            $td1.append(rerollButton.render().el);
+            $td2.append(restartButton.render().el);
+            $tr.append($td1);
+            $tr.append($td2);
+            $table.append($tr);
+            this.$el.append($table);*/
+
+            var tableAdapter = {};
+            tableAdapter[0] = 0;
+            tableAdapter[1] = 2;
+            tableAdapter[2] = 4;
+            tableAdapter[3] = 6;
+            tableAdapter[4] = 8;
+            tableAdapter[5] = 10;
+            tableAdapter[6] = 1;
+            tableAdapter[7] = 3;
+            tableAdapter[8] = 5;
+            tableAdapter[9] = 7;
+            tableAdapter[10] = 9;
+            tableAdapter[11] = 11;
+            tableAdapter[12] = 13;
+
+            var combosElements = [];
+
             for (var i = 0; i < this.model.attributes.combinations.length; i++){
 
                 var used = false;
@@ -584,10 +628,13 @@
                 if (used) mdl.value = $.numbers.app.getCombination(i).points;
 
                 var combo =  new $.numbers.CombinationView({model: mdl});
-                element.append( combo.render().el );
+                //element.append( combo.render().el );
+                combosElements.push(combo);
 
                 this.combinationsViews.push(combo);
             }
+
+
         },
         render: function() {
             this.$el.empty();
@@ -618,10 +665,21 @@
                 var self = this;
                 this.$el.empty();
 
-                var restartButton = new $.numbers.RestartButton();
-                this.$el.append(restartButton.render().el);
                 var rerollButton = new $.numbers.RerollButton();
-                this.$el.append(rerollButton.render().el);
+                //this.$el.append(rerollButton.render().el);
+                var restartButton = new $.numbers.RestartButton();
+                //this.$el.append(restartButton.render().el);
+
+                var $table = $('<table/>');
+                var $tr = $('<tr/>');
+                var $td1 = $('<td width="50%" style="padding: 0px"/>');
+                var $td2 = $('<td width="50%" style="padding: 0px"/>');
+                $td1.append(rerollButton.render().el);
+                $td2.append(restartButton.render().el);
+                $tr.append($td1);
+                $tr.append($td2);
+                $table.append($tr);
+                this.$el.append($table);
 
                 $.numbers.app.currentRerollStatus = false;
                 $.numbers.app.currentSelected = [false, false, false, false, false, false];
@@ -645,10 +703,21 @@
                 var self = this;
                 this.$el.empty();
 
-                var restartButton = new $.numbers.RestartButton();
-                this.$el.append(restartButton.render().el);
                 var rerollButton = new $.numbers.RerollButton();
-                this.$el.append(rerollButton.render().el);
+                //this.$el.append(rerollButton.render().el);
+                var restartButton = new $.numbers.RestartButton();
+                //this.$el.append(restartButton.render().el);
+
+                var $table = $('<table/>');
+                var $tr = $('<tr/>');
+                var $td1 = $('<td width="50%" style="padding: 0px"/>');
+                var $td2 = $('<td width="50%" style="padding: 0px"/>');
+                $td1.append(rerollButton.render().el);
+                $td2.append(restartButton.render().el);
+                $tr.append($td1);
+                $tr.append($td2);
+                $table.append($tr);
+                this.$el.append($table);
 
                 $.numbers.app.currentRerollStatus = false;
                 $.numbers.app.currentSelected = [false, false, false, false, false, false];
@@ -714,11 +783,20 @@
                 $('body').append(this.gameView.render().el);
             } else {
                 var self = this;
-                this.gameView = new $.numbers.GameView();
-                this.gameView.render(function(){
-                    $('body').append(self.gameView.el);
+
+                this.getConnection(function(){
+                    self.gameView = new $.numbers.GameView();
+                    self.gameView.render(function(){
+                        $('body').append(self.gameView.el);
+                    });
                 });
             }
+        },
+
+        getConnection: function(callback){
+            this.connection = new $.numbers.ModelConnection(function(){
+                callback();
+            });
         },
 
         addCombination: function(combo){

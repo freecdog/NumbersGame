@@ -1,0 +1,30 @@
+//
+   Created by jaric on 04.07.14.
+
+extends layout
+block content
+
+    p Server time: #{serverTime}
+
+    a(href="/") Menu
+    br
+    a(href="/api/dropAll") Drop all
+
+    p Connections[#{Object.keys(connected).length}]:
+    -for(var connection in connected)
+        #pad1 #{connection}:
+        -for(var conState in connected[connection])
+            if (conState == "time")
+                -var diff = (serverTime - connected[connection][conState]) / 1000.0;
+                #pad2 #{conState} — (#{diff}) #{connected[connection][conState]}
+            else
+                #pad2 #{conState} — #{connected[connection][conState]}
+    p Games[#{Object.keys(games).length}]:
+    -for(var game in games)
+        #pad1 #{game}:
+        -for(var gameState in games[game])
+            if (gameState != "boxes")
+                #pad2 #{gameState} — #{games[game][gameState]}
+
+    br
+    | questions: mm1000@list.ru
