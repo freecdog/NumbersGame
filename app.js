@@ -372,9 +372,17 @@ app.get('/api/dices', function(req, res){
     res.send(combo);
 });
 app.get('/api/dices/:dicesindexes', function(req, res){
-    var combo = [generateDice(), generateDice(), generateDice(), generateDice(), generateDice(), generateDice()];
+    //var combo = [generateDice(), generateDice(), generateDice(), generateDice(), generateDice(), generateDice()];
     //var combinationString = ""; for (var i =0; i<6; i++) combinationString += combo[i].toString();
-    console.error("need some code here");
+
+    var combo = [];
+    //console.log("user params", req.params);
+    for (var i = 0; i < req.params.dicesindexes.length; i++){
+        combo.push(generateDice());
+    }
+
+    //console.error("need some code here");
+    console.log(req.connection.remoteAddress, combo);
     res.send(combo);
 });
 
