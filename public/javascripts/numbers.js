@@ -242,7 +242,7 @@
 
     $.numbers = {};
 
-    $.numbers.networking = false;
+    $.numbers.networking = true;
     console.log("Networking", $.numbers.networking ? "enabled" : "disabled");
 
     // Models
