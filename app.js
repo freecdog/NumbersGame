@@ -427,7 +427,8 @@ app.get("/api/connectPlayer", function(req, res){
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
 
-    res.send(data);removeExpiredConnections();
+    res.send(data);
+    removeExpiredConnections();
 });
 app.get("/api/disconnectPlayer", function(req, res){
     if (connectedCookies[req.sessionID]) {

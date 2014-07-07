@@ -1,5 +1,5 @@
 /**
- * Created by jaric on 24.06.14.
+ * Created by yarvyk on 07.07.14.
  */
 
 (function($) {
@@ -249,7 +249,6 @@
 
     // status difinition in rules
     $.numbers.Game = Backbone.Model.extend( {
-        urlRoot: '/api/game',
         idAttribute: '_id',
         defaults: {
             '_id':  null,
@@ -266,7 +265,37 @@
                 //console.error("we need some code here");
             }
 
+            this.listenTo(this, 'change', this.statusChanged);
+
+            this.updateModel();
+        },
+        statusChanged: function(){
+            var needUpdate = true;
+            if (this.status == 0) {
+                this.urlRoot = '/api/connectPlayer';
+            } else if (this.status == 10) {
+                this.urlRoot = '/api/findGame';
+            } else {
+                needUpdate = false;
+                console.warn("unknown game status:",this.status);
+            }
+            if (needUpdate){
+                this.updateModel();
+            }
+        },
+        updateModel: function(callback){
+            if (callback == null) callback = function(){};
+            this.fetch({
+                success: function(mdl, values){
+                    callback();
+                },
+                error: function(mdl, values){
+                    console.log("Can't update", mdl, values);
+                    callback();
+                }
+            });
         }
+
     });
 
     $.numbers.Combination = Backbone.Model.extend({
@@ -279,6 +308,7 @@
         },
 
         initialize: function(callback, storedDices) {
+            if (callback == null) callback = function(){};
             if ($.numbers.networking == false) {
                 this.urlRoot = "";
                 if (typeof storedDices == 'undefined') {
@@ -301,7 +331,7 @@
                 } else {
                     this.attributes.dices = storedDices;
                     this.attributes.combinations = checkCombinations(this.attributes.dices);
-                    if (callback != null) callback();
+                    callback();
                 }
             }
 
@@ -363,17 +393,18 @@
         urlRoot: '/api/connectPlayer',
         initialize: function(callback) {
             //console.error("we need some code here");
+            if (callback == null) callback = function(){};
             var self = this;
             this.fetch({
                 success: function(mdl, values){
                     $.numbers.networking = true;
                     console.log("connection fetched", mdl, values);
-                    if (callback != null) callback();
+                    callback();
                 },
                 error: function(mdl, values){
                     $.numbers.networking = false;
                     console.log("Can't connect to server", mdl, values);
-                    if (callback != null) callback();
+                    callback();
                 }
             });
         }
@@ -670,6 +701,7 @@
             this.model = new $.numbers.Game();
         },
         render: function(callback){
+            if (callback == null) callback = function(){};
             if ($.numbers.networking == false) {
                 var self = this;
                 this.$el.empty();
@@ -707,7 +739,7 @@
                 this.$el.append(acceptCombinationButton.render().el);
 
                 console.log('gameView rendered');
-                if (callback != null) callback();
+                callback();
                 return this;
             } else {
                 var self = this;
@@ -743,7 +775,7 @@
                     self.$el.append(acceptCombinationButton.render().el);
 
                     console.log('gameView rendered');
-                    if (callback != null) callback();
+                    callback();
                     return self;
                 } else {
                     $.numbers.app.currentCombination = new $.numbers.Combination(function(){
@@ -756,7 +788,7 @@
                         self.$el.append(acceptCombinationButton.render().el);
 
                         console.log('gameView rendered');
-                        if (callback != null) callback();
+                        callback();
                         //return self;
                     });
                 }
@@ -782,27 +814,18 @@
             console.log("1. app init");
         },
         numbers: function(){
-            //var combinationString = generateDice().toString() + generateDice().toString() +
-            // generateDice().toString() + generateDice().toString() +
-            // generateDice().toString() + generateDice().toString();
-            //console.log("Test. we are here", combinationString);
-            //console.log(checkCombinations(combinationString));
             console.log("2. app route");
 
-            if ($.numbers.networking == false) {
-                this.gameView = new $.numbers.GameView();
-                $('body').append(this.gameView.render().el);
-            } else {
-                var self = this;
+            var self = this;
 
-                this.getConnection(function(){
-                    console.log("networking:", $.numbers.networking);
-                    self.gameView = new $.numbers.GameView();
-                    self.gameView.render(function(){
-                        $('body').append(self.gameView.el);
-                    });
+            // #TODO work on init order and View-Model onChange interaction
+            this.getConnection(function(){
+                console.log("networking:", $.numbers.networking);
+                self.gameView = new $.numbers.GameView();
+                self.gameView.render(function(){
+                    $('body').append(self.gameView.el);
                 });
-            }
+            });
         },
 
         getConnection: function(callback){
@@ -820,12 +843,6 @@
                 combos.push(combo);
             }
             this.addValue("combinations", JSON.stringify(combos));
-            /* end game case
-            if (combos.length == 13) {
-                console.log("going to calculate results");
-                var totalPts = this.calculate();
-                $.numbers.app.combinationsView.render(totalPts);
-            }*/
         },
         getCombination: function(index){
             if (this.existValue("combinations")){
