@@ -249,6 +249,7 @@
 
     // status difinition in rules
     $.numbers.Game = Backbone.Model.extend( {
+        urlRoot: '/api/connectPlayer',
         idAttribute: '_id',
         defaults: {
             '_id':  null,
@@ -307,9 +308,32 @@
             combinations: []
         },
 
-        initialize: function(callback, storedDices) {
+        initialize: function(callback) {
             if (callback == null) callback = function(){};
-            if ($.numbers.networking == false) {
+            var self = this;
+
+            // localStorage - sync values among all tabs
+            // sessionStorage - keep values only in one tab
+            this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
+
+            if (this.existValue("lastDices")){
+                //this.attributes.dices = JSON.parse( this.getValue("lastDices") );
+                self.set({dices: JSON.parse( self.getValue("lastDices") )});
+                //this.attributes.combinations = checkCombinations(this.attributes.dices);
+                self.set({combinations: checkCombinations(self.attributes.dices)});
+                callback();
+            } else {
+                this.getDices(function(dices){
+                    self.addValue("lastDices", JSON.stringify(dices));
+                    //self.attributes.dices = dices;
+                    self.set({dices: dices});
+                    //self.attributes.combinations = checkCombinations(self.attributes.dices);
+                    self.set({combinations: checkCombinations(self.attributes.dices)});
+                    callback();
+                });
+            }
+
+            /*if ($.numbers.networking == false) {
                 this.urlRoot = "";
                 if (typeof storedDices == 'undefined') {
                     this.attributes.dices = this.getCombination(function(){});
@@ -333,11 +357,11 @@
                     this.attributes.combinations = checkCombinations(this.attributes.dices);
                     callback();
                 }
-            }
+            }*/
 
         },
 
-        getCombination: function(callback) {
+        getDices: function(callback) {
             var ans = [0, 0, 0, 0, 0, 0];
             if ($.numbers.networking == false) {
                 for (var i = 0; i < 6; i++) ans[i] = generateDice();
@@ -353,6 +377,7 @@
             return ans;
         },
 
+        // #TODO reroll and clean up old shit =)
         reroll: function(callback, indexes){
             if ($.numbers.networking == false) {
                 //console.log("before", this.attributes.dices);
@@ -386,6 +411,107 @@
                     }
                 });
             }
+        },
+
+        acceptCombination: function(index){
+            var selectedIndex = index;
+            if (selectedIndex != -1) {
+                var combo = {};
+                combo.dices = this.attributes.dices;
+                combo.combinationIndex = selectedIndex;
+                combo.points = this.attributes.combinations[selectedIndex];
+
+                if (this.checkCombination(selectedIndex)) {
+                    this.addCombination(combo);
+                    this.removeValue("lastDices");
+                    console.log("combo added", combo);
+
+                    // generating new combination
+                    this.generateCombination();
+
+                    return true;
+                } else {
+                    console.log("can't add combo");
+                    return false;
+                }
+            } else {
+                console.log("nothing was taked");
+                return false;
+            }
+        },
+        generateCombination: function(callback){
+            var self = this;
+            self.getDices(function(dices){
+                self.set({dices: dices});
+                self.set({combinations: checkCombinations(self.attributes.dices)});
+            });
+        },
+        checkCombination: function(index){
+            var available = true;
+            var usedCombos = this.getCombinations();
+            if (usedCombos.length != 0){
+                for (var i = 0; i < usedCombos.length; i++){
+                    if (usedCombos[i] == index){
+                        available = false;
+                        break;
+                    }
+                }
+            }
+            return available;
+        },
+        addCombination: function(combo){
+            var combos = [];
+            if (this.existValue("combinations")){
+                combos = JSON.parse( this.getValue("combinations") );
+                combos.push(combo);
+            } else {
+                combos.push(combo);
+            }
+            this.addValue("combinations", JSON.stringify(combos));
+        },
+        getCombinationByIndex: function(index){
+            if (this.existValue("combinations")){
+                var combos = JSON.parse( this.getValue("combinations") );
+                for (var i = 0; i < combos.length; i++){
+                    if (combos[i].combinationIndex == index) {
+                        return combos[i];
+                    }
+                }
+            }
+            console.log("no combination with such index:", index);
+            return null;
+        },
+        getCombinations: function(){
+            var combosIndexes = [];
+            if (this.existValue("combinations")){
+                var combos = JSON.parse( this.getValue("combinations") );
+                for (var i = 0; i < combos.length; i++){
+                    combosIndexes.push(combos[i].combinationIndex);
+                }
+            }
+            return combosIndexes;
+        },
+
+        restart: function(){
+            this.removeValue("combinations");
+            this.removeValue("lastDices");
+            //this.gameView.render();
+            console.warn("not sure if this work");
+            this.initialize();
+        },
+
+        // storage
+        addValue: function(name,value){
+            this.storage.setItem(name, value);
+        },
+        getValue: function(name){
+            return this.storage.getItem(name);
+        },
+        existValue: function(name){
+            return this.storage.getItem(name) != null;
+        },
+        removeValue: function(name){
+            this.storage.removeItem(name);
         }
     });
 
@@ -435,7 +561,7 @@
             "click": "clicked"
         },
         clicked: function(){
-            console.log("going to reroll");
+            console.log("going to reroll", this.options.parent);
             $.numbers.app.rerollDices();
         },
         buttonTemplate: _.template("[reroll]"),
@@ -453,7 +579,9 @@
         },
         clicked: function(){
             console.log("going to accept");
-            $.numbers.app.acceptCombination();
+            var ind = this.options.parent.selectedIndex;
+            this.options.parent.model.acceptCombination(ind);
+            //$.numbers.app.acceptCombination(ind);
         },
         buttonTemplate: _.template("[accept combination]"),
         render: function(){
@@ -551,12 +679,16 @@
         tagName: 'div',
         className: 'combinations',
         events: {
-            //"click": function(event){this.clicked(event);}
         },
         initialize: function(){
             this.selectedIndex = -1;
-            //$.numbers.app.addValue("CombinationsView", Math.random() * 100);
+            this.listenTo(this.model, "change:combinations", this.listener);
         },
+        listener: function(mdl,xhr){
+            console.log("listener is here", mdl, xhr);
+            this.render();
+        },
+
         selectCombination: function(index, element){
             this.selectedIndex = index;
             //$(element).addClass("selected");
@@ -572,7 +704,7 @@
                 this.deselectCombination(i, this.combinationsViews[i]);
             }
         },
-        acceptCombination: function(){
+        /*acceptCombination: function(){
             if (this.selectedIndex != -1) {
                 var combo = {};
                 combo.dices = this.model.attributes.dices;
@@ -592,7 +724,7 @@
                 console.log("nothing was taked");
                 return false;
             }
-        },
+        },*/
         dicesHolderTemplate:  _.template('<div id="dicesHolder"></div>'),
         renderDices: function(element){
             for (var i = 0; i < this.model.attributes.dices.length; i++) {
@@ -616,7 +748,8 @@
             var names = ["1er", "2er", "3er", "4er", "5er", "6er", "Dreir Pasch",
                 "Vierer Pasch", "Full House", "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
             this.combinationsViews = [];
-            var usedCombinations = $.numbers.app.getCombinations();
+            //var usedCombinations = $.numbers.app.getCombinations();
+            var usedCombinations = this.model.getCombinations();
 
             var $table = $('<table/>');
 
@@ -654,7 +787,8 @@
                     usedCombination: used,
                     parent: this
                 };
-                if (used) mdl.value = $.numbers.app.getCombination(i).points;
+                //if (used) mdl.value = $.numbers.app.getCombinationByIndex(i).points;
+                if (used) mdl.value = this.model.getCombinationByIndex(i).points;
 
                 var combo = new $.numbers.CombinationView({model: mdl});
                 //element.append( combo.render().el );
@@ -682,7 +816,8 @@
             this.$el.append(this.dicesHolderTemplate());
             var dicesHolder = this.$el.find("#dicesHolder");
 
-            if ($.numbers.app.getCombinations().length == 13){
+            //if ($.numbers.app.getCombinations().length == 13){
+            if (this.model.getCombinations().length == 13){
                 this.renderResults(dicesHolder);
             } else {
                 this.renderDices(dicesHolder);
@@ -706,7 +841,7 @@
                 var self = this;
                 this.$el.empty();
 
-                var rerollButton = new $.numbers.RerollButton();
+                var rerollButton = new $.numbers.RerollButton({parent: $.numbers.app.combinationsView});
                 //this.$el.append(rerollButton.render().el);
                 var restartButton = new $.numbers.RestartButton();
                 //this.$el.append(restartButton.render().el);
@@ -724,18 +859,13 @@
 
                 $.numbers.app.currentRerollStatus = false;
                 $.numbers.app.currentSelected = [false, false, false, false, false, false];
-                if ($.numbers.app.existValue("lastDices")){
-                    var storedDices = JSON.parse( $.numbers.app.getValue("lastDices") );
-                    $.numbers.app.currentCombination = new $.numbers.Combination(null, storedDices);
-                } else {
-                    $.numbers.app.currentCombination = new $.numbers.Combination();
-                }
+                $.numbers.app.currentCombination = new $.numbers.Combination();
                 var comboView = new $.numbers.CombinationsView({model: $.numbers.app.currentCombination});
                 $.numbers.app.combinationsView = comboView;
                 var numbers = this.$el; //$('#combinations');
                 numbers.append(comboView.render().el);
 
-                var acceptCombinationButton = new $.numbers.AcceptCombinationButton();
+                var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
                 this.$el.append(acceptCombinationButton.render().el);
 
                 console.log('gameView rendered');
@@ -745,7 +875,7 @@
                 var self = this;
                 this.$el.empty();
 
-                var rerollButton = new $.numbers.RerollButton();
+                var rerollButton = new $.numbers.RerollButton({parent: $.numbers.app.combinationsView});
                 //this.$el.append(rerollButton.render().el);
                 var restartButton = new $.numbers.RestartButton();
                 //this.$el.append(restartButton.render().el);
@@ -763,35 +893,35 @@
 
                 $.numbers.app.currentRerollStatus = false;
                 $.numbers.app.currentSelected = [false, false, false, false, false, false];
-                if ($.numbers.app.existValue("lastDices")){
-                    var storedDices = JSON.parse( $.numbers.app.getValue("lastDices") );
-                    $.numbers.app.currentCombination = new $.numbers.Combination(null, storedDices);
-                    var comboView = new $.numbers.CombinationsView({model: $.numbers.app.currentCombination});
-                    $.numbers.app.combinationsView = comboView;
-                    var numbers = self.$el; //$('#combinations');
-                    numbers.append(comboView.render().el);
+                //if ($.numbers.app.existValue("lastDices")){
+                //var storedDices = JSON.parse( $.numbers.app.getValue("lastDices") );
+                $.numbers.app.currentCombination = new $.numbers.Combination();
+                var comboView = new $.numbers.CombinationsView({model: $.numbers.app.currentCombination});
+                $.numbers.app.combinationsView = comboView;
+                var numbers = self.$el; //$('#combinations');
+                numbers.append(comboView.render().el);
 
-                    var acceptCombinationButton = new $.numbers.AcceptCombinationButton();
-                    self.$el.append(acceptCombinationButton.render().el);
+                var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
+                self.$el.append(acceptCombinationButton.render().el);
 
-                    console.log('gameView rendered');
-                    callback();
-                    return self;
-                } else {
+                console.log('gameView rendered');
+                callback();
+                return self;
+                /*} else {
                     $.numbers.app.currentCombination = new $.numbers.Combination(function(){
                         var comboView = new $.numbers.CombinationsView({model: $.numbers.app.currentCombination});
                         $.numbers.app.combinationsView = comboView;
                         var numbers = self.$el; //$('#combinations');
                         numbers.append(comboView.render().el);
 
-                        var acceptCombinationButton = new $.numbers.AcceptCombinationButton();
+                        var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
                         self.$el.append(acceptCombinationButton.render().el);
 
                         console.log('gameView rendered');
                         callback();
                         //return self;
                     });
-                }
+                }*/
 
             }
 
@@ -807,6 +937,7 @@
         },
 
         initialize: function(){
+
             // localStorage - sync values among all tabs
             // sessionStorage - keep values only in one tab
             this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
@@ -818,7 +949,6 @@
 
             var self = this;
 
-            // #TODO work on init order and View-Model onChange interaction
             this.getConnection(function(){
                 console.log("networking:", $.numbers.networking);
                 self.gameView = new $.numbers.GameView();
@@ -834,7 +964,7 @@
             });
         },
 
-        addCombination: function(combo){
+        /*addCombination: function(combo){
             var combos = [];
             if (this.existValue("combinations")){
                 combos = JSON.parse( this.getValue("combinations") );
@@ -843,8 +973,8 @@
                 combos.push(combo);
             }
             this.addValue("combinations", JSON.stringify(combos));
-        },
-        getCombination: function(index){
+        },*/
+        /*getCombinationByIndex: function(index){
             if (this.existValue("combinations")){
                 var combos = JSON.parse( this.getValue("combinations") );
                 for (var i = 0; i < combos.length; i++){
@@ -855,8 +985,8 @@
             }
             console.log("no combination with such index:", index);
             return null;
-        },
-        getCombinations: function(){
+        },*/
+        /*getCombinations: function(){
             var combosIndexes = [];
             if (this.existValue("combinations")){
                 var combos = JSON.parse( this.getValue("combinations") );
@@ -878,7 +1008,7 @@
                 }
             }
             return available;
-        },
+        },*/
 
         calculate: function(){
             var ans = 0;
@@ -896,11 +1026,14 @@
             return ans;
         },
 
-        acceptCombination: function(){
-            if ($.numbers.app.combinationsView.acceptCombination()) {
-                this.gameView.render();
+        /*acceptCombination: function(index){
+            //if ($.numbers.app.combinationsView.acceptCombination()) {
+            //    this.gameView.render();
+            //}
+            if (this.currentCombination.acceptCombination(index)) {
+                //this.gameView.render();
             }
-        },
+        },*/
         // reroll all checked dices, rerollMode
         rerollDices: function(){
             if ($.numbers.networking == false) {
@@ -939,6 +1072,7 @@
             this.removeValue("lastDices");
             this.gameView.render();
         },
+
 
         // storage
         addValue: function(name,value){
