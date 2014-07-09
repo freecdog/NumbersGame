@@ -254,9 +254,9 @@
             combinations: null
         },
         initialize: function() {
-            this.listenTo(this, 'change', this.statusChanged);
+            //this.listenTo(this, 'change', this.statusChanged);
 
-            this.updateModel();
+            //this.updateModel();
         },
         statusChanged: function(){
             var needUpdate = true;
@@ -292,6 +292,7 @@
         idAttribute: '_id',
         defaults: {
             '_id':  null,
+            status: 0,
             dices: [0, 0, 0, 0, 0, 0],
             combinations: []
         },
@@ -304,6 +305,9 @@
             // sessionStorage - keep values only in one tab
             this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
 
+            this.listenTo(this, 'change:status', this.statusChanged);
+            this.statusChanged();
+
             this.currentRerollStatus = false;
             this.currentSelected = [false, false, false, false, false, false];
 
@@ -313,6 +317,55 @@
             } else {
                 this.generateCombination(callback);
             }
+        },
+
+        statusChanged: function(){
+            console.log("status changed");
+            var needUpdate = true;
+            var status = this.attributes.status;
+            if (status == 0) {
+                this.urlRoot = '/api/connectPlayer';
+            } else if (status == 10) {
+                this.urlRoot = '/api/findGame';
+            } else if (status == 20) {
+                this.urlRoot = '/api/gameProcess/' + this.attributes._id;
+            } else {
+                needUpdate = false;
+                console.warn("unknown game status:",this.status);
+            }
+            if (needUpdate){
+                this.updateModel();
+            }
+        },
+        updateModel: function(){
+            var self = this;
+            console.log("going to fetch", this.urlRoot);
+            this.fetch({
+                success: function(mdl, values){
+                    var status = self.attributes.status;
+                    if (status == 0) {
+                        self.changeStatus(10);
+                    }
+                },
+                error: function(mdl, values, xhr){
+                    var status = self.attributes.status;
+                    if (status == 10) {
+                        if (values.status == 200) {
+                            console.log("trying to find");
+                            setTimeout(function(){
+                                self.updateModel();
+                            }, 1000);
+                        } else {
+                            console.log("Connection eRRor", mdl, values, xhr);
+                        }
+                    } else {
+                        console.log("Connection error", mdl, values, xhr);
+                    }
+                }
+            });
+        },
+        changeStatus: function(value){
+            this.set({status: value});
         },
 
         getDices: function(callback) {
@@ -587,6 +640,30 @@
             return this;
         }
     });
+    $.numbers.StatusView = Backbone.View.extend({
+        tagName: 'div',
+        className: 'statusView',
+        initialize: function(){
+            this.listenTo(this.model, "change:status", this.listener);
+        },
+        listener: function(){
+            this.render();
+        },
+        statusTemplate: _.template("status: <%= status%> "),
+        meaningTemplate: _.template("(<%= value%>)"),
+        render: function(){
+            this.$el.empty();
+            this.$el.append(this.statusTemplate(this.model.attributes));
+
+            var value;
+            if (this.model.attributes.status == 0) value = "connecting";
+            else if (this.model.attributes.status == 10) value = "finding game";
+            else value = "unknown status";
+            this.$el.append(this.meaningTemplate({value: value}));
+
+            return this;
+        }
+    });
 
     $.numbers.ResultView = Backbone.View.extend({
         tagName: 'div',
@@ -806,7 +883,7 @@
         tagName: 'div',
         className: 'game',
         initialize: function(){
-            this.model = new $.numbers.Game();
+            //this.model = new $.numbers.Game();
         },
         render: function(){
             var self = this;
@@ -814,6 +891,9 @@
             //$.numbers.app.currentCombination = new $.numbers.Combination();
             var comboView = new $.numbers.CombinationsView({model: $.numbers.app.combinationModel});
             $.numbers.app.combinationsView = comboView;
+
+            var statusView = new $.numbers.StatusView({model: $.numbers.app.combinationModel});
+            this.$el.append(statusView.render().el);
 
             var rerollButton = new $.numbers.RerollButton({parent: $.numbers.app.combinationsView});
             //this.$el.append(rerollButton.render().el);
@@ -857,13 +937,17 @@
 
             var self = this;
 
-            this.getConnection(function(){
-                console.log("networking:", $.numbers.networking);
+            //this.getConnection(function(){
+                $.numbers.networking = true;
+                console.log("networking(junked):", $.numbers.networking);
                 self.combinationModel = new $.numbers.Combination();
-                self.gameView = new $.numbers.GameView();
+
+                self.gameModel = new $.numbers.Game();
+                self.gameView = new $.numbers.GameView({model: self.gameModel});
                 self.gameView.render();
+
                 $('body').append(self.gameView.el);
-            });
+            //});
         },
         getConnection: function(callback){
             this.connection = new $.numbers.ModelConnection(function(){
