@@ -257,8 +257,8 @@
             //this.listenTo(this, 'change', this.statusChanged);
 
             //this.updateModel();
-        },
-        statusChanged: function(){
+        }
+        /*statusChanged: function(){
             var needUpdate = true;
             if (this.status == 0) {
                 this.urlRoot = '/api/connectPlayer';
@@ -266,7 +266,7 @@
                 this.urlRoot = '/api/findGame';
             } else {
                 needUpdate = false;
-                console.warn("unknown game status:",this.status);
+                console.warn("unknown game status:",this);
             }
             if (needUpdate){
                 this.updateModel();
@@ -283,13 +283,13 @@
                     callback();
                 }
             });
-        }
+        }*/
 
     });
 
     $.numbers.Combination = Backbone.Model.extend({
         urlRoot: '/api/dices',
-        idAttribute: '_id',
+        //idAttribute: 'id',
         defaults: {
             '_id':  null,
             status: 0,
@@ -329,9 +329,12 @@
                 this.urlRoot = '/api/findGame';
             } else if (status == 20) {
                 this.urlRoot = '/api/gameProcess/' + this.attributes._id;
+            } else if (status == -1) {
+                console.log("game is over");
+                //this.urlRoot = '/api/gameProcess/' + this.attributes._id;
             } else {
                 needUpdate = false;
-                console.warn("unknown game status:",this.status);
+                console.warn("unknown game status:",this.status, this);
             }
             if (needUpdate){
                 this.updateModel();
@@ -339,16 +342,24 @@
         },
         updateModel: function(){
             var self = this;
+            // if there are urlRoot and attributes.id it will be fetched urlRoot + / + id
             console.log("going to fetch", this.urlRoot);
             this.fetch({
                 success: function(mdl, values){
                     var status = self.attributes.status;
                     if (status == 0) {
                         self.changeStatus(10);
+                    } else if (status == 20) {
+                        // TODO work on interaction with server
+                        console.log("process fetched:", mdl, values);
+                        setTimeout(function(){
+                            self.updateModel();
+                        }, 1000);
                     }
                 },
                 error: function(mdl, values, xhr){
                     var status = self.attributes.status;
+                    // TODO is there an answer why fetching result lead to error?
                     if (status == 10) {
                         if (values.status == 200) {
                             console.log("trying to find");
@@ -394,8 +405,9 @@
 
         reroll: function(indexes){
             var self = this;
+            var i = 0;
             if ($.numbers.networking == false) {
-                for (var i = 0; i < indexes.length; i++) {
+                for (i = 0; i < indexes.length; i++) {
                     this.attributes.dices[ indexes[i] ] = generateDice();
                     this.currentSelected[ indexes[i] ] = false;
                 }
@@ -404,14 +416,14 @@
                 var prevUrlRoot = this.urlRoot;
 
                 this.urlRoot += "/";
-                for (var i = 0; i < indexes.length; i++){
+                for (i = 0; i < indexes.length; i++){
                     this.urlRoot += indexes[i].toString();
                 }
                 console.log("going to fetch rerolled dices", this.urlRoot);
 
                 this.fetch({
                     success: function(mdl, values){
-                        for (var i = 0; i < indexes.length; i++) {
+                        for (i = 0; i < indexes.length; i++) {
                             self.attributes.dices[ indexes[i] ] = parseInt(values[i]);
                             self.currentSelected[ indexes[i] ] = false;
                         }
@@ -419,7 +431,7 @@
                         console.log("rerolled dices", self.attributes.dices);
                         self.urlRoot = prevUrlRoot;
                     },
-                    error: function(mdl, values){
+                    error: function(){
                         self.urlRoot = prevUrlRoot;
                     }
                 });
@@ -442,14 +454,13 @@
         },
 
         acceptCombination: function(index){
-            var selectedIndex = index;
-            if (selectedIndex != -1) {
+            if (index != -1) {
                 var combo = {};
                 combo.dices = this.attributes.dices;
-                combo.combinationIndex = selectedIndex;
-                combo.points = this.attributes.combinations[selectedIndex];
+                combo.combinationIndex = index;
+                combo.points = this.attributes.combinations[index];
 
-                if (this.checkCombination(selectedIndex)) {
+                if (this.checkCombination(index)) {
                     this.addCombination(combo);
                     this.removeValue("lastDices");
                     console.log("combo added", combo);
@@ -457,7 +468,7 @@
                     this.currentRerollStatus = false;
 
                     // generating new combination
-                    this.generateCombination();
+                    this.generateCombination(null);
 
                     return true;
                 } else {
@@ -472,6 +483,10 @@
         generateCombination: function(callback){
             if (callback == null) callback = function(){};
             var self = this;
+            if (this.urlRoot != "/api/dices") {
+                console.warn("url is different, cancelling generating, breaking operation, url is", this.urlRoot);
+                return;
+            }
             self.getDices(function(dices){
                 self.addValue("lastDices", JSON.stringify(dices));
                 self.setDices(dices);
@@ -566,7 +581,6 @@
         initialize: function(callback) {
             //console.error("we need some code here");
             if (callback == null) callback = function(){};
-            var self = this;
             this.fetch({
                 success: function(mdl, values){
                     $.numbers.networking = true;
@@ -649,6 +663,12 @@
         listener: function(){
             this.render();
         },
+        events: {
+            "click": "clicked"
+        },
+        clicked: function(){
+            console.log("model state:", this.model);
+        },
         statusTemplate: _.template("status: <%= status%> "),
         meaningTemplate: _.template("(<%= value%>)"),
         render: function(){
@@ -656,9 +676,13 @@
             this.$el.append(this.statusTemplate(this.model.attributes));
 
             var value;
+
             if (this.model.attributes.status == 0) value = "connecting";
             else if (this.model.attributes.status == 10) value = "finding game";
+            else if (this.model.attributes.status == 20) value = "gameProcess";
+            else if (this.model.attributes.status == -1) value = "game is over";
             else value = "unknown status";
+
             this.$el.append(this.meaningTemplate({value: value}));
 
             return this;
@@ -848,12 +872,12 @@
                 this.combinationsViews.push(combo);
             }
 
-            for (var i = 0; i < 7; i++){
+            for (var k = 0; k < 7; k++){
                 var $tr = $('<tr/>');
-                var $td1 = $('<td width="50%" style="padding: 0px"/>');
-                var $td2 = $('<td width="50%" style="padding: 0px"/>');
-                if (i!=6) $td1.append(combosElements[0 + i]);
-                $td2.append(combosElements[6 + i]);
+                var $td1 = $('<td style="width: 50%; padding: 0;"></td>');
+                var $td2 = $('<td style="width: 50%; padding: 0;"></td>');
+                if (k!=6) $td1.append(combosElements[0 + k]);
+                $td2.append(combosElements[6 + k]);
                 $tr.append($td1);
                 $tr.append($td2);
                 $table.append($tr);
@@ -902,8 +926,8 @@
 
             var $table = $('<table/>');
             var $tr = $('<tr/>');
-            var $td1 = $('<td width="50%" style="padding: 0px"/>');
-            var $td2 = $('<td width="50%" style="padding: 0px"/>');
+            var $td1 = $('<td style="width: 50%; padding: 0;"></td>');
+            var $td2 = $('<td style="width: 50%; padding: 0;"></td>');
             $td1.append(rerollButton.render().el);
             $td2.append(restartButton.render().el);
             $tr.append($td1);
@@ -949,11 +973,11 @@
                 $('body').append(self.gameView.el);
             //});
         },
-        getConnection: function(callback){
+        /*getConnection: function(callback){
             this.connection = new $.numbers.ModelConnection(function(){
                 callback();
             });
-        },
+        },*/
 
         doAccept: function(index){
             this.combinationModel.acceptCombination(index);

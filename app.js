@@ -265,7 +265,7 @@ console.log(checkCombinations("134256"));
 
 var value = 0;
 
-var minPlayers = 2;
+var minPlayers = 1;
 
 var connectedCookies = {};
 
@@ -282,19 +282,23 @@ function removeExpiredConnections(){
             if (Math.abs(new Date() - connectedCookies[key].time) > 600000) {   // 1 hour
 
                 for (var gInd in games) {
-                    var game = games[gInd];
-                    for (var playerIndex in game.players) {
-                        var player = game.players[playerIndex];
-                        if (player == key) {
-                            //console.log("games[" + gInd + "] deleted");
-                            //delete games[gInd];
-                            // if game wasn't ended it is marked as abandoned, else if purchases info still alive it will be deleted
-                            if (games[gInd].status != 9){
-                                games[gInd].status = -1;
-                            } else {
-                                if (purchases[gInd] != null) delete purchases[gInd];
+                    if (games.hasOwnProperty(gInd)){
+                        var game = games[gInd];
+                        for (var playerIndex in game.players) {
+                            if (game.players.hasOwnProperty(playerIndex)){
+                                var player = game.players[playerIndex];
+                                if (player == key) {
+                                    //console.log("games[" + gInd + "] deleted");
+                                    //delete games[gInd];
+                                    // if game wasn't ended it is marked as abandoned, else if purchases info still alive it will be deleted
+                                    if (games[gInd].status != 9){
+                                        games[gInd].status = -1;
+                                    } else {
+                                        if (purchases[gInd] != null) delete purchases[gInd];
+                                    }
+                                    break;
+                                }
                             }
-                            break;
                         }
                     }
                 }
@@ -322,10 +326,10 @@ function prepareGame() {
     if (len >= minPlayers) {
         var gameId = "g" + gamesIndex.toString();
         games[gameId] = {};
-        games[gameId].id = gameId;
+        games[gameId]._id = gameId;
         gamesIndex++;
         games[gameId].players = [];
-        games[gameId].status = 1;
+        games[gameId].status = 20;
         for (var i = 0; i < minPlayers; i++) {
             if (i==0) {
                 //games[gameId].settings = connectedCookies[wannaPlayers[i]].settings;
@@ -335,12 +339,15 @@ function prepareGame() {
             games[gameId].players.push(wannaPlayers[i]);
             if (games[gameId].names == null) games[gameId].names = [];
 
-            var playerName = connectedCookies[wannaPlayers[i]].settings.name;
-            if (playerName == undefined || playerName == null || playerName == "")
-                games[gameId].names.push("player" + (10000 * Math.random()).toFixed(0) );
-            else
-                games[gameId].names.push(connectedCookies[wannaPlayers[i]].settings.name);
-            //console.log("names:", games[gameId].names);
+            // No settings, no name
+            //var playerName = connectedCookies[wannaPlayers[i]].settings.name;
+            //if (playerName == undefined || playerName == null || playerName == "")
+              //  games[gameId].names.push("player" + (10000 * Math.random()).toFixed(0) );
+            //else
+                //games[gameId].names.push(connectedCookies[wannaPlayers[i]].settings.name);
+            var playerName = "player" + (10000 * Math.random()).toFixed(0);
+            games[gameId].names.push(playerName);
+            console.log("names:", games[gameId].names);
 
             connectedCookies[wannaPlayers[i]].status = 3;
         }
@@ -375,6 +382,7 @@ app.get('/onlineStatistics', function(req, res){
     });
 });
 
+// API
 app.get('/api/dices', function(req, res){
     var combo = [generateDice(), generateDice(), generateDice(), generateDice(), generateDice(), generateDice()];
     //var combinationString = ""; for (var i =0; i<6; i++) combinationString += combo[i].toString();
@@ -423,7 +431,8 @@ app.get("/api/connectPlayer", function(req, res){
     } else {
         connectedCookies[req.sessionID] = {};
         connectedCookies[req.sessionID].time = new Date();
-        connectedCookies[req.sessionID].status = 1; // connected
+        //connectedCookies[req.sessionID].status = 1; // connected
+        connectedCookies[req.sessionID].status = 2; // 2 because we skiped POST find game request
     }
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
@@ -441,20 +450,24 @@ app.get("/api/disconnectPlayer", function(req, res){
     res.send(Object.keys(connectedCookies).length.toString());
 });
 
-
 app.get("/api/findGame", function(req, res){
+    if (connectedCookies.hasOwnProperty(req.sessionID)){
+        connectedCookies[req.sessionID].time = new Date();
 
-    connectedCookies[req.sessionID].time = new Date();
+        console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
 
-    console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
+        prepareGame();
+        var game = findGameById(req.sessionID);
+        if (game == null) game = connectedCookies.length;
+        else console.log("game to send:", game);
+        res.send(game);
 
-    prepareGame();
-    var game = findGameById(req.sessionID);
-    res.send(game);
-
-    removeExpiredConnections();
+        removeExpiredConnections();
+    } else {
+        res.send();
+    }
 });
-app.post("/api/findGame", function(req, res){
+/*app.post("/api/findGame", function(req, res){
     console.log(req._remoteAddress + ", game received, onliners: " + Object.keys(connectedCookies).length.toString());
 
     connectedCookies[req.sessionID].status = 2; // searching game
@@ -469,7 +482,7 @@ app.post("/api/findGame", function(req, res){
     res.send(game);
 
     removeExpiredConnections();
-});
+});*/
 
 app.get("/api/dropAll", function(req, res){
     connectedCookies = {};
@@ -489,8 +502,9 @@ app.get("/api/gameProcess/:gid", function(req, res){
         game = games[gid];
     else
         game = findGameById(req.sessionID);
-    //console.log("game:", game.id);
+    //console.log("game:", game._id);
     if (game) {
+        //console.log("game status", game.status);
         data.status = game.status;
 
         //console.log("purchases.len: ", Object.keys(purchases).length);
@@ -521,18 +535,6 @@ app.get("/api/gameProcess/:gid", function(req, res){
             }
         }
 
-        //for (var key in purchases) {
-        //    if (purchases.hasOwnProperty(key)) {
-        //        if (purchases[key].sessionId != req.sessionID){
-        //            var ans = {};
-        //            ans["resourceIndex"] = key;
-        //            ans["owner"] = "1";
-        //            ans["ownerMoneyChangeValue"] = purchases[key].ownerMoneyChangeValue;
-        //            purchasesToSend.push(ans);
-        //            delete purchases[key];
-        //        }
-        //    }
-        //}
         if (purchasesToSend != null && purchasesToSend.length > 0) {
             console.log("purchasesToSend: " + JSON.stringify(purchasesToSend));
         }
