@@ -64,7 +64,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/1-128.png");
+    background: url("../images/dices/1-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -75,7 +75,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/2-128.png");
+    background: url("../images/dices/2-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -86,7 +86,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/3-128.png");
+    background: url("../images/dices/3-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -97,7 +97,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/4-128.png");
+    background: url("../images/dices/4-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -108,7 +108,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/5-128.png");
+    background: url("../images/dices/5-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -119,7 +119,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/6-128.png");
+    background: url("../images/dices/6-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -132,7 +132,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/0-128.png");
+    background: url("../images/dices/0-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -140,7 +140,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/7-128.png");
+    background: url("../images/dices/7-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -148,7 +148,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/8-128.png");
+    background: url("../images/dices/8-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }
@@ -156,7 +156,7 @@ table {
     display: inline-block;
     height: 128px;
     width: 128px;
-    background: url("/images/dices/9-128.png");
+    background: url("../images/dices/9-128.png");
     -moz-border-radius: 30px;
     border-radius: 30px;
 }

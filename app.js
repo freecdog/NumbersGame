@@ -387,7 +387,8 @@ app.get('/api/dices/:dicesindexes', function(req, res){
 
     var combo = [];
     //console.log("user params", req.params);
-    for (var i = 0; i < req.params.dicesindexes.length; i++){
+    var len = Math.min(6, req.params.dicesindexes.length);
+    for (var i = 0; i < len; i++){
         combo.push(generateDice());
     }
 
