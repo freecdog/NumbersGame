@@ -297,26 +297,20 @@
             combinations: []
         },
 
-        initialize: function(callback) {
-            if (callback == null) callback = function(){};
-            var self = this;
-
+        initialize: function() {
             // localStorage - sync values among all tabs
             // sessionStorage - keep values only in one tab
             this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
 
+            this.stopListening();
             this.listenTo(this, 'change:status', this.statusChanged);
             this.statusChanged();
 
             this.currentRerollStatus = false;
             this.currentSelected = [false, false, false, false, false, false];
 
-            if (this.existValue("lastDices")){
-                self.setDices(JSON.parse(self.getValue("lastDices")));
-                callback();
-            } else {
-                this.generateCombination(callback);
-            }
+            // TODO is it needed on init? Think no.
+            //this.updateDices();
         },
 
         statusChanged: function(){
@@ -328,13 +322,15 @@
             } else if (status == 10) {
                 this.urlRoot = '/api/findGame';
             } else if (status == 20) {
-                this.urlRoot = '/api/gameProcess/' + this.attributes._id;
-            } else if (status == -1) {
+                this.updateDices();
+                this.urlRoot = '/api/rounds/' + this.attributes._id;
+            } else if (status == 9) {
+                needUpdate = false;
                 console.log("game is over");
-                //this.urlRoot = '/api/gameProcess/' + this.attributes._id;
+                //this.urlRoot = '/api/rounds/' + this.attributes._id;
             } else {
                 needUpdate = false;
-                console.warn("unknown game status:",this.status, this);
+                console.warn("unknown game status:",this.attributes.status, this);
             }
             if (needUpdate){
                 this.updateModel();
@@ -350,16 +346,16 @@
                     if (status == 0) {
                         self.changeStatus(10);
                     } else if (status == 20) {
-                        // TODO work on interaction with server
+                        // TODO why it is fetched twice?
                         console.log("process fetched:", mdl, values);
                         setTimeout(function(){
                             self.updateModel();
-                        }, 1000);
+                        }, 2000);
                     }
                 },
                 error: function(mdl, values, xhr){
                     var status = self.attributes.status;
-                    // TODO is there an answer why fetching result lead to error?
+                    // TODO is there any reason why fetching result lead to error?
                     if (status == 10) {
                         if (values.status == 200) {
                             console.log("trying to find");
@@ -379,6 +375,21 @@
             this.set({status: value});
         },
 
+        updateDices: function(){
+            var self = this;
+            if (this.existValue("lastDices")){
+                console.log("dices exist");
+                self.setDices(JSON.parse(self.getValue("lastDices")));
+            } else {
+                console.log("dices fetching");
+                var prevUrlRoot = this.urlRoot;
+                this.urlRoot = "/api/dices";
+
+                this.generateCombination(null);
+
+                this.urlRoot = prevUrlRoot;
+            }
+        },
         getDices: function(callback) {
             if (callback == null) callback = function(){};
             var ans = [0, 0, 0, 0, 0, 0];
@@ -415,7 +426,8 @@
             } else {
                 var prevUrlRoot = this.urlRoot;
 
-                this.urlRoot += "/";
+                //this.urlRoot += "/";
+                this.urlRoot = "/api/dices/";
                 for (i = 0; i < indexes.length; i++){
                     this.urlRoot += indexes[i].toString();
                 }
@@ -429,12 +441,14 @@
                         }
                         self.setDices(self.attributes.dices);
                         console.log("rerolled dices", self.attributes.dices);
-                        self.urlRoot = prevUrlRoot;
+                        //self.urlRoot = prevUrlRoot;
                     },
-                    error: function(){
-                        self.urlRoot = prevUrlRoot;
+                    error: function(mdl, values){
+                        console.log("connection error while reroll", mdl, values);
+                        //self.urlRoot = prevUrlRoot;
                     }
                 });
+                self.urlRoot = prevUrlRoot;
             }
         },
         // reroll all checked dices, rerollMode
@@ -467,8 +481,11 @@
 
                     this.currentRerollStatus = false;
 
+                    this.sendCombination(combo);
+
                     // generating new combination
-                    this.generateCombination(null);
+                    //this.generateCombination(null);
+                    this.updateDices();
 
                     return true;
                 } else {
@@ -538,6 +555,25 @@
             }
             return combosIndexes;
         },
+        sendCombination: function(combo){
+            var prevUrlRoot = this.urlRoot;
+            // probably we will need encodeURIComponent() or encodeURI, and decodeURI on server side
+            //this.urlRoot = "/api/rounds/" + this.attributes._id + "/" + JSON.stringify(combo);
+
+            this.urlRoot = "/api/combination/" + combo.combinationIndex.toString();
+
+            console.log("going to send combination", this.urlRoot);
+            this.fetch({
+                success: function(mdl, values){
+                    console.log("combination sent", mdl, values);
+                },
+                error: function(mdl, values){
+                    console.log("connection error while sending combination", mdl, values);
+                }
+            });
+
+            this.urlRoot = prevUrlRoot;
+        },
 
         calculate: function(){
             var ans = 0;
@@ -558,6 +594,7 @@
         restart: function(){
             this.removeValue("combinations");
             this.removeValue("lastDices");
+            this.attributes.status = 0;
             this.initialize();
         },
 
@@ -679,8 +716,8 @@
 
             if (this.model.attributes.status == 0) value = "connecting";
             else if (this.model.attributes.status == 10) value = "finding game";
-            else if (this.model.attributes.status == 20) value = "gameProcess";
-            else if (this.model.attributes.status == -1) value = "game is over";
+            else if (this.model.attributes.status == 20) value = "rounds";
+            else if (this.model.attributes.status == 9) value = "game is over";
             else value = "unknown status";
 
             this.$el.append(this.meaningTemplate({value: value}));

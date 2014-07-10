@@ -260,8 +260,7 @@ function checkCombinations(dicesInput) {
     }
 }
 
-console.log(checkCombinations("134256"));
-
+console.log("small test", checkCombinations("134256"));
 
 var value = 0;
 
@@ -330,6 +329,10 @@ function prepareGame() {
         gamesIndex++;
         games[gameId].players = [];
         games[gameId].status = 20;
+
+        games[gameId].rounds = [];
+        for (var j = 0; j < minPlayers; j++) games[gameId].rounds.push([]);
+
         for (var i = 0; i < minPlayers; i++) {
             if (i==0) {
                 //games[gameId].settings = connectedCookies[wannaPlayers[i]].settings;
@@ -356,13 +359,22 @@ function prepareGame() {
 function findGameById(sessionId) {
     for (var gInd in games) {
         var game = games[gInd];
-        //if (game.status == 1) {
-        for (var j = 0; j < game.players.length; j++) {
-            if (sessionId == game.players[j]) {
-                return game;
+        // if in game
+        if (connectedCookies[sessionId].status == 4){
+            for (var j = 0; j < game.players.length; j++) {
+                if (sessionId == game.players[j]) {
+                    return game;
+                }
+            }
+        } else {
+            if (game.status != 9 && game.status != -1) {
+                for (var j = 0; j < game.players.length; j++) {
+                    if (sessionId == game.players[j]) {
+                        return game;
+                    }
+                }
             }
         }
-        //}
     }
     return null;
 }
@@ -371,7 +383,6 @@ app.get('/', routes.index);
 app.get('/play', function(req,res){
     res.render("play");
 });
-
 app.get('/onlineStatistics', function(req, res){
     removeExpiredConnections();
 
@@ -382,28 +393,168 @@ app.get('/onlineStatistics', function(req, res){
     });
 });
 
+function getPlayerIndexInGame(game, sessionID){
+    var ans = -1;
+    for (var i = 0; i < game.players.length; i++){
+        if (sessionID == game.players[i]) {
+            ans = i;
+            break;
+        }
+    }
+    return ans;
+}
 // API
 app.get('/api/dices', function(req, res){
-    var combo = [generateDice(), generateDice(), generateDice(), generateDice(), generateDice(), generateDice()];
-    //var combinationString = ""; for (var i =0; i<6; i++) combinationString += combo[i].toString();
-    console.log(req.connection.remoteAddress, combo);
-    res.send(combo);
-});
-app.get('/api/dices/:dicesindexes', function(req, res){
-    //var combo = [generateDice(), generateDice(), generateDice(), generateDice(), generateDice(), generateDice()];
-    //var combinationString = ""; for (var i =0; i<6; i++) combinationString += combo[i].toString();
+    if (connectedCookies.hasOwnProperty(req.sessionID)){
+        var game = findGameById(req.sessionID);
+        if (game != null) {
+            var dices = [generateDice(), generateDice(), generateDice(),
+                generateDice(), generateDice(), generateDice()];
+            //var combinationString = ""; for (var i =0; i<6; i++)
+            // combinationString += combo[i].toString();
 
-    var combo = [];
-    //console.log("user params", req.params);
-    var len = Math.min(6, req.params.dicesindexes.length);
-    for (var i = 0; i < len; i++){
-        combo.push(generateDice());
+            var playerIndex = getPlayerIndexInGame(game, req.sessionID);
+            if (playerIndex == -1) console.log("error while generating dices, no player with such sessionID in this game", req.sessionID, game);
+
+            var round = {};
+            round.dices = dices;
+            round.combinations = checkCombinations(dices);
+            round.rerolled = false;
+
+            game.rounds[playerIndex].push(round);
+
+            console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
+            res.send(dices);
+        } else {
+            res.send(null);
+        }
+    } else {
+        res.send(null);
+    }
+});
+app.get('/api/dices/:dicesIndexes', function(req, res){
+    if (connectedCookies.hasOwnProperty(req.sessionID)){
+        var game = findGameById(req.sessionID);
+        if (game != null) {
+            var dices = [];
+            var dlen = Math.min(6, req.params.dicesIndexes.length);
+            for (var i = 0; i < dlen; i++){
+                dices.push(generateDice());
+            }
+            for (var k = 0; k < dlen; k++) {
+                if (req.params.dicesIndexes[k] < '0' || req.params.dicesIndexes[k] > '5') {
+                    console.log("error, reroll dices indexes has wrong values:", req.params.dicesIndexes[k]);
+                    break;
+                }
+            }
+
+            var playerIndex = getPlayerIndexInGame(game, req.sessionID);
+            if (playerIndex == -1) console.log("error while rerolling dices, no player with such sessionID in this game", req.sessionID, game);
+
+            var rIndex = game.rounds[playerIndex].length - 1;
+            if (game.rounds[playerIndex][rIndex].rerolled) {
+                // sending last set of dices
+                res.send(game.rounds[playerIndex][rIndex].dices);
+            } else {
+                game.rounds[playerIndex][rIndex].olddices = [];
+                for (var m = 0; m < game.rounds[playerIndex][rIndex].dices.length; m++){
+                    game.rounds[playerIndex][rIndex].olddices[m] = game.rounds[playerIndex][rIndex].dices[m];
+                };
+
+                for (var j = 0; j < dlen; j++){
+                    game.rounds[playerIndex][rIndex].dices[ parseInt(req.params.dicesIndexes[j]) ] = dices[j];
+                }
+
+                game.rounds[playerIndex][rIndex].combinations = checkCombinations(game.rounds[playerIndex][rIndex].dices);
+                game.rounds[playerIndex][rIndex].rerolled = true;
+
+                console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
+                res.send(dices);
+            }
+        } else {
+            res.send(null);
+        }
+    } else {
+        res.send(null);
+    }
+});
+app.get('/api/combination/:comboIndex', function(req, res){
+    if (connectedCookies.hasOwnProperty(req.sessionID)){
+        var game = findGameById(req.sessionID);
+        if (game != null) {
+            var playerIndex = getPlayerIndexInGame(game, req.sessionID);
+            if (playerIndex == -1) console.log("error while accepting combination, no player with such sessionID in this game", req.sessionID, game);
+
+            var comboIndex = parseInt(req.params.comboIndex);
+            if (req.params.comboIndex.length <= 2 && comboIndex != "NaN" && comboIndex >= 0 && comboIndex <= 12) {
+
+                var rIndex = game.rounds[playerIndex].length - 1;
+                game.rounds[playerIndex][rIndex].combinationIndex = req.params.comboIndex;
+                game.rounds[playerIndex][rIndex].points = game.rounds[playerIndex][rIndex].combinations[game.rounds[playerIndex][rIndex].combinationIndex];
+
+                // end of game
+                if (game.rounds[playerIndex].length == 13){
+                    if (isEndOfGame(game)){
+                        endOfGame(game);
+                    }
+                }
+
+                console.log(req.connection.remoteAddress, JSON.stringify(game));
+                res.send("1");
+            } else {
+                console.log("error, something wrong with comboIndex:", req.params.comboIndex);
+                res.send(null);
+            }
+        } else {
+            res.send(null);
+        }
+    } else {
+        res.send(null);
+    }
+});
+
+function isEndOfGame(game){
+    for (var i = 0; i < game.rounds.length; i++) {
+        var len = game.rounds[i].length;
+        if (len < 13 || game.rounds[i][len-1].combinationIndex == null) {
+            return false;
+        }
+    }
+    return true;
+}
+function endOfGame(game){
+    game.status = 9;
+
+    game.results = [];
+    game.winner = {index: "", name: "", result: 0};
+    for (var i = 0; i < game.players.length; i++){
+        var result = calculateResult(game.rounds[i]);
+        game.results[i] = result;
+        if (result > game.winner.result) {
+            game.winner.index = game.players[i];
+            game.winner.name = game.names[i];
+            game.winner.result = result;
+        }
+
+        connectedCookies[game.players[i]].status = 4;
     }
 
-    //console.error("need some code here");
-    console.log(req.connection.remoteAddress, combo);
-    res.send(combo);
-});
+    console.log("game ends:", game);
+}
+function calculateResult(rounds){
+    var ans = 0;
+
+    var roundsPoints = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (var i = 0; i < rounds.length; i++){
+        roundsPoints[rounds[i].combinationIndex] = rounds[i].points;
+    }
+    for (var j = 0; j < roundsPoints.length; j++){
+        ans += roundsPoints[j];
+        if (j == 5 && ans >= 63) ans += 35;
+    }
+
+    return ans;
+}
 
 function collectOnlineStatistics(){
     var data = {};
@@ -428,11 +579,12 @@ app.get("/api/connectPlayer", function(req, res){
 
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         connectedCookies[req.sessionID].time = new Date();
+        if (connectedCookies[req.sessionID].status = 4) connectedCookies[req.sessionID].status = 2;
     } else {
         connectedCookies[req.sessionID] = {};
         connectedCookies[req.sessionID].time = new Date();
         //connectedCookies[req.sessionID].status = 1; // connected
-        connectedCookies[req.sessionID].status = 2; // 2 because we skiped POST find game request
+        connectedCookies[req.sessionID].status = 2; // 2 because we are skipping POST find game request
     }
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
@@ -490,7 +642,7 @@ app.get("/api/dropAll", function(req, res){
     res.redirect("/");
 });
 
-app.get("/api/gameProcess/:gid", function(req, res){
+app.get("/api/rounds/:gid", function(req, res){
     //console.log(req._remoteAddress + " GameProcess check" );
 
     //console.log("purchases: " + JSON.stringify(purchases));
@@ -498,48 +650,17 @@ app.get("/api/gameProcess/:gid", function(req, res){
     var data = {};
     var game;
     var gid = req.params.gid;
-    if (gid != null && games.hasOwnProperty(gid))
+    if (gid != null && games.hasOwnProperty(gid)){
         game = games[gid];
-    else
+    }
+    else {
         game = findGameById(req.sessionID);
+    }
     //console.log("game:", game._id);
     if (game) {
         //console.log("game status", game.status);
-        data.status = game.status;
 
-        //console.log("purchases.len: ", Object.keys(purchases).length);
-        var purchasesToSend = [];
-        var indexesToDelete = [];
-        var len = 0;
-        if (purchases != null && purchases[gid] != null) {
-            if (purchases[gid].purchases)
-                len = purchases[gid].purchases.length;
-            //console.log("trying to send purchases, len:", len);
-            for (var i = 0; i < len; i++) {
-                if (purchases[gid].purchases[i]){
-                    if (purchases[gid].purchases[i].sessionId != req.sessionID) {
-                        var ans = {};
-                        ans["resourceIndex"] = purchases[gid].purchases[i].purchaseIndex;
-                        // #TODO should do something more specific, I mean may be username, but it's ok for 1v1 games
-                        ans["owner"] = "1";
-                        ans["ownerMoneyChangeValue"] = purchases[gid].purchases[i].ownerMoneyChangeValue;
-                        ans["serverTime"] = purchases[gid].purchases[i].serverTime;
-                        purchasesToSend.push(ans);
-                        //delete purchases[key];
-                        indexesToDelete.push(i);
-                    }
-                }
-            }
-            for (var i = 0; i < indexesToDelete.length; i++) {
-                delete purchases[gid].purchases[indexesToDelete[i]];
-            }
-        }
-
-        if (purchasesToSend != null && purchasesToSend.length > 0) {
-            console.log("purchasesToSend: " + JSON.stringify(purchasesToSend));
-        }
-        data.purchases = purchasesToSend;
-        res.send(data);
+        res.send(game);
 
         connectedCookies[req.sessionID].time = new Date();
         removeExpiredConnections();
@@ -548,7 +669,27 @@ app.get("/api/gameProcess/:gid", function(req, res){
     }
 
 });
-app.post("/api/gameProcess", function(req, res){
+app.get("/api/rounds/:gid/:datastring", function(req, res){
+    //console.log(req._remoteAddress + " GameProcess check" );
+
+    //console.log("purchases: " + JSON.stringify(purchases));
+
+    var gameId = req.params.gid;
+    if (gameId != null){
+        //console.log("data from client:", JSON.parse(req.params.datastring));
+        var data = JSON.parse(req.params.datastring);
+
+        ;
+    }
+
+    //console.log(req._remoteAddress + " purchases " + req.body.purchase );
+    res.send("1");
+
+    connectedCookies[req.sessionID].time = new Date();
+    removeExpiredConnections();
+
+});
+/*app.post("/api/rounds", function(req, res){
 
     if (req.body.gameId != null){
         purchases[req.body.gameId] = {};
@@ -575,7 +716,7 @@ app.post("/api/gameProcess", function(req, res){
 
     connectedCookies[req.sessionID].time = new Date();
     removeExpiredConnections();
-});
+});*/
 
 
 http.createServer(app).listen(app.get('port'), function(){
