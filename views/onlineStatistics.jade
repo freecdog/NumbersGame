@@ -23,7 +23,23 @@ block content
     -for(var game in games)
         #pad1 #{game}:
         -for(var gameState in games[game])
-            if (gameState != "boxes")
+            if (gameState == "rounds")
+                #pad2 #{gameState}:
+                -for(var player in games[game][gameState])
+                    #pad3 Player index: #{player}
+                    -for(var round in games[game][gameState][player])
+                        #pad4 Round number: #{round}
+                        -for(var roundParams in games[game][gameState][player][round])
+                            if (roundParams == "rerolled" || roundParams == "combinationIndex" || roundParams == "points")
+                                #pad5 #{roundParams}: #{games[game][gameState][player][round][roundParams]}
+                            else
+                                #pad5 #{roundParams}: #{JSON.stringify(games[game][gameState][player][round][roundParams])}
+                                //
+                                    -for(var paramDetails in games[game][gameState][player][round][roundParams])
+                                        #pad6 #{paramDetails}: #{games[game][gameState][player][round][roundParams][paramDetails]}
+            else if (gameState == "winner")
+                #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
+            else
                 #pad2 #{gameState} — #{games[game][gameState]}
 
     br

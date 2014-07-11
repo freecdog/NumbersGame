@@ -309,7 +309,7 @@
             this.currentRerollStatus = false;
             this.currentSelected = [false, false, false, false, false, false];
 
-            // TODO is it needed on init? Think no.
+            // TODO is it needed on init? Think no, but may be it should be "on" for offline version
             //this.updateDices();
         },
 
@@ -324,7 +324,7 @@
             } else if (status == 20) {
                 this.updateDices();
                 this.urlRoot = '/api/rounds/' + this.attributes._id;
-            } else if (status == 9) {
+            } else if (status == 90) {
                 needUpdate = false;
                 console.log("game is over");
                 //this.urlRoot = '/api/rounds/' + this.attributes._id;
@@ -339,15 +339,19 @@
         updateModel: function(){
             var self = this;
             // if there are urlRoot and attributes.id it will be fetched urlRoot + / + id
-            console.log("going to fetch", this.urlRoot);
+            if (this.attributes.status != 20) {
+                console.log("going to fetch", this.urlRoot);
+            }
             this.fetch({
                 success: function(mdl, values){
+                    //console.log("fetched:", mdl, values);
+                    console.log("fetched new status:", mdl.attributes.status != values.status);
                     var status = self.attributes.status;
                     if (status == 0) {
                         self.changeStatus(10);
                     } else if (status == 20) {
-                        // TODO why it is fetched twice?
-                        console.log("process fetched:", mdl, values);
+                        //console.log("process fetched:", mdl, values);
+                        // TODO, there is a problem about twice fetching process
                         setTimeout(function(){
                             self.updateModel();
                         }, 2000);
@@ -363,7 +367,7 @@
                                 self.updateModel();
                             }, 1000);
                         } else {
-                            console.log("Connection eRRor", mdl, values, xhr);
+                            console.log("Connection eRRoRR", mdl, values, xhr);
                         }
                     } else {
                         console.log("Connection error", mdl, values, xhr);
@@ -376,12 +380,16 @@
         },
 
         updateDices: function(){
-            var self = this;
             if (this.existValue("lastDices")){
+                if (this.getValue("lastDices") == "undefined") {
+                    console.warn("storaged dices was undefined");
+                    this.removeValue("lastDices");
+                    this.updateDices();
+                }
                 console.log("dices exist");
-                self.setDices(JSON.parse(self.getValue("lastDices")));
+                this.setDices(JSON.parse(this.getValue("lastDices")));
             } else {
-                console.log("dices fetching");
+                console.log("fetching dices");
                 var prevUrlRoot = this.urlRoot;
                 this.urlRoot = "/api/dices";
 
@@ -389,6 +397,13 @@
 
                 this.urlRoot = prevUrlRoot;
             }
+            /*console.log("fetching dices");
+            var prevUrlRoot = this.urlRoot;
+            this.urlRoot = "/api/dices";
+
+            this.generateCombination(null);
+
+            this.urlRoot = prevUrlRoot;*/
         },
         getDices: function(callback) {
             if (callback == null) callback = function(){};
@@ -467,6 +482,7 @@
             }
         },
 
+        // TODO, last combo choice is shown after reloading page, should do something with it
         acceptCombination: function(index){
             if (index != -1) {
                 var combo = {};
@@ -500,13 +516,16 @@
         generateCombination: function(callback){
             if (callback == null) callback = function(){};
             var self = this;
-            if (this.urlRoot != "/api/dices") {
-                console.warn("url is different, cancelling generating, breaking operation, url is", this.urlRoot);
-                return;
-            }
             self.getDices(function(dices){
-                self.addValue("lastDices", JSON.stringify(dices));
-                self.setDices(dices);
+                if (typeof dices == "undefined") {
+                    console.warn("fetched dices are undefined");
+                    //return;
+                    self.addValue("lastDices", JSON.stringify(dices));
+                    self.setDices(dices);
+                } else {
+                    self.addValue("lastDices", JSON.stringify(dices));
+                    self.setDices(dices);
+                }
                 callback();
             });
         },
@@ -653,6 +672,7 @@
             return this;
         }
     });
+    // TODO, reroll button change visual decor after using
     $.numbers.RerollButton = Backbone.View.extend({
         tagName: 'div',
         className: 'rerollButton',
@@ -717,11 +737,37 @@
             if (this.model.attributes.status == 0) value = "connecting";
             else if (this.model.attributes.status == 10) value = "finding game";
             else if (this.model.attributes.status == 20) value = "rounds";
-            else if (this.model.attributes.status == 9) value = "game is over";
+            else if (this.model.attributes.status == 90) value = "game is over";
             else value = "unknown status";
 
             this.$el.append(this.meaningTemplate({value: value}));
 
+            return this;
+        }
+    });
+    $.numbers.NamesView = Backbone.View.extend({
+        tagName: 'div',
+        className: 'statusView',
+        initialize: function(){
+            this.listenTo(this.model, "change:names", this.listener);
+        },
+        listener: function(){
+            this.render();
+        },
+        events: {
+            "click": "clicked"
+        },
+        clicked: function(){
+            console.log("model state:", this.model);
+        },
+        nameTemplate: _.template("<%= name %> "),
+        render: function(){
+            this.$el.empty();
+            if (this.model.attributes != null && this.model.attributes.names != null) {
+                for (var i = 0; i < this.model.attributes.names.length; i++){
+                    this.$el.append(this.nameTemplate({name: this.model.attributes.names[i]}));
+                }
+            }
             return this;
         }
     });
@@ -792,6 +838,10 @@
                     //this.deselect();
                     this.model.parent.deselectCombination(this.model.index, this);
                 }
+
+                console.log("quick click");
+                var ind = this.model.index;
+                $.numbers.app.doAccept(ind);
             }
         },
         select: function(){
@@ -952,6 +1002,9 @@
             //$.numbers.app.currentCombination = new $.numbers.Combination();
             var comboView = new $.numbers.CombinationsView({model: $.numbers.app.combinationModel});
             $.numbers.app.combinationsView = comboView;
+
+            var nameView = new $.numbers.NamesView({model: $.numbers.app.combinationModel});
+            this.$el.append(nameView.render().el);
 
             var statusView = new $.numbers.StatusView({model: $.numbers.app.combinationModel});
             this.$el.append(statusView.render().el);

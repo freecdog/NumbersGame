@@ -290,7 +290,7 @@ function removeExpiredConnections(){
                                     //console.log("games[" + gInd + "] deleted");
                                     //delete games[gInd];
                                     // if game wasn't ended it is marked as abandoned, else if purchases info still alive it will be deleted
-                                    if (games[gInd].status != 9){
+                                    if (games[gInd].status != 90){
                                         games[gInd].status = -1;
                                     } else {
                                         if (purchases[gInd] != null) delete purchases[gInd];
@@ -330,9 +330,6 @@ function prepareGame() {
         games[gameId].players = [];
         games[gameId].status = 20;
 
-        games[gameId].rounds = [];
-        for (var j = 0; j < minPlayers; j++) games[gameId].rounds.push([]);
-
         for (var i = 0; i < minPlayers; i++) {
             if (i==0) {
                 //games[gameId].settings = connectedCookies[wannaPlayers[i]].settings;
@@ -350,24 +347,27 @@ function prepareGame() {
                 //games[gameId].names.push(connectedCookies[wannaPlayers[i]].settings.name);
             var playerName = "player" + (10000 * Math.random()).toFixed(0);
             games[gameId].names.push(playerName);
-            console.log("names:", games[gameId].names);
+
+            if (games[gameId].rounds == null) games[gameId].rounds = [];
+            games[gameId].rounds.push([]);
 
             connectedCookies[wannaPlayers[i]].status = 3;
         }
+        console.log("names:", games[gameId].names);
     }
 }
 function findGameById(sessionId) {
     for (var gInd in games) {
         var game = games[gInd];
         // if in game
-        if (connectedCookies[sessionId].status == 4){
+        if (connectedCookies[sessionId].status == 80){
             for (var j = 0; j < game.players.length; j++) {
                 if (sessionId == game.players[j]) {
                     return game;
                 }
             }
         } else {
-            if (game.status != 9 && game.status != -1) {
+            if (game.status != 90 && game.status != -1) {
                 for (var j = 0; j < game.players.length; j++) {
                     if (sessionId == game.players[j]) {
                         return game;
@@ -408,23 +408,46 @@ app.get('/api/dices', function(req, res){
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         var game = findGameById(req.sessionID);
         if (game != null) {
-            var dices = [generateDice(), generateDice(), generateDice(),
-                generateDice(), generateDice(), generateDice()];
-            //var combinationString = ""; for (var i =0; i<6; i++)
-            // combinationString += combo[i].toString();
-
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
             if (playerIndex == -1) console.log("error while generating dices, no player with such sessionID in this game", req.sessionID, game);
 
-            var round = {};
-            round.dices = dices;
-            round.combinations = checkCombinations(dices);
-            round.rerolled = false;
+            var generateNewDices = true, notFinishedRoundIndex = -1;
+            for (var i = 0; i < game.rounds[playerIndex].length; i++) {
+                // if round not finished
+                if (game.rounds[playerIndex][i].combinationIndex == null) {
+                    notFinishedRoundIndex = i;
+                    generateNewDices = false;
+                    break;
+                }
+            }
 
-            game.rounds[playerIndex].push(round);
+            if (generateNewDices){
+                if (game.rounds[playerIndex].length < 13) {
+                    var dices = [generateDice(), generateDice(), generateDice(),
+                        generateDice(), generateDice(), generateDice()];
+                    //var combinationString = ""; for (var i =0; i<6; i++)
+                    // combinationString += combo[i].toString();
 
-            console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
-            res.send(dices);
+                    var round = {};
+                    round.dices = dices;
+                    round.combinations = checkCombinations(dices);
+                    round.rerolled = false;
+
+                    game.rounds[playerIndex].push(round);
+
+                    console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
+                    res.send(dices);
+                } else {
+                    console.log("asking extra dices while game was over");
+                    var lastDices = game.rounds[playerIndex][game.rounds[playerIndex].length-1].dices;
+                    res.send(lastDices);
+                }
+            } else {
+                console.log("updating not finished dices");
+                var notFinishedDices = game.rounds[playerIndex][notFinishedRoundIndex].dices;
+                res.send(notFinishedDices);
+            }
+
         } else {
             res.send(null);
         }
@@ -436,41 +459,51 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         var game = findGameById(req.sessionID);
         if (game != null) {
-            var dices = [];
             var dlen = Math.min(6, req.params.dicesIndexes.length);
-            for (var i = 0; i < dlen; i++){
-                dices.push(generateDice());
-            }
+
+            var validDicesIndexes = true;
             for (var k = 0; k < dlen; k++) {
                 if (req.params.dicesIndexes[k] < '0' || req.params.dicesIndexes[k] > '5') {
                     console.log("error, reroll dices indexes has wrong values:", req.params.dicesIndexes[k]);
+                    validDicesIndexes = false;
                     break;
                 }
             }
 
-            var playerIndex = getPlayerIndexInGame(game, req.sessionID);
-            if (playerIndex == -1) console.log("error while rerolling dices, no player with such sessionID in this game", req.sessionID, game);
+            if (validDicesIndexes){
+                var playerIndex = getPlayerIndexInGame(game, req.sessionID);
+                if (playerIndex == -1) console.log("error while rerolling dices, no player with such sessionID in this game", req.sessionID, game);
 
-            var rIndex = game.rounds[playerIndex].length - 1;
-            if (game.rounds[playerIndex][rIndex].rerolled) {
-                // sending last set of dices
-                res.send(game.rounds[playerIndex][rIndex].dices);
-            } else {
-                game.rounds[playerIndex][rIndex].olddices = [];
-                for (var m = 0; m < game.rounds[playerIndex][rIndex].dices.length; m++){
-                    game.rounds[playerIndex][rIndex].olddices[m] = game.rounds[playerIndex][rIndex].dices[m];
-                };
+                var rIndex = game.rounds[playerIndex].length - 1;
+                if (game.rounds[playerIndex][rIndex].rerolled) {
+                    // sending last set of dices
+                    res.send(game.rounds[playerIndex][rIndex].dices);
+                } else {
+                    var dices = [];
+                    for (var i = 0; i < dlen; i++){
+                        dices.push(generateDice());
+                    }
 
-                for (var j = 0; j < dlen; j++){
-                    game.rounds[playerIndex][rIndex].dices[ parseInt(req.params.dicesIndexes[j]) ] = dices[j];
+                    game.rounds[playerIndex][rIndex].olddices = [];
+                    for (var m = 0; m < game.rounds[playerIndex][rIndex].dices.length; m++){
+                        game.rounds[playerIndex][rIndex].olddices[m] = game.rounds[playerIndex][rIndex].dices[m];
+                    };
+
+                    for (var j = 0; j < dlen; j++){
+                        game.rounds[playerIndex][rIndex].dices[ parseInt(req.params.dicesIndexes[j]) ] = dices[j];
+                    }
+
+                    game.rounds[playerIndex][rIndex].combinations = checkCombinations(game.rounds[playerIndex][rIndex].dices);
+                    game.rounds[playerIndex][rIndex].rerolled = true;
+
+                    console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
+                    res.send(dices);
                 }
-
-                game.rounds[playerIndex][rIndex].combinations = checkCombinations(game.rounds[playerIndex][rIndex].dices);
-                game.rounds[playerIndex][rIndex].rerolled = true;
-
-                console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
-                res.send(dices);
+            } else {
+                console.log("error, not valid dices indexes to reroll");
+                res.send(null);
             }
+
         } else {
             res.send(null);
         }
@@ -488,27 +521,50 @@ app.get('/api/combination/:comboIndex', function(req, res){
             var comboIndex = parseInt(req.params.comboIndex);
             if (req.params.comboIndex.length <= 2 && comboIndex != "NaN" && comboIndex >= 0 && comboIndex <= 12) {
 
-                var rIndex = game.rounds[playerIndex].length - 1;
-                game.rounds[playerIndex][rIndex].combinationIndex = req.params.comboIndex;
-                game.rounds[playerIndex][rIndex].points = game.rounds[playerIndex][rIndex].combinations[game.rounds[playerIndex][rIndex].combinationIndex];
+                var validComboIndex = true;
+                for (var i = 0; i < game.rounds[playerIndex].length; i++) {
+                    if (game.rounds[playerIndex][i].combinationIndex == comboIndex) {
 
-                // end of game
-                if (game.rounds[playerIndex].length == 13){
-                    if (isEndOfGame(game)){
-                        endOfGame(game);
+                        validComboIndex = false;
+                        break;
                     }
                 }
 
-                console.log(req.connection.remoteAddress, JSON.stringify(game));
-                res.send("1");
+                if (validComboIndex){
+                    var rIndex = game.rounds[playerIndex].length - 1;
+                    game.rounds[playerIndex][rIndex].combinationIndex = req.params.comboIndex;
+                    game.rounds[playerIndex][rIndex].points = game.rounds[playerIndex][rIndex].combinations[game.rounds[playerIndex][rIndex].combinationIndex];
+
+                    // end of game
+                    var gameEnds = false;
+                    if (game.rounds[playerIndex].length == 13){
+                        if (isEndOfGame(game)){
+                            endOfGame(game);
+                            gameEnds = true;
+                        }
+                    }
+
+                    console.log(req.connection.remoteAddress, JSON.stringify(game));
+                    if (gameEnds) {
+                        res.send(game);
+                    } else {
+                        res.send("1");
+                    }
+                } else {
+                    console.log("error, such combination had been already used");
+                    res.send(game);
+                }
+
             } else {
                 console.log("error, something wrong with comboIndex:", req.params.comboIndex);
                 res.send(null);
             }
         } else {
+            console.log("game not found (/api/combination/:comboIndex)");
             res.send(null);
         }
     } else {
+        console.log("session not found (/api/combination/:comboIndex)");
         res.send(null);
     }
 });
@@ -523,7 +579,7 @@ function isEndOfGame(game){
     return true;
 }
 function endOfGame(game){
-    game.status = 9;
+    game.status = 90;
 
     game.results = [];
     game.winner = {index: "", name: "", result: 0};
@@ -536,7 +592,7 @@ function endOfGame(game){
             game.winner.result = result;
         }
 
-        connectedCookies[game.players[i]].status = 4;
+        connectedCookies[game.players[i]].status = 80;
     }
 
     console.log("game ends:", game);
@@ -576,10 +632,9 @@ function collectOnlineStatistics(){
     return data;
 }
 app.get("/api/connectPlayer", function(req, res){
-
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         connectedCookies[req.sessionID].time = new Date();
-        if (connectedCookies[req.sessionID].status = 4) connectedCookies[req.sessionID].status = 2;
+        if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
     } else {
         connectedCookies[req.sessionID] = {};
         connectedCookies[req.sessionID].time = new Date();
