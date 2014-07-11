@@ -324,6 +324,8 @@
             } else if (status == 20) {
                 this.updateDices();
                 this.urlRoot = '/api/rounds/' + this.attributes._id;
+            } else if (status == 70) {
+                this.urlRoot = '/api/giveup';
             } else if (status == 90) {
                 needUpdate = false;
                 console.log("game is over");
@@ -355,6 +357,10 @@
                         setTimeout(function(){
                             self.updateModel();
                         }, 2000);
+                    } else if (status == 90) {
+                        if (self._previousAttributes.status == 70) {
+                            self.changeStatus(0);
+                        }
                     }
                 },
                 error: function(mdl, values, xhr){
@@ -483,7 +489,9 @@
         },
 
         // TODO, last combo choice is shown after reloading page, should do something with it
+        // TODO, =/ In first game no result, but in other games everything works fine
         acceptCombination: function(index){
+            var self = this;
             if (index != -1) {
                 var combo = {};
                 combo.dices = this.attributes.dices;
@@ -519,9 +527,9 @@
             self.getDices(function(dices){
                 if (typeof dices == "undefined") {
                     console.warn("fetched dices are undefined");
-                    //return;
-                    self.addValue("lastDices", JSON.stringify(dices));
-                    self.setDices(dices);
+                    return;
+                    //self.addValue("lastDices", JSON.stringify(dices));
+                    //self.setDices(dices);
                 } else {
                     self.addValue("lastDices", JSON.stringify(dices));
                     self.setDices(dices);
@@ -613,7 +621,7 @@
         restart: function(){
             this.removeValue("combinations");
             this.removeValue("lastDices");
-            this.attributes.status = 0;
+            this.attributes.status = 70;
             this.initialize();
         },
 

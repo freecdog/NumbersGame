@@ -438,8 +438,8 @@ app.get('/api/dices', function(req, res){
                     console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
                     res.send(dices);
                 } else {
-                    console.log("asking extra dices while game was over");
                     var lastDices = game.rounds[playerIndex][game.rounds[playerIndex].length-1].dices;
+                    console.log("asking extra dices while game was over", lastDices);
                     res.send(lastDices);
                 }
             } else {
@@ -548,7 +548,8 @@ app.get('/api/combination/:comboIndex', function(req, res){
                     if (gameEnds) {
                         res.send(game);
                     } else {
-                        res.send("1");
+                        res.send(game);
+                        //res.send("1");
                     }
                 } else {
                     console.log("error, such combination had been already used");
@@ -565,6 +566,23 @@ app.get('/api/combination/:comboIndex', function(req, res){
         }
     } else {
         console.log("session not found (/api/combination/:comboIndex)");
+        res.send(null);
+    }
+});
+app.get('/api/giveup', function(req, res){
+    if (connectedCookies.hasOwnProperty(req.sessionID)){
+        var game = findGameById(req.sessionID);
+        if (game != null){
+            if (game.status != 90) {
+                endOfGame(game);
+            }
+            res.send(game);
+        } else {
+            console.log("game not found (/api/giveup)");
+            res.send(null);
+        }
+    } else {
+        console.log("session not found (/api/giveup)");
         res.send(null);
     }
 });
