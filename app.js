@@ -404,6 +404,7 @@ function getPlayerIndexInGame(game, sessionID){
     return ans;
 }
 // API
+// TODO, send dices as object {dices: []}
 app.get('/api/dices', function(req, res){
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         var game = findGameById(req.sessionID);

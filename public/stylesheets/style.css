@@ -49,6 +49,9 @@ table {
     font-size: 2em;
     background-color: #4f4fff;
 }
+.rerollButton.selected {
+    background-color: #4f4f4f;
+}
 .acceptCombinationButton {
     font-size: 2em;
     background-color: #2fdf2f;

@@ -306,8 +306,10 @@
             this.listenTo(this, 'change:status', this.statusChanged);
             this.statusChanged();
 
-            this.currentRerollStatus = false;
-            this.currentSelected = [false, false, false, false, false, false];
+            //this.currentRerollStatus = false;
+            this.set({currentRerollStatus: false});
+            //this.currentSelected = [false, false, false, false, false, false];
+            this.set({currentSelected: [false, false, false, false, false, false]});
 
             // TODO is it needed on init? Think no, but may be it should be "on" for offline version
             //this.updateDices();
@@ -435,13 +437,14 @@
             this.set({combinations: checkCombinations(dices)});
         },
 
+        // TODO, after reroll when f5 pressed status not updated
         reroll: function(indexes){
             var self = this;
             var i = 0;
             if ($.numbers.networking == false) {
                 for (i = 0; i < indexes.length; i++) {
                     this.attributes.dices[ indexes[i] ] = generateDice();
-                    this.currentSelected[ indexes[i] ] = false;
+                    this.attributes.currentSelected[ indexes[i] ] = false;
                 }
                 self.setDices(self.attributes.dices);
             } else {
@@ -458,7 +461,7 @@
                     success: function(mdl, values){
                         for (i = 0; i < indexes.length; i++) {
                             self.attributes.dices[ indexes[i] ] = parseInt(values[i]);
-                            self.currentSelected[ indexes[i] ] = false;
+                            self.attributes.currentSelected[ indexes[i] ] = false;
                         }
                         self.setDices(self.attributes.dices);
                         console.log("rerolled dices", self.attributes.dices);
@@ -474,13 +477,14 @@
         },
         // reroll all checked dices, rerollMode
         rerollDices: function(){
-            if (this.currentRerollStatus == false) {
+            if (this.attributes.currentRerollStatus == false) {
                 var indexes = [];
-                for (var i = 0; i < this.currentSelected.length; i++) {
-                    if (this.currentSelected[i] == true) indexes.push(i);
+                for (var i = 0; i < this.attributes.currentSelected.length; i++) {
+                    if (this.attributes.currentSelected[i] == true) indexes.push(i);
                 }
                 if (indexes.length > 0) {
-                    this.currentRerollStatus = true;
+                    //this.currentRerollStatus = true;
+                    this.set({currentRerollStatus: true});
                     this.reroll(indexes);
                 }
             } else {
@@ -488,10 +492,7 @@
             }
         },
 
-        // TODO, last combo choice is shown after reloading page, should do something with it
-        // TODO, =/ In first game no result, but in other games everything works fine
         acceptCombination: function(index){
-            var self = this;
             if (index != -1) {
                 var combo = {};
                 combo.dices = this.attributes.dices;
@@ -499,17 +500,27 @@
                 combo.points = this.attributes.combinations[index];
 
                 if (this.checkCombination(index)) {
-                    this.addCombination(combo);
+                    var totalRounds = this.addCombination(combo);
                     this.removeValue("lastDices");
                     console.log("combo added", combo);
 
-                    this.currentRerollStatus = false;
+                    //this.currentRerollStatus = false;
+                    this.set({currentRerollStatus: false});
 
-                    this.sendCombination(combo);
+                    var self = this;
+                    this.sendCombination(combo, function(){
+                        if (totalRounds != 13) {
+                            self.updateDices();
+                        } else {
+                            // there is additional setDices, because for some reason it won't to render
+                            self.setDices([0, 0, 0, 0, 0, 0]);
+                            self.setDices(combo.dices);
+                        }
+                    });
 
                     // generating new combination
                     //this.generateCombination(null);
-                    this.updateDices();
+                    //this.updateDices();
 
                     return true;
                 } else {
@@ -555,10 +566,12 @@
             if (this.existValue("combinations")){
                 combos = JSON.parse( this.getValue("combinations") );
                 combos.push(combo);
+                console.log("total combinations: ", combos.length);
             } else {
                 combos.push(combo);
             }
             this.addValue("combinations", JSON.stringify(combos));
+            return combos.length;
         },
         getCombinationByIndex: function(index){
             if (this.existValue("combinations")){
@@ -582,7 +595,7 @@
             }
             return combosIndexes;
         },
-        sendCombination: function(combo){
+        sendCombination: function(combo, callback){
             var prevUrlRoot = this.urlRoot;
             // probably we will need encodeURIComponent() or encodeURI, and decodeURI on server side
             //this.urlRoot = "/api/rounds/" + this.attributes._id + "/" + JSON.stringify(combo);
@@ -593,6 +606,10 @@
             this.fetch({
                 success: function(mdl, values){
                     console.log("combination sent", mdl, values);
+                    if (callback != null) {
+                        console.log("running callback, probably it is dices fetch");
+                        callback();
+                    }
                 },
                 error: function(mdl, values){
                     console.log("connection error while sending combination", mdl, values);
@@ -680,15 +697,21 @@
             return this;
         }
     });
-    // TODO, reroll button change visual decor after using
     $.numbers.RerollButton = Backbone.View.extend({
         tagName: 'div',
         className: 'rerollButton',
         events: {
             "click": "clicked"
         },
+        initialize: function(){
+            this.listenTo(this.model, "change:currentRerollStatus", this.changedRerollStatus);
+        },
+        changedRerollStatus: function(){
+            //console.warn("reroll status changed", this.model.attributes.currentRerollStatus);
+            this.render();
+        },
         clicked: function(){
-            console.log("going to reroll", this.options.parent);
+            console.log("going to reroll", this.options.parent, this.model);
             //this.options.parent.model.rerollDices();
             //$.numbers.app.combinationModel.rerollDices();
             $.numbers.app.doReroll();
@@ -697,6 +720,16 @@
         render: function() {
             this.$el.empty();
             this.$el.append(this.buttonTemplate());
+            if (this.model.attributes.currentRerollStatus) {
+                //console.log("adding class Selected to reroll button");
+                this.$el.addClass('selected');
+                //this.$el.removeAttr("background-color");
+                //this.$el.css("background-color", "#fff");
+                //this.$el.empty();
+            } else {
+                this.$el.removeClass('selected');
+                //console.log("reroll button rerendered");
+            }
             return this;
         }
     });
@@ -766,7 +799,7 @@
             "click": "clicked"
         },
         clicked: function(){
-            console.log("model state:", this.model);
+            //console.log("model state:", this.model);
         },
         nameTemplate: _.template("<%= name %> "),
         render: function(){
@@ -804,7 +837,7 @@
             this.model.selected = !this.model.selected;
             if (this.model.selected) this.select();
             else this.deselect();
-            $.numbers.app.combinationModel.currentSelected[this.model.index] = this.model.selected;
+            $.numbers.app.combinationModel.attributes.currentSelected[this.model.index] = this.model.selected;
         },
         select: function(){
             this.$el.addClass('selected');
@@ -1017,7 +1050,7 @@
             var statusView = new $.numbers.StatusView({model: $.numbers.app.combinationModel});
             this.$el.append(statusView.render().el);
 
-            var rerollButton = new $.numbers.RerollButton({parent: $.numbers.app.combinationsView});
+            var rerollButton = new $.numbers.RerollButton({model: $.numbers.app.combinationModel, parent: $.numbers.app.combinationsView});
             //this.$el.append(rerollButton.render().el);
             var restartButton = new $.numbers.RestartButton({parent: $.numbers.app.combinationsView});
             //this.$el.append(restartButton.render().el);
