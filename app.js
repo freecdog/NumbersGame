@@ -437,16 +437,16 @@ app.get('/api/dices', function(req, res){
                     game.rounds[playerIndex].push(round);
 
                     console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
-                    res.send(dices);
+                    res.send({dices: dices});
                 } else {
                     var lastDices = game.rounds[playerIndex][game.rounds[playerIndex].length-1].dices;
                     console.log("asking extra dices while game was over", lastDices);
-                    res.send(lastDices);
+                    res.send({dices: lastDices});
                 }
             } else {
                 console.log("updating not finished dices");
                 var notFinishedDices = game.rounds[playerIndex][notFinishedRoundIndex].dices;
-                res.send(notFinishedDices);
+                res.send({dices: notFinishedDices});
             }
 
         } else {
@@ -498,7 +498,8 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                     game.rounds[playerIndex][rIndex].rerolled = true;
 
                     console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
-                    res.send(dices);
+                    //res.send(dices);
+                    res.send({dices: game.rounds[playerIndex][rIndex].dices});
                 }
             } else {
                 console.log("error, not valid dices indexes to reroll");

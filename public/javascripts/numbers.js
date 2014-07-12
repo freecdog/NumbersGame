@@ -302,17 +302,22 @@
             // sessionStorage - keep values only in one tab
             this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
 
-            this.stopListening();
-            this.listenTo(this, 'change:status', this.statusChanged);
+            this.restartListener();
             this.statusChanged();
 
-            //this.currentRerollStatus = false;
-            this.set({currentRerollStatus: false});
+            //this.rerolled = false;
+            this.set({rerolled: false});
             //this.currentSelected = [false, false, false, false, false, false];
             this.set({currentSelected: [false, false, false, false, false, false]});
 
-            // TODO is it needed on init? Think no, but may be it should be "on" for offline version
+            // is it needed on init? Think no, but may be it should be "on" for offline version
             //this.updateDices();
+        },
+
+        restartListener: function(){
+            this.stopListening();
+            this.listenTo(this, 'change:status', this.statusChanged);
+            this.listenTo(this, 'change:rerolled', this.statusChanged);
         },
 
         statusChanged: function(){
@@ -321,6 +326,10 @@
             var status = this.attributes.status;
             if (status == 0) {
                 this.urlRoot = '/api/connectPlayer';
+
+                // if pushing restart button and there is still a game (status == 20) update rate become much more than 2 sec
+                // with this restartListener, problem become smaller, but still not gone
+                this.restartListener();
             } else if (status == 10) {
                 this.urlRoot = '/api/findGame';
             } else if (status == 20) {
@@ -375,10 +384,16 @@
                                 self.updateModel();
                             }, 1000);
                         } else {
-                            console.log("Connection eRRoRR", mdl, values, xhr);
+                            console.error("Connection eRRoRR", mdl, values, xhr);
+                        }
+                    } else if (status == 70) {
+                        self.changeStatus(0);
+                    } else if (status == 90) {
+                        if (self._previousAttributes.status == 70) {
+                            self.changeStatus(0);
                         }
                     } else {
-                        console.log("Connection error", mdl, values, xhr);
+                        console.error("Connection error", mdl, values, xhr);
                     }
                 }
             });
@@ -421,7 +436,7 @@
             } else {
                 this.fetch({
                     success: function(mdl, directValues){
-                        ans = directValues;
+                        ans = directValues.dices;
                         callback(ans);
                     },
                     error: function(mdl, values){
@@ -459,16 +474,19 @@
 
                 this.fetch({
                     success: function(mdl, values){
-                        for (i = 0; i < indexes.length; i++) {
-                            self.attributes.dices[ indexes[i] ] = parseInt(values[i]);
-                            self.attributes.currentSelected[ indexes[i] ] = false;
-                        }
+                        //for (i = 0; i < indexes.length; i++) {
+                        //    self.attributes.dices[ indexes[i] ] = parseInt(values[i]);
+                        //    self.attributes.currentSelected[ indexes[i] ] = false;
+                        //}
+                        self.attributes.dices = values.dices;
+                        for (i = 0; i < 6; i++) {self.attributes.currentSelected[i] = false;}
+
                         self.setDices(self.attributes.dices);
                         console.log("rerolled dices", self.attributes.dices);
                         //self.urlRoot = prevUrlRoot;
                     },
                     error: function(mdl, values){
-                        console.log("connection error while reroll", mdl, values);
+                        console.error("connection error while reroll", mdl, values);
                         //self.urlRoot = prevUrlRoot;
                     }
                 });
@@ -477,14 +495,14 @@
         },
         // reroll all checked dices, rerollMode
         rerollDices: function(){
-            if (this.attributes.currentRerollStatus == false) {
+            if (this.attributes.rerolled == false) {
                 var indexes = [];
                 for (var i = 0; i < this.attributes.currentSelected.length; i++) {
                     if (this.attributes.currentSelected[i] == true) indexes.push(i);
                 }
                 if (indexes.length > 0) {
-                    //this.currentRerollStatus = true;
-                    this.set({currentRerollStatus: true});
+                    //this.rerolled = true;
+                    this.set({rerolled: true});
                     this.reroll(indexes);
                 }
             } else {
@@ -502,14 +520,16 @@
                 if (this.checkCombination(index)) {
                     var totalRounds = this.addCombination(combo);
                     this.removeValue("lastDices");
-                    console.log("combo added", combo);
+                    console.log("lastDices removed, combo added", combo);
 
-                    //this.currentRerollStatus = false;
-                    this.set({currentRerollStatus: false});
+                    //this.rerolled = false;
+                    this.set({rerolled: false});
 
                     var self = this;
                     this.sendCombination(combo, function(){
                         if (totalRounds != 13) {
+                            // additional remove lastDices for correct update, too much triggers =/
+                            self.removeValue("lastDices");
                             self.updateDices();
                         } else {
                             // there is additional setDices, because for some reason it won't to render
@@ -612,7 +632,7 @@
                     }
                 },
                 error: function(mdl, values){
-                    console.log("connection error while sending combination", mdl, values);
+                    console.error("connection error while sending combination", mdl, values);
                 }
             });
 
@@ -670,7 +690,7 @@
                 },
                 error: function(mdl, values){
                     $.numbers.networking = false;
-                    console.log("Can't connect to server", mdl, values);
+                    console.error("Can't connect to server", mdl, values);
                     callback();
                 }
             });
@@ -704,10 +724,10 @@
             "click": "clicked"
         },
         initialize: function(){
-            this.listenTo(this.model, "change:currentRerollStatus", this.changedRerollStatus);
+            this.listenTo(this.model, "change:rerolled", this.changedRerollStatus);
         },
         changedRerollStatus: function(){
-            //console.warn("reroll status changed", this.model.attributes.currentRerollStatus);
+            //console.warn("reroll status changed", this.model.attributes.rerolled);
             this.render();
         },
         clicked: function(){
@@ -720,7 +740,7 @@
         render: function() {
             this.$el.empty();
             this.$el.append(this.buttonTemplate());
-            if (this.model.attributes.currentRerollStatus) {
+            if (this.model.attributes.rerolled) {
                 //console.log("adding class Selected to reroll button");
                 this.$el.addClass('selected');
                 //this.$el.removeAttr("background-color");
@@ -788,7 +808,7 @@
     });
     $.numbers.NamesView = Backbone.View.extend({
         tagName: 'div',
-        className: 'statusView',
+        className: 'nameView',
         initialize: function(){
             this.listenTo(this.model, "change:names", this.listener);
         },
@@ -799,7 +819,7 @@
             "click": "clicked"
         },
         clicked: function(){
-            //console.log("model state:", this.model);
+            console.log("names:", this.model.attributes.names);
         },
         nameTemplate: _.template("<%= name %> "),
         render: function(){
