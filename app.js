@@ -264,7 +264,7 @@ console.log("small test", checkCombinations("134256"));
 
 var value = 0;
 
-var minPlayers = 1;
+var minPlayers = 2;
 
 var connectedCookies = {};
 
@@ -663,6 +663,7 @@ app.get("/api/connectPlayer", function(req, res){
     }
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
+    data.sessionID = req.sessionID;
 
     res.send(data);
     removeExpiredConnections();

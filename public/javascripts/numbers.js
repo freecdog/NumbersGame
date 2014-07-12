@@ -819,14 +819,34 @@
             "click": "clicked"
         },
         clicked: function(){
+            // TODO, can't get document.cookie, because it's empty =/, now server send sessionID in response
+            /*
+            var cookies = {};           // The object we will return
+            var all = document.cookie;  // Get all cookies in one big string
+            var list = all.split("; "); // Split into individual name=value pairs
+            for(var i = 0; i < list.length; i++) {  // For each cookie
+                var cookie = list[i];
+                var p = cookie.indexOf("=");        // Find the first = sign
+                var name = cookie.substring(0,p);   // Get cookie name
+                var value = cookie.substring(p+1);  // Get cookie value
+                value = decodeURIComponent(value);  // Decode the value
+                cookies[name] = value;              // Store name and value in object
+            }
+            console.log("cookies", cookies);
+            */
             console.log("names:", this.model.attributes.names);
         },
-        nameTemplate: _.template("<%= name %> "),
+        nameTemplate: _.template("<span> <%= name %> </span>"),
+        ownNameTemplate: _.template("<span><b> <%= name %> </b></span>"),
         render: function(){
             this.$el.empty();
             if (this.model.attributes != null && this.model.attributes.names != null) {
                 for (var i = 0; i < this.model.attributes.names.length; i++){
-                    this.$el.append(this.nameTemplate({name: this.model.attributes.names[i]}));
+                    if (this.model.attributes.players[i] == this.model.attributes.sessionID){
+                        this.$el.append(this.ownNameTemplate({name: this.model.attributes.names[i]}));
+                    } else {
+                        this.$el.append(this.nameTemplate({name: this.model.attributes.names[i]}));
+                    }
                 }
             }
             return this;
