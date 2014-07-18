@@ -42,7 +42,7 @@ function configure(){
     }
 }
 // now default config should be loaded from config.txt file
-//configure();
+configure();
 
 // all environments
 app.set('port', process.env.PORT || 33322);
