@@ -1,35 +1,14 @@
 body {
     margin: 0px;
     /*padding: 50px*/
-    font: 1.0em "Lucida Grande", Helvetica, Arial, sans-serif;
+    font: 1.5em "Lucida Grande", Helvetica, Arial, sans-serif;
     color: #ECE9E9;
     background-color: #343434;
 }
-
 a {
     color: #00B7FF;
+    font-size: 2em;
 }
-
-#pad1 {
-    padding-left: 40px;
-}
-
-#pad2 {
-    padding-left: 80px;
-}
-
-#pad3 {
-    padding-left: 120px;
-}
-
-#pad4 {
-    padding-left: 160px;
-}
-
-#pad5 {
-    padding-left: 200px;
-}
-
 table {
     border: 0;
     margin: 0px;
@@ -37,6 +16,22 @@ table {
     width: 100%;
     border-spacing: 0;
     border-collapse: collapse;
+}
+
+#pad1 {
+    padding-left: 40px;
+}
+#pad2 {
+    padding-left: 80px;
+}
+#pad3 {
+    padding-left: 120px;
+}
+#pad4 {
+    padding-left: 160px;
+}
+#pad5 {
+    padding-left: 200px;
 }
 
 .restartGameButton {

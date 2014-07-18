@@ -6,6 +6,44 @@ var path = require('path');
 
 var app = express();
 
+// default config
+var config = {
+    "minPlayers" : 1,
+    "secret": "someSecret"
+};
+function configure(){
+    var fs = require('fs');
+
+    var configPath = __dirname + '/config.txt';
+
+    try {
+        var filedata = fs.readFileSync(configPath, {encoding: "utf8"});
+        // some hack with first symbol =/
+        filedata = filedata.replace(/^\uFEFF/, '');
+        // parsing file to JSON object
+        var jsondata = JSON.parse(filedata);
+
+        if (jsondata){
+            var objectFieldsCounter = 0;
+            for (var property in jsondata) {
+                if (jsondata.hasOwnProperty(property)) {
+                    objectFieldsCounter++;
+
+                    config[property] = jsondata[property];
+                }
+            }
+            console.log("Configured fields:", objectFieldsCounter);
+            console.log("Current configuration:", config);
+        } else {
+            console.log('No json data in file');
+        }
+    } catch (e) {
+        console.log("error:", e);
+    }
+}
+// now default config should be loaded from config.txt file
+//configure();
+
 // all environments
 app.set('port', process.env.PORT || 33322);
 app.set('views', path.join(__dirname, 'views'));
@@ -15,7 +53,7 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(express.session({ secret: 'your secret here' }));
+app.use(express.session({ secret: config.secret }));
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -264,8 +302,6 @@ console.log("small test", checkCombinations("134256"));
 
 var value = 0;
 
-var minPlayers = 2;
-
 var connectedCookies = {};
 
 var purchases = {};
@@ -322,7 +358,7 @@ function prepareGame() {
     }
 
     var len = wannaPlayers.length;
-    if (len >= minPlayers) {
+    if (len >= config.minPlayers) {
         var gameId = "g" + gamesIndex.toString();
         games[gameId] = {};
         games[gameId]._id = gameId;
@@ -330,7 +366,7 @@ function prepareGame() {
         games[gameId].players = [];
         games[gameId].status = 20;
 
-        for (var i = 0; i < minPlayers; i++) {
+        for (var i = 0; i < len; i++) {
             if (i==0) {
                 //games[gameId].settings = connectedCookies[wannaPlayers[i]].settings;
                 //games[gameId].boxes = connectedCookies[wannaPlayers[i]].boxes;
@@ -379,6 +415,80 @@ function findGameById(sessionId) {
     return null;
 }
 
+function getPlayerIndexInGame(game, sessionID){
+    var ans = -1;
+    for (var i = 0; i < game.players.length; i++){
+        if (sessionID == game.players[i]) {
+            ans = i;
+            break;
+        }
+    }
+    return ans;
+}
+
+function isEndOfGame(game){
+    for (var i = 0; i < game.rounds.length; i++) {
+        var len = game.rounds[i].length;
+        if (len < 13 || game.rounds[i][len-1].combinationIndex == null) {
+            return false;
+        }
+    }
+    return true;
+}
+function endOfGame(game){
+    game.status = 90;
+
+    game.results = [];
+    game.winner = {index: "", name: "", result: 0};
+    for (var i = 0; i < game.players.length; i++){
+        var result = calculateResult(game.rounds[i]);
+        game.results[i] = result;
+        if (result > game.winner.result) {
+            game.winner.index = game.players[i];
+            game.winner.name = game.names[i];
+            game.winner.result = result;
+        }
+
+        connectedCookies[game.players[i]].status = 80;
+    }
+
+    console.log("game ends:", game);
+}
+function calculateResult(rounds){
+    var ans = 0;
+
+    var roundsPoints = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    for (var i = 0; i < rounds.length; i++){
+        roundsPoints[rounds[i].combinationIndex] = rounds[i].points;
+    }
+    for (var j = 0; j < roundsPoints.length; j++){
+        ans += roundsPoints[j];
+        if (j == 5 && ans >= 63) ans += 35;
+    }
+
+    return ans;
+}
+
+function collectOnlineStatistics(){
+    var data = {};
+    data.playersOnline = Object.keys(connectedCookies).length;
+    data.playersSearching = 0;
+    data.activeGames = 0;
+    for(var player in connectedCookies) {
+        if (connectedCookies.hasOwnProperty(player)){
+            if (connectedCookies[player].status == 1 || connectedCookies[player].status == 2) {
+                data.playersSearching++;
+            }
+        }
+    }
+    for (var game in games) {
+        if (games.hasOwnProperty(game)){
+            if (games[game].status == 1) data.activeGames++;
+        }
+    }
+    return data;
+}
+
 app.get('/', routes.index);
 app.get('/play', function(req,res){
     res.render("play");
@@ -392,19 +502,17 @@ app.get('/onlineStatistics', function(req, res){
         games: games
     });
 });
+app.get("/dropAll", function(req, res){
+    connectedCookies = {};
+    games = {};
+    res.redirect("/onlineStatistics");
+});
+app.get("/reconfigure", function(req, res){
+    configure();
+    res.redirect("/");
+});
 
-function getPlayerIndexInGame(game, sessionID){
-    var ans = -1;
-    for (var i = 0; i < game.players.length; i++){
-        if (sessionID == game.players[i]) {
-            ans = i;
-            break;
-        }
-    }
-    return ans;
-}
 // API
-// TODO, send dices as object {dices: []}
 app.get('/api/dices', function(req, res){
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         var game = findGameById(req.sessionID);
@@ -589,68 +697,6 @@ app.get('/api/giveup', function(req, res){
     }
 });
 
-function isEndOfGame(game){
-    for (var i = 0; i < game.rounds.length; i++) {
-        var len = game.rounds[i].length;
-        if (len < 13 || game.rounds[i][len-1].combinationIndex == null) {
-            return false;
-        }
-    }
-    return true;
-}
-function endOfGame(game){
-    game.status = 90;
-
-    game.results = [];
-    game.winner = {index: "", name: "", result: 0};
-    for (var i = 0; i < game.players.length; i++){
-        var result = calculateResult(game.rounds[i]);
-        game.results[i] = result;
-        if (result > game.winner.result) {
-            game.winner.index = game.players[i];
-            game.winner.name = game.names[i];
-            game.winner.result = result;
-        }
-
-        connectedCookies[game.players[i]].status = 80;
-    }
-
-    console.log("game ends:", game);
-}
-function calculateResult(rounds){
-    var ans = 0;
-
-    var roundsPoints = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-    for (var i = 0; i < rounds.length; i++){
-        roundsPoints[rounds[i].combinationIndex] = rounds[i].points;
-    }
-    for (var j = 0; j < roundsPoints.length; j++){
-        ans += roundsPoints[j];
-        if (j == 5 && ans >= 63) ans += 35;
-    }
-
-    return ans;
-}
-
-function collectOnlineStatistics(){
-    var data = {};
-    data.playersOnline = Object.keys(connectedCookies).length;
-    data.playersSearching = 0;
-    data.activeGames = 0;
-    for(var player in connectedCookies) {
-        if (connectedCookies.hasOwnProperty(player)){
-            if (connectedCookies[player].status == 1 || connectedCookies[player].status == 2) {
-                data.playersSearching++;
-            }
-        }
-    }
-    for (var game in games) {
-        if (games.hasOwnProperty(game)){
-            if (games[game].status == 1) data.activeGames++;
-        }
-    }
-    return data;
-}
 app.get("/api/connectPlayer", function(req, res){
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         connectedCookies[req.sessionID].time = new Date();
@@ -694,28 +740,6 @@ app.get("/api/findGame", function(req, res){
     } else {
         res.send();
     }
-});
-/*app.post("/api/findGame", function(req, res){
-    console.log(req._remoteAddress + ", game received, onliners: " + Object.keys(connectedCookies).length.toString());
-
-    connectedCookies[req.sessionID].status = 2; // searching game
-    connectedCookies[req.sessionID].time = new Date();
-
-    connectedCookies[req.sessionID].settings = JSON.parse(req.body.settings);
-    connectedCookies[req.sessionID].boxes = JSON.parse(req.body.boxes);
-
-    prepareGame();
-
-    var game = findGameById(req.sessionID);
-    res.send(game);
-
-    removeExpiredConnections();
-});*/
-
-app.get("/api/dropAll", function(req, res){
-    connectedCookies = {};
-    games = {};
-    res.redirect("/");
 });
 
 app.get("/api/rounds/:gid", function(req, res){
@@ -765,35 +789,6 @@ app.get("/api/rounds/:gid/:datastring", function(req, res){
     removeExpiredConnections();
 
 });
-/*app.post("/api/rounds", function(req, res){
-
-    if (req.body.gameId != null){
-        purchases[req.body.gameId] = {};
-        purchases[req.body.gameId].gameId = req.body.gameId;
-
-        if (purchases[req.body.gameId].purchases == null)
-            purchases[req.body.gameId].purchases = [];
-
-        var item = {};
-        item.sessionId = req.sessionID;
-        item.purchaseIndex = req.body.purchase;
-        item.ownerMoneyChangeValue = req.body.ownerMoneyChangeValue;
-        item.serverTime = new Date().getTime();
-
-        purchases[req.body.gameId].purchases.push(item);
-        //purchases[req.body.gameId].sessionId = req.sessionID;
-        //purchases[req.body.gameId].purchaseIndex = req.body.purchase;
-        //purchases[req.body.gameId].ownerMoneyChangeValue = req.body.ownerMoneyChangeValue;
-        //purchases[req.body.gameId].serverTime = new Date().getTime();
-    }
-
-    //console.log(req._remoteAddress + " purchases " + req.body.purchase );
-    res.send("1");
-
-    connectedCookies[req.sessionID].time = new Date();
-    removeExpiredConnections();
-});*/
-
 
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
