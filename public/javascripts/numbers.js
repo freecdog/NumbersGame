@@ -513,7 +513,7 @@
                 self.urlRoot = prevUrlRoot;
             }
         },
-        // reroll all checked dices, rerollMode
+        // reroll all checked dice, rerollMode
         rerollDices: function(){
             if (this.attributes.rerolled == false) {
                 var indexes = [];
