@@ -554,7 +554,10 @@ app.get('/api/dices', function(req, res){
             } else {
                 console.log("updating not finished dices");
                 var notFinishedDices = game.rounds[playerIndex][notFinishedRoundIndex].dices;
-                res.send({dices: notFinishedDices});
+                res.send({
+                    dices: notFinishedDices,
+                    rerolled: game.rounds[playerIndex][notFinishedRoundIndex].rerolled
+                });
             }
 
         } else {
@@ -586,7 +589,10 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                 var rIndex = game.rounds[playerIndex].length - 1;
                 if (game.rounds[playerIndex][rIndex].rerolled) {
                     // sending last set of dices
-                    res.send(game.rounds[playerIndex][rIndex].dices);
+                    res.send({
+                        dices: game.rounds[playerIndex][rIndex].dices,
+                        rerolled: game.rounds[playerIndex][rIndex].rerolled
+                    });
                 } else {
                     var dices = [];
                     for (var i = 0; i < dlen; i++){

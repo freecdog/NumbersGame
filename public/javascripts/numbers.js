@@ -403,7 +403,27 @@
         },
 
         updateDices: function(){
-            if (this.existValue("lastDices")){
+            if ($.numbers.networking == false) {
+                if (this.existValue("lastDices")){
+                    if (this.getValue("lastDices") == "undefined") {
+                        console.warn("storaged dices was undefined");
+                        this.removeValue("lastDices");
+                        this.updateDices();
+                    }
+                    console.log("dices exist");
+                    this.setDices(JSON.parse(this.getValue("lastDices")));
+                } else {
+                    console.log("generating dices");
+                    this.generateCombination(null);
+                }
+            } else {
+                console.log("fetching dices");
+                var prevUrlRoot = this.urlRoot;
+                this.urlRoot = "/api/dices";
+                this.generateCombination(null);
+                this.urlRoot = prevUrlRoot;
+            }
+            /*if (this.existValue("lastDices")){
                 if (this.getValue("lastDices") == "undefined") {
                     console.warn("storaged dices was undefined");
                     this.removeValue("lastDices");
@@ -419,7 +439,7 @@
                 this.generateCombination(null);
 
                 this.urlRoot = prevUrlRoot;
-            }
+            }*/
             /*console.log("fetching dices");
             var prevUrlRoot = this.urlRoot;
             this.urlRoot = "/api/dices";
