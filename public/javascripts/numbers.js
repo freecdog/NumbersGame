@@ -304,6 +304,7 @@
             this.restartListener();
             this.statusChanged();
 
+            // it doesn't looks like good code
             //this.rerolled = false;
             this.set({rerolled: false});
             //this.currentSelected = [false, false, false, false, false, false];
@@ -337,6 +338,7 @@
             } else if (status == 70) {
                 this.urlRoot = '/api/giveup';
             } else if (status == 90) {
+                // TODO, if status 90 and pressed F5, status fetched as 20
                 needUpdate = false;
                 console.log("game is over");
                 //this.urlRoot = '/api/rounds/' + this.attributes._id;
@@ -871,6 +873,49 @@
             return this;
         }
     });
+    $.numbers.InputView = Backbone.View.extend({
+        tagName: 'div',
+        className: 'inputView',
+        initialize: function(){
+            //this.el.contentEditable = "true";
+            //this.setValue(this.getName(this.options.parent.model));
+            this.$el.attr('contentEditable',true);
+            this.listenTo(this.options.parent.model, "change:names", this.listener);
+        },
+        listener: function(){
+            this.setValue(this.getName(this.options.parent.model));
+        },
+        events: {
+            "click": "clicked",
+            "keydown": "clicked"
+        },
+        clicked: function(event){
+            console.log(this.getValue(), event, this.$el.clone());
+        },
+        getValue: function(){
+            return this.$el[0].textContent;
+        },
+        setValue: function(value){
+            this.$el[0].textContent = value;
+        },
+        getName: function(model){
+            var id = model.attributes.sessionID;
+            var ind = -1;
+            for (var i = 0; i < model.attributes.players.length; i++){
+                if (model.attributes.players[i] == id) {
+                    ind = i;
+                    break;
+                }
+            }
+            return model.attributes.names[ind];
+        },
+        render: function(){
+            this.$el.empty();
+            this.$el.append("asdf");
+
+            return this;
+        }
+    });
 
     $.numbers.ResultView = Backbone.View.extend({
         tagName: 'div',
@@ -1130,6 +1175,9 @@
 
             var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
             this.$el.append(acceptCombinationButton.render().el);
+
+            var inputView = new $.numbers.InputView({parent: $.numbers.app.combinationsView});
+            this.$el.append(inputView.render().el);
 
             console.log('gameView rendered');
             return this;

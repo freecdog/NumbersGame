@@ -63,6 +63,20 @@ table {
     background-color: #4f4f4f;
 }
 
+.inputView {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+    /*background-color: #00eeff;*/
+    background-color: -moz-field;
+    border: 0px solid darkgray;
+    /*box-shadow: 1px 1px 1px 0 lightgray inset;*/
+    /*font: -moz-field;
+    font: -webkit-small-control;*/
+    /*margin-top: 5px;
+    padding: 2px 3px;*/
+    width: 398px;
+}
+
 .dicesHolder {
     height: 128px;
 }
