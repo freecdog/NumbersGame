@@ -284,7 +284,6 @@
                 }
             });
         }*/
-
     });
 
     $.numbers.Combination = Backbone.Model.extend({
