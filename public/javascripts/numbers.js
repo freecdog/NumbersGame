@@ -244,7 +244,7 @@
 
     // Models
 
-    // status difinition in rules
+    // status definition in rules
     $.numbers.Game = Backbone.Model.extend( {
         urlRoot: '/api/connectPlayer',
         idAttribute: '_id',
