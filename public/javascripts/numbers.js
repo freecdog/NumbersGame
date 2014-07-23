@@ -255,7 +255,6 @@
         },
         initialize: function() {
             //this.listenTo(this, 'change', this.statusChanged);
-
             //this.updateModel();
         }
         /*statusChanged: function(){
