@@ -445,7 +445,6 @@
             this.urlRoot = "/api/dices";
 
             this.generateCombination(null);
-
             this.urlRoot = prevUrlRoot;*/
         },
         getDices: function(callback) {
