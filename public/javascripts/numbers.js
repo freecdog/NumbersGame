@@ -883,8 +883,10 @@
             this.setValue(this.getName(this.options.parent.model));
         },
         events: {
-            "click": "clicked",
-            "keydown": "clicked"
+            // https://developer.mozilla.org/en-US/docs/Web/Events
+            //"click": "clicked",
+            //"keydown": "clicked",
+            "input": "clicked"
         },
         clicked: function(event){
             console.log(this.getValue(), event, this.$el.clone());
