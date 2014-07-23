@@ -911,7 +911,6 @@
         render: function(){
             this.$el.empty();
             this.$el.append("asdf");
-
             return this;
         }
     });
