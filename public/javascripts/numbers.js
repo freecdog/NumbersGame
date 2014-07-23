@@ -561,7 +561,6 @@
                     // generating new combination
                     //this.generateCombination(null);
                     //this.updateDices();
-
                     return true;
                 } else {
                     console.log("can't add combo");
