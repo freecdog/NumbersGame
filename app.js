@@ -61,10 +61,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
-
+// public
 function generateDice(){
     return Math.floor(Math.random()*6) + 1;
 }
+// private
 function stringToDices(dicesString){
     var dices = [0, 0, 0, 0, 0, 0];
     var fault = false;
@@ -259,6 +260,7 @@ function checkChance(dices){
     return dicesSum(dices);
 }
 
+// public
 function checkCombinations(dicesInput) {
     var dices = [0, 0, 0, 0, 0, 0];
     if( Object.prototype.toString.call( dicesInput ) === '[object Array]' ) {
@@ -297,6 +299,11 @@ function checkCombinations(dicesInput) {
         return false;
     }
 }
+
+// template for exteranal class to detect combinations
+(function(obj){
+    ;
+})({});
 
 console.log("small test", checkCombinations("134256"));
 
