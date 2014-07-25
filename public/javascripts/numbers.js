@@ -715,8 +715,8 @@
     $.numbers.DiceView = Backbone.View.extend({
         tagName: 'div',
         initialize: function(){
-            //this.$el.attr("class", "dice"+this.model.value.toString() );
-            this.$el.css("display", "inline-block");
+            this.$el.attr("class", "dice"+this.model.value.toString() );
+            //this.$el.css("display", "inline-block");
         },
         events: {
             "click": "clicked"
@@ -737,7 +737,7 @@
         //diceTemplate:  _.template('<div class="dice<%= value %>"> <%= value %> </div>'),
         render: function() {
             this.$el.empty();
-            this.$el.append("<span>" + this.model.value + "</span>");
+            //this.$el.append("<span>" + this.model.value + "</span>");
             //this.$el.append(this.diceTemplate(this.model));
             console.log('dice rendered');
             return this;
