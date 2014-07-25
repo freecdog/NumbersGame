@@ -140,6 +140,12 @@
                         if (self._previousAttributes.status == 70) {
                             self.changeStatus(0);
                         }
+                        // refresh (f5) behaviour when game already ended
+                        if (self.attributes.combinations.length == 0) {
+                            var ind = self.getOwnPlayerIndex();
+                            var rlen = self.attributes.rounds[ind].length;
+                            self.setDices(self.attributes.rounds[ind][rlen-1].dices);
+                        }
                     }
                 },
                 error: function(mdl, values, xhr){
@@ -239,7 +245,6 @@
             this.set({combinations: checkCombinations(dices)});
         },
 
-        // TODO, after reroll when f5 pressed status not updated
         reroll: function(indexes){
             var self = this;
             var i = 0;
@@ -448,6 +453,17 @@
             this.initialize();
         },
 
+        getOwnPlayerIndex: function(){
+            var ans = -1;
+            for (var i = 0; i < this.attributes.names.length; i++){
+                if (this.attributes.players[i] == this.attributes.sessionID){
+                    ans = i;
+                    break;
+                }
+            }
+            return ans;
+        },
+
         // storage
         addValue: function(name,value){
             this.storage.setItem(name, value);
@@ -606,6 +622,7 @@
         },
         clicked: function(){
             // TODO, can't get document.cookie, because it's empty =/, now server send sessionID in response
+            // The reason why document.cookie is empty is httponly set as true
             /*
             var cookies = {};           // The object we will return
             var all = document.cookie;  // Get all cookies in one big string
@@ -627,8 +644,9 @@
         render: function(){
             this.$el.empty();
             if (this.model.attributes != null && this.model.attributes.names != null) {
+                var ownIndex = this.model.getOwnPlayerIndex();
                 for (var i = 0; i < this.model.attributes.names.length; i++){
-                    if (this.model.attributes.players[i] == this.model.attributes.sessionID){
+                    if (i == ownIndex){
                         this.$el.append(this.ownNameTemplate({name: this.model.attributes.names[i]}));
                     } else {
                         this.$el.append(this.nameTemplate({name: this.model.attributes.names[i]}));
@@ -697,7 +715,8 @@
     $.numbers.DiceView = Backbone.View.extend({
         tagName: 'div',
         initialize: function(){
-            this.$el.attr("class", "dice"+this.model.value.toString() );
+            //this.$el.attr("class", "dice"+this.model.value.toString() );
+            this.$el.css("display", "inline-block");
         },
         events: {
             "click": "clicked"
@@ -718,6 +737,7 @@
         //diceTemplate:  _.template('<div class="dice<%= value %>"> <%= value %> </div>'),
         render: function() {
             this.$el.empty();
+            this.$el.append("<span>" + this.model.value + "</span>");
             //this.$el.append(this.diceTemplate(this.model));
             console.log('dice rendered');
             return this;

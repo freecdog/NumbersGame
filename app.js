@@ -67,7 +67,7 @@ var NumbersBase = require('./public/javascripts/NumbersBase.js');
 var generateDice = NumbersBase.generateDice;
 var checkCombinations = NumbersBase.checkCombinations;
 
-console.log("small test", generateDice(), checkCombinations("134256"));
+//console.log("small test", generateDice(), checkCombinations("134256"));
 
 var value = 0;
 
@@ -161,27 +161,47 @@ function prepareGame() {
         console.log("names:", games[gameId].names);
     }
 }
+// TODO, now it returns last game of player while iterating through ALL amount of games
+// should do something with it
 function findGameById(sessionId) {
+    var ans = null;
+
+    function isThisGameMine(game){
+        var isIt = false;
+        for (var j = 0; j < game.players.length; j++) {
+            if (sessionId == game.players[j]) {
+                isIt = true;
+            }
+        }
+        return isIt;
+    }
+
     for (var gInd in games) {
+    //for (var i = gamesIndex-1; i >=0; i--){
+        //var gInd = "g" + gamesIndex.toString();
+        //if (games.hasOwnProperty(gInd) == false) {
+        //    console.log("skipping game index:", i);
+        //    continue;
+        //}
+
         var game = games[gInd];
         // if in game
         if (connectedCookies[sessionId].status == 80){
-            for (var j = 0; j < game.players.length; j++) {
-                if (sessionId == game.players[j]) {
-                    return game;
-                }
+            if (isThisGameMine(game)) {
+                //return game;
+                ans = game;
             }
         } else {
             if (game.status != 90 && game.status != -1) {
-                for (var j = 0; j < game.players.length; j++) {
-                    if (sessionId == game.players[j]) {
-                        return game;
-                    }
+                if (isThisGameMine(game)) {
+                    //return game;
+                    ans = game;
                 }
             }
         }
     }
-    return null;
+    //return null;
+    return ans;
 }
 
 function getPlayerIndexInGame(game, sessionID){
@@ -371,7 +391,7 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                     game.rounds[playerIndex][rIndex].olddices = [];
                     for (var m = 0; m < game.rounds[playerIndex][rIndex].dices.length; m++){
                         game.rounds[playerIndex][rIndex].olddices[m] = game.rounds[playerIndex][rIndex].dices[m];
-                    };
+                    }
 
                     for (var j = 0; j < dlen; j++){
                         game.rounds[playerIndex][rIndex].dices[ parseInt(req.params.dicesIndexes[j]) ] = dices[j];
@@ -461,6 +481,8 @@ app.get('/api/giveup', function(req, res){
             if (game.status != 90) {
                 endOfGame(game);
             }
+            // returning to find
+            connectedCookies[req.sessionID].status = 2;
             res.send(game);
         } else {
             console.log("game not found (/api/giveup)");
@@ -475,7 +497,7 @@ app.get('/api/giveup', function(req, res){
 app.get("/api/connectPlayer", function(req, res){
     if (connectedCookies.hasOwnProperty(req.sessionID)){
         connectedCookies[req.sessionID].time = new Date();
-        if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
+        //if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
     } else {
         connectedCookies[req.sessionID] = {};
         connectedCookies[req.sessionID].time = new Date();
@@ -553,8 +575,6 @@ app.get("/api/rounds/:gid/:datastring", function(req, res){
     if (gameId != null){
         //console.log("data from client:", JSON.parse(req.params.datastring));
         var data = JSON.parse(req.params.datastring);
-
-        ;
     }
 
     //console.log(req._remoteAddress + " purchases " + req.body.purchase );

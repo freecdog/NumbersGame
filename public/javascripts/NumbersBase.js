@@ -2,7 +2,6 @@
  * Created by jaric on 25.07.2014.
  */
 (function(exports){
-    console.log("asdasd");
 
     // private
     function stringToDices(dicesString){

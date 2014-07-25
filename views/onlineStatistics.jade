@@ -12,31 +12,33 @@ block content
 
     p Connections[#{Object.keys(connected).length}]:
     -for(var connection in connected)
-        #pad1 #{connection}:
+        #pad1(onclick="toggle_visibility(this)") #{connection}:
         -for(var conState in connected[connection])
             if (conState == "time")
                 -var diff = (serverTime - connected[connection][conState]) / 1000.0;
-                #pad2 #{conState} — (#{diff}) #{connected[connection][conState]}
+                #pad2(onclick="toggle_visibility(this)") #{conState} — (#{diff}) #{connected[connection][conState]}
             else
-                #pad2 #{conState} — #{connected[connection][conState]}
+                #pad2(onclick="toggle_visibility(this)") #{conState} — #{connected[connection][conState]}
     p Games[#{Object.keys(games).length}]:
     -for(var game in games)
-        #pad1 #{game}:
+        #pad1(onclick="toggle_visibility(this)") #{game}:
         -for(var gameState in games[game])
             if (gameState == "rounds")
-                #pad2 #{gameState}:
+                #pad2(onclick="toggle_visibility(this)") #{gameState}:
                 -for(var player in games[game][gameState])
-                    #pad3 Player index: #{player}
+                    #pad3(onclick="toggle_visibility(this)") Player index: #{player}
+
                     -for(var round in games[game][gameState][player])
-                        #pad4 Round number: #{round}
+                        #pad4(onclick="toggle_visibility(this)") Round number: #{round}
                         -for(var roundParams in games[game][gameState][player][round])
                             if (roundParams == "rerolled" || roundParams == "combinationIndex" || roundParams == "points")
                                 #pad5 #{roundParams}: #{games[game][gameState][player][round][roundParams]}
                             else
                                 #pad5 #{roundParams}: #{JSON.stringify(games[game][gameState][player][round][roundParams])}
-                                //
+                                //-
                                     -for(var paramDetails in games[game][gameState][player][round][roundParams])
                                         #pad6 #{paramDetails}: #{games[game][gameState][player][round][roundParams][paramDetails]}
+
             else if (gameState == "winner")
                 #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
             else
@@ -44,3 +46,28 @@ block content
 
     br
     | questions: mm1000@list.ru
+
+    script(src="/javascripts/jquery-1.9.1.js")
+    script.
+        function toggle_visibility(obj) {
+
+            function toggleId(level){
+                $("*[id=pad"+ level.toString()+"]").each(function(){
+                    if ($(this).is(':visible')) {
+                        $(this).slideUp("fast");
+                    } else {
+                        $(this).slideDown("fast");
+                    }
+                });
+            }
+
+            var d = new Date();
+            var nid = parseInt(obj.id.substr(3)) + 1;
+            for (var i = nid; i <= 6; i++) {
+                toggleId(i);
+            }
+            //$('html, body').animate({
+            //    scrollTop: $(obj).offset().top
+            //}, 2000);
+            console.log((new Date() - d) + " ms");
+        }
