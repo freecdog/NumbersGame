@@ -529,7 +529,7 @@ app.get("/api/findGame", function(req, res){
 
         prepareGame();
         var game = findGameById(req.sessionID);
-        if (game == null) game = connectedCookies.length;
+        if (game == null) game = collectOnlineStatistics();
         else console.log("game to send:", game);
         res.send(game);
 

@@ -68,6 +68,9 @@
             // sessionStorage - keep values only in one tab
             this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
 
+            this.updateRate = 2000; // ms
+            this.lastUpdateTime = 0;
+
             this.restartListener();
             this.statusChanged();
 
@@ -105,7 +108,6 @@
             } else if (status == 70) {
                 this.urlRoot = '/api/giveup';
             } else if (status == 90) {
-                // TODO, if status 90 and pressed F5, status fetched as 20
                 needUpdate = false;
                 console.log("game is over");
                 //this.urlRoot = '/api/rounds/' + this.attributes._id;
@@ -126,16 +128,34 @@
             this.fetch({
                 success: function(mdl, values){
                     //console.log("fetched:", mdl, values);
-                    console.log("fetched new status:", mdl.attributes.status != values.status);
+                    if (values.status != null && mdl._previousAttributes.status != values.status) {
+                        console.log("fetched new status:", values.status != null && mdl._previousAttributes.status != values.status, values.status);
+                    } else {
+                        console.log("fetched new status:", values.status != null && mdl._previousAttributes.status != values.status);
+                    }
                     var status = self.attributes.status;
                     if (status == 0) {
                         self.changeStatus(10);
+                    } else if (status == 10) {
+                        if (new Date() - self.lastUpdateTime > self.updateRate) {
+                            self.lastUpdateTime = new Date();
+                            setTimeout(function () {
+                                self.updateModel();
+                            }, self.updateRate);
+                        } else {
+                            console.log("going to update too early", status);
+                        }
                     } else if (status == 20) {
                         //console.log("process fetched:", mdl, values);
-                        // TODO, there is a problem about twice fetching process
-                        setTimeout(function(){
-                            self.updateModel();
-                        }, 2000);
+                        // there were a problem about twice fetching, but with this if it looks fine
+                        if (new Date() - self.lastUpdateTime > self.updateRate) {
+                            self.lastUpdateTime = new Date();
+                            setTimeout(function(){
+                                self.updateModel();
+                            }, self.updateRate);
+                        } else {
+                            console.log("going to update too early", status);
+                        }
                     } else if (status == 90) {
                         if (self._previousAttributes.status == 70) {
                             self.changeStatus(0);
@@ -150,13 +170,10 @@
                 },
                 error: function(mdl, values, xhr){
                     var status = self.attributes.status;
-                    // TODO is there any reason why fetching result lead to error?
+                    console.warn("actually error");
                     if (status == 10) {
                         if (values.status == 200) {
-                            console.log("trying to find");
-                            setTimeout(function(){
-                                self.updateModel();
-                            }, 1000);
+                            console.warn("there were case with fetching here, but now it's moved to success");
                         } else {
                             console.error("Connection eRRoRR", mdl, values, xhr);
                         }
