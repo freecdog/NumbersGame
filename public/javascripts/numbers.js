@@ -60,7 +60,10 @@
             '_id':  null,
             status: 0,
             dices: [0, 0, 0, 0, 0, 0],
-            combinations: []
+            combinations: [],
+
+            clickable: true,
+            observerIndex: -1
         },
 
         initialize: function() {
@@ -68,7 +71,7 @@
             // sessionStorage - keep values only in one tab
             this.storage = localStorage; //document.cookie; //localStorage; //sessionStorage;
 
-            this.updateRate = 2000; // ms
+            this.updateRate = 1000; // ms
             this.lastUpdateTime = 0;
 
             this.restartListener();
@@ -481,6 +484,18 @@
             return ans;
         },
 
+        viewAnotherModel: function(playerIndex){
+            var ans = {};
+            ans.clickable = this.getOwnPlayerIndex() == playerIndex;
+            var rlen = this.attributes.rounds[playerIndex].length;
+            ans.dices = this.attributes.rounds[playerIndex][rlen - 1].dices;
+            ans.rerolled = this.attributes.rounds[playerIndex][rlen - 1].rerolled;
+            ans.observerIndex = playerIndex;
+
+            //console.warn("now I do nothing");
+            this.set({clickable: ans.clickable, observerIndex: ans.observerIndex});
+        },
+
         // storage
         addValue: function(name,value){
             this.storage.setItem(name, value);
@@ -627,7 +642,7 @@
     });
     $.numbers.NamesView = Backbone.View.extend({
         tagName: 'div',
-        className: 'nameView',
+        className: 'namesView',
         initialize: function(){
             this.listenTo(this.model, "change:names", this.listener);
         },
@@ -637,8 +652,7 @@
         events: {
             "click": "clicked"
         },
-        clicked: function(){
-            // TODO, can't get document.cookie, because it's empty =/, now server send sessionID in response
+        clicked: function(e){
             // The reason why document.cookie is empty is httponly set as true
             /*
             var cookies = {};           // The object we will return
@@ -654,19 +668,20 @@
             }
             console.log("cookies", cookies);
             */
-            console.log("names:", this.model.attributes.names);
+            console.log("names:", e.target.title, this.model.attributes.names, e);
+            $.numbers.app.doViewAnotherModel(parseInt(e.target.title));
         },
-        nameTemplate: _.template("<span> <%= name %> </span>"),
-        ownNameTemplate: _.template("<span><b> <%= name %> </b></span>"),
+        nameTemplate: _.template('<span title="<%= index %>"> <%= name %> </span>'),
+        ownNameTemplate: _.template('<b><span title="<%= index %>"> <%= name %> </span></b>'),
         render: function(){
             this.$el.empty();
             if (this.model.attributes != null && this.model.attributes.names != null) {
                 var ownIndex = this.model.getOwnPlayerIndex();
                 for (var i = 0; i < this.model.attributes.names.length; i++){
                     if (i == ownIndex){
-                        this.$el.append(this.ownNameTemplate({name: this.model.attributes.names[i]}));
+                        this.$el.append(this.ownNameTemplate({name: this.model.attributes.names[i], index: i}));
                     } else {
-                        this.$el.append(this.nameTemplate({name: this.model.attributes.names[i]}));
+                        this.$el.append(this.nameTemplate({name: this.model.attributes.names[i], index: i}));
                     }
                 }
             }
@@ -739,11 +754,15 @@
             "click": "clicked"
         },
         clicked: function(){
-            //console.log("click", this.model.value, event);
-            this.model.selected = !this.model.selected;
-            if (this.model.selected) this.select();
-            else this.deselect();
-            $.numbers.app.combinationModel.attributes.currentSelected[this.model.index] = this.model.selected;
+            if (this.model.parent.model.attributes.clickable){
+                //console.log("click", this.model.value, event);
+                this.model.selected = !this.model.selected;
+                if (this.model.selected) this.select();
+                else this.deselect();
+                $.numbers.app.combinationModel.attributes.currentSelected[this.model.index] = this.model.selected;
+            } else {
+                console.log("You can only observe game process of other player");
+            }
         },
         select: function(){
             this.$el.addClass('selected');
@@ -773,23 +792,27 @@
             "click": "clicked"
         },
         clicked: function(){
-            if (this.model.usedCombination == false) {
-                //console.log("click", this.model.name, this.model.value, event);
-                this.selected = !this.selected;
+            if (this.model.parent.model.attributes.clickable){
+                if (this.model.usedCombination == false) {
+                    //console.log("click", this.model.name, this.model.value, event);
+                    this.selected = !this.selected;
 
-                if (this.selected) {
-                    this.model.parent.deselectAllCombinations();
-                    //this.select();
-                    this.model.parent.selectCombination(this.model.index, this);
-                }
-                else {
-                    //this.deselect();
-                    this.model.parent.deselectCombination(this.model.index, this);
-                }
+                    if (this.selected) {
+                        this.model.parent.deselectAllCombinations();
+                        //this.select();
+                        this.model.parent.selectCombination(this.model.index, this);
+                    }
+                    else {
+                        //this.deselect();
+                        this.model.parent.deselectCombination(this.model.index, this);
+                    }
 
-                console.log("quick click");
-                var ind = this.model.index;
-                $.numbers.app.doAccept(ind);
+                    console.log("quick click");
+                    var ind = this.model.index;
+                    $.numbers.app.doAccept(ind);
+                }
+            } else {
+                console.log("You can only observe game process of other player");
             }
         },
         select: function(){
@@ -811,8 +834,6 @@
     $.numbers.CombinationsView = Backbone.View.extend({
         tagName: 'div',
         className: 'combinations',
-        events: {
-        },
         initialize: function(){
             this.selectedIndex = -1;
             this.listenTo(this.model, "change:combinations", this.combinationsChanged);
@@ -938,11 +959,74 @@
         }
     });
 
+    // TODO, I should redesign $.numbers.CombinationsView to use it in GameObserve view
+    $.numbers.GameObserve = Backbone.View.extend({
+        tagName: 'div',
+        className: 'game',
+        initialize: function(){
+            this.previousDisplay = this.$el.css("display");
+            this.$el.css("display", "none");
+
+            this.listenTo(this.model, 'change:clickable', this.listener);
+            this.listenTo(this.model, 'change:observerIndex', this.render);
+        },
+        listener: function(){
+            if (!this.model.attributes.clickable) {
+                this.$el.css("display", this.previousDisplay);
+            } else {
+                this.previousDisplay = this.$el.css("display");
+                this.$el.css("display", "none");
+            }
+        },
+        events: {
+            "click": "click"
+        },
+        click: function(){
+            var ind = $.numbers.app.combinationModel.getOwnPlayerIndex();
+            $.numbers.app.combinationModel.viewAnotherModel(ind);
+        },
+        renderDices: function(element, dices){
+            for (var i = 0; i < dices.length; i++) {
+                var dice = new $.numbers.DiceView({model: {
+                    index: i,
+                    value: dices[i],
+                    selected: false,
+                    parent: this
+                }});
+                element.append(dice.render().el);
+            }
+        },
+        render: function(){
+            this.$el.empty();
+            //var comboView = new $.numbers.CombinationsView({model: $.numbers.app.combinationModel});
+            //$.numbers.app.combinationsView = comboView;
+
+            var playerIndex = this.model.attributes.observerIndex;
+            if (playerIndex != -1){
+                var rlen = this.model.attributes.rounds[playerIndex].length;
+                var dices = this.model.attributes.rounds[playerIndex][rlen - 1].dices;
+                this.renderDices(this.$el, dices);
+            }
+
+            return this;
+        }
+    });
     $.numbers.GameView = Backbone.View.extend({
         tagName: 'div',
         className: 'game',
         initialize: function(){
             //this.model = new $.numbers.Game();
+            this.listenTo($.numbers.app.combinationModel, 'change:clickable', this.listener);
+        },
+        listener: function(){
+            //console.warn("doasdjiaojsdioajsdfipojasdf");
+            var mdl = $.numbers.app.combinationModel;
+            if (mdl.attributes.clickable) {
+                this.$el.css("display", this.previousDisplay);
+            } else {
+                this.previousDisplay = this.$el.css("display");
+                this.$el.css("display", "none");
+            }
         },
         render: function(){
             var self = this;
@@ -950,12 +1034,6 @@
             //$.numbers.app.currentCombination = new $.numbers.Combination();
             var comboView = new $.numbers.CombinationsView({model: $.numbers.app.combinationModel});
             $.numbers.app.combinationsView = comboView;
-
-            var nameView = new $.numbers.NamesView({model: $.numbers.app.combinationModel});
-            this.$el.append(nameView.render().el);
-
-            var statusView = new $.numbers.StatusView({model: $.numbers.app.combinationModel});
-            this.$el.append(statusView.render().el);
 
             var rerollButton = new $.numbers.RerollButton({model: $.numbers.app.combinationModel, parent: $.numbers.app.combinationsView});
             //this.$el.append(rerollButton.render().el);
@@ -1001,17 +1079,27 @@
             console.log("2. app route");
 
             var self = this;
+            var $body = $('body');
 
             //this.getConnection(function(){
                 $.numbers.networking = true;
                 console.log("networking(junked):", $.numbers.networking);
                 self.combinationModel = new $.numbers.Combination();
 
+                var nameView = new $.numbers.NamesView({model: self.combinationModel});
+                $body.append(nameView.render().el);
+
+                var statusView = new $.numbers.StatusView({model: self.combinationModel});
+                $body.append(statusView.render().el);
+
                 self.gameModel = new $.numbers.Game();
                 self.gameView = new $.numbers.GameView({model: self.gameModel});
                 self.gameView.render();
 
-                $('body').append(self.gameView.el);
+                $body.append(self.gameView.el);
+
+                self.gameObserver = new $.numbers.GameObserve({model: self.combinationModel});
+                $body.append(self.gameObserver.render().el);
             //});
         },
         /*getConnection: function(callback){
@@ -1028,6 +1116,9 @@
         },
         doRestart: function(){
             this.combinationModel.restart();
+        },
+        doViewAnotherModel: function(index){
+            this.combinationModel.viewAnotherModel(index);
         }
     });
 
