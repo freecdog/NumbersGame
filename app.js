@@ -53,7 +53,13 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(express.session({ secret: config.secret }));
+app.use(express.session({
+    secret: config.secret,
+    cookie: {
+        expires: null,
+        maxAge: null
+    }
+}));
 app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -277,6 +283,8 @@ function collectOnlineStatistics(){
     }
     return data;
 }
+
+// TODO, sometimes game falls with status == -1, and won't restart
 
 app.get('/', routes.index);
 app.get('/play', function(req,res){

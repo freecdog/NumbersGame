@@ -83,6 +83,9 @@
             //this.currentSelected = [false, false, false, false, false, false];
             this.set({currentSelected: [false, false, false, false, false, false]});
 
+            this.set({clickable: true});
+            this.set({observerIndex: -1});
+
             // is it needed on init? Think no, but may be it should be "on" for offline version
             //this.updateDices();
         },
@@ -173,7 +176,7 @@
                 },
                 error: function(mdl, values, xhr){
                     var status = self.attributes.status;
-                    console.warn("actually error");
+                    console.warn("actually error", status);
                     if (status == 10) {
                         if (values.status == 200) {
                             console.warn("there were case with fetching here, but now it's moved to success");
@@ -261,10 +264,17 @@
             return ans;
         },
         setDices: function(dices){
+            // from http://stackoverflow.com/questions/15336801/backbone-js-change-event-not-firing-when-value-is-same-as-previous-value-prior-t
+            // unset should lead to set event even if new dice are same to previous one
+            this.unset("dices", {silent: true});
             this.set({dices: dices});
+            this.unset("combinations", {silent: true});
             this.set({combinations: checkCombinations(dices)});
         },
 
+        toggleDice: function(index, value){
+            this.attributes.currentSelected[index] = value;
+        },
         reroll: function(indexes){
             var self = this;
             var i = 0;
@@ -381,7 +391,7 @@
         },
         checkCombination: function(index){
             var available = true;
-            var usedCombos = this.getCombinations();
+            var usedCombos = this.getUsedCombinations();
             if (usedCombos.length != 0){
                 for (var i = 0; i < usedCombos.length; i++){
                     if (usedCombos[i] == index){
@@ -416,15 +426,43 @@
             console.log("no combination with such index:", index);
             return null;
         },
-        getCombinations: function(){
+        getUsedCombinations: function(){
             var combosIndexes = [];
-            if (this.existValue("combinations")){
-                var combos = JSON.parse( this.getValue("combinations") );
-                for (var i = 0; i < combos.length; i++){
+            var combos;
+            //if ($.numbers.networking){
+            //    var index = this.getOwnPlayerIndex();
+            //    combos = this.attributes.rounds[index];
+            //}
+            if (this.existValue("combinations")) {
+                combos = JSON.parse(this.getValue("combinations"));
+            } else {
+                combos = [];
+            }
+            for (var i = 0; i < combos.length; i++) {
+                combosIndexes.push(combos[i].combinationIndex);
+            }
+            return combosIndexes;
+        },
+        getUsedCombinationsMemory: function(index){
+            var combosIndexes = [];
+            var combos;
+            combos = this.attributes.rounds[index];
+            for (var i = 0; i < combos.length; i++) {
+                if (combos[i].combinationIndex) {
                     combosIndexes.push(combos[i].combinationIndex);
                 }
             }
             return combosIndexes;
+        },
+        getCombinationByIndexMemory: function(playerIndex, index){
+            var combos = this.attributes.rounds[playerIndex];
+            for (var i = 0; i < combos.length; i++){
+                if (combos[i].combinationIndex == index) {
+                    return combos[i];
+                }
+            }
+            console.log("no combination with such index:", index);
+            return null;
         },
         sendCombination: function(combo, callback){
             var prevUrlRoot = this.urlRoot;
@@ -458,6 +496,19 @@
                 for (var i = 0; i < combos.length; i++){
                     combosPoints[combos[i].combinationIndex] = (combos[i].points);
                 }
+            }
+            for (var j = 0; j < combosPoints.length; j++){
+                ans += combosPoints[j];
+                if (j == 5 && ans >= 63) ans += 35;
+            }
+            return ans;
+        },
+        calculatePlayer: function(index){
+            var ans = 0;
+            var combosPoints = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+            var combos = this.attributes.rounds[index];
+            for (var i = 0; i < combos.length; i++){
+                combosPoints[combos[i].combinationIndex] = (combos[i].points);
             }
             for (var j = 0; j < combosPoints.length; j++){
                 ans += combosPoints[j];
@@ -759,7 +810,8 @@
                 this.model.selected = !this.model.selected;
                 if (this.model.selected) this.select();
                 else this.deselect();
-                $.numbers.app.combinationModel.attributes.currentSelected[this.model.index] = this.model.selected;
+                //$.numbers.app.combinationModel.attributes.currentSelected[this.model.index] = this.model.selected;
+                $.numbers.app.doToggleDice(this.model.index, this.model.selected);
             } else {
                 console.log("You can only observe game process of other player");
             }
@@ -858,6 +910,7 @@
                 this.deselectCombination(i, this.combinationsViews[i]);
             }
         },
+
         dicesHolderTemplate:  _.template('<div id="dicesHolder"></div>'),
         renderDices: function(element){
             for (var i = 0; i < this.model.attributes.dices.length; i++) {
@@ -881,7 +934,7 @@
             var names = ["1er", "2er", "3er", "4er", "5er", "6er", "Dreir Pasch",
                 "Vierer Pasch", "Full House", "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
             this.combinationsViews = [];
-            var usedCombinations = this.model.getCombinations();
+            var usedCombinations = this.model.getUsedCombinations();
 
             var $table = $('<table/>');
 
@@ -947,7 +1000,7 @@
             this.$el.append(this.dicesHolderTemplate());
             var dicesHolder = this.$el.find("#dicesHolder");
 
-            if (this.model.getCombinations().length == 13){
+            if (this.model.getUsedCombinations().length == 13){
                 this.renderResults(dicesHolder);
             } else {
                 this.renderDices(dicesHolder);
@@ -959,7 +1012,6 @@
         }
     });
 
-    // TODO, I should redesign $.numbers.CombinationsView to use it in GameObserve view
     $.numbers.GameObserve = Backbone.View.extend({
         tagName: 'div',
         className: 'game',
@@ -969,6 +1021,7 @@
 
             this.listenTo(this.model, 'change:clickable', this.listener);
             this.listenTo(this.model, 'change:observerIndex', this.render);
+            this.listenTo(this.model, 'change:rounds', this.render);
         },
         listener: function(){
             if (!this.model.attributes.clickable) {
@@ -982,8 +1035,8 @@
             "click": "click"
         },
         click: function(){
-            var ind = $.numbers.app.combinationModel.getOwnPlayerIndex();
-            $.numbers.app.combinationModel.viewAnotherModel(ind);
+            //var ind = this.model.getOwnPlayerIndex();
+            //this.model.viewAnotherModel(ind);
         },
         renderDices: function(element, dices){
             for (var i = 0; i < dices.length; i++) {
@@ -996,6 +1049,78 @@
                 element.append(dice.render().el);
             }
         },
+        renderResults: function(element){
+            var playerIndex = this.model.attributes.observerIndex;
+            var str = this.model.calculatePlayer(playerIndex).toString();
+            for (var i = 0; i < str.length; i++) {
+                var num = parseInt(str[i]);
+                element.append( (new $.numbers.ResultView({model: {value: num}})).render().el);
+            }
+        },
+        renderCombinations: function(element, combinations){
+            var names = ["1er", "2er", "3er", "4er", "5er", "6er", "Dreir Pasch",
+                "Vierer Pasch", "Full House", "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
+            this.combinationsViews = [];
+            var playerIndex = this.model.attributes.observerIndex;
+            var usedCombinations = this.model.getUsedCombinationsMemory(playerIndex);
+
+            var $table = $('<table/>');
+
+            var tableAdapter = {};
+            tableAdapter[0] = 0;
+            tableAdapter[1] = 2;
+            tableAdapter[2] = 4;
+            tableAdapter[3] = 6;
+            tableAdapter[4] = 8;
+            tableAdapter[5] = 10;
+            tableAdapter[6] = 1;
+            tableAdapter[7] = 3;
+            tableAdapter[8] = 5;
+            tableAdapter[9] = 7;
+            tableAdapter[10] = 9;
+            tableAdapter[11] = 11;
+            tableAdapter[12] = 13;
+
+            var combosElements = [];
+
+            for (var i = 0; i < combinations.length; i++){
+
+                var used = false;
+                for (var j = 0; j < usedCombinations.length; j++) {
+                    if (i == usedCombinations[j]) {
+                        used = true;
+                        break;
+                    }
+                }
+
+                var mdl = {
+                    index: i,
+                    name: names[i],
+                    value: combinations[i],
+                    usedCombination: used,
+                    parent: this
+                };
+                if (used) mdl.value = this.model.getCombinationByIndexMemory(playerIndex, i).points;
+
+                var combo = new $.numbers.CombinationView({model: mdl});
+                //element.append( combo.render().el );
+                combosElements.push(combo.render().el);
+
+                this.combinationsViews.push(combo);
+            }
+
+            for (var k = 0; k < 7; k++){
+                var $tr = $('<tr/>');
+                var $td1 = $('<td style="width: 50%; padding: 0;"></td>');
+                var $td2 = $('<td style="width: 50%; padding: 0;"></td>');
+                if (k!=6) $td1.append(combosElements[0 + k]);
+                $td2.append(combosElements[6 + k]);
+                $tr.append($td1);
+                $tr.append($td2);
+                $table.append($tr);
+            }
+            element.append($table);
+        },
         render: function(){
             this.$el.empty();
             //var comboView = new $.numbers.CombinationsView({model: $.numbers.app.combinationModel});
@@ -1005,7 +1130,16 @@
             if (playerIndex != -1){
                 var rlen = this.model.attributes.rounds[playerIndex].length;
                 var dices = this.model.attributes.rounds[playerIndex][rlen - 1].dices;
-                this.renderDices(this.$el, dices);
+
+                var usedCombinations = this.model.getUsedCombinationsMemory(playerIndex);
+                if (usedCombinations.length == 13){
+                    this.renderResults(this.$el);
+                } else {
+                    this.renderDices(this.$el, dices);
+                }
+
+                var combinations = checkCombinations(dices);
+                this.renderCombinations(this.$el, combinations);
             }
 
             return this;
@@ -1113,6 +1247,9 @@
         },
         doReroll: function(){
             this.combinationModel.rerollDices();
+        },
+        doToggleDice: function(index, value){
+            this.combinationModel.toggleDice(index, value);
         },
         doRestart: function(){
             this.combinationModel.restart();
