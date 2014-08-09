@@ -308,6 +308,12 @@ app.get("/reconfigure", function(req, res){
     configure();
     res.redirect("/");
 });
+app.get('/rules', function(req,res){
+    res.render("rules");
+});
+app.get('/about', function(req,res){
+    res.render("about");
+});
 
 // API
 app.get('/api/dices', function(req, res){

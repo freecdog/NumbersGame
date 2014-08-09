@@ -1,8 +1,25 @@
 extends layout
 
 block content
-    a(href="/play") Play
+    div(class="menuElement")
+        a(href="/play") Play
     br
-    a(href="/onlineStatistics") Online Statistics
-    br
-    a(href="/reconfigure") Reconfigure
+    div(class="menuElement")
+        a(href="/onlineStatistics") Online statistics
+    div(class="menuElement")
+        a(href="/rules") Rules
+    div(class="menuElement")
+        a(href="/about") About
+
+    //-
+        div(class="menuElement")
+            a(href="/reconfigure") Reconfigure
+
+    script(src="/javascripts/jquery-1.9.1.js")
+    script(src="/javascripts/underscore.js")
+    script(src="/javascripts/backbone.js")
+    script(src='/javascripts/menu.js')
+    script.
+        (function($) {
+            $.menu.bootstrap();
+        })(jQuery);

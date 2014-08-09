@@ -7,8 +7,9 @@ block content
     p Server time: #{serverTime}
 
     a(href="/") Menu
-    br
-    a(href="/dropAll") Drop all
+    //-
+        br
+        a(href="/dropAll") Drop all
 
     p Connections[#{Object.keys(connected).length}]:
     -for(var connection in connected)

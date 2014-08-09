@@ -10,6 +10,8 @@
 
     $.numbers = {};
 
+    // TODO, Safari ans Zenfone browser fails with one-touch combination choose.
+
     // Models
 
     // status definition in rules
@@ -1191,8 +1193,8 @@
             var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
             this.$el.append(acceptCombinationButton.render().el);
 
-            var inputView = new $.numbers.InputView({parent: $.numbers.app.combinationsView});
-            this.$el.append(inputView.render().el);
+            //var inputView = new $.numbers.InputView({parent: $.numbers.app.combinationsView});
+            //this.$el.append(inputView.render().el);
 
             console.log('gameView rendered');
             return this;
