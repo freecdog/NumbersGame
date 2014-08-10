@@ -285,6 +285,8 @@ function collectOnlineStatistics(){
 }
 
 // TODO, sometimes game falls with status == -1, and won't restart
+// TODO, giveup ruin game for another player, it's unfair
+// TODO, player name from main page should make sense
 
 app.get('/', routes.index);
 app.get('/play', function(req,res){
@@ -563,8 +565,7 @@ app.get("/api/rounds/:gid", function(req, res){
     var gid = req.params.gid;
     if (gid != null && games.hasOwnProperty(gid)){
         game = games[gid];
-    }
-    else {
+    } else {
         game = findGameById(req.sessionID);
     }
     //console.log("game:", game._id);
@@ -581,22 +582,20 @@ app.get("/api/rounds/:gid", function(req, res){
 
 });
 app.get("/api/rounds/:gid/:datastring", function(req, res){
-    //console.log(req._remoteAddress + " GameProcess check" );
+    if (connectedCookies.hasOwnProperty(req.sessionID)) {
 
-    //console.log("purchases: " + JSON.stringify(purchases));
+        var gameId = req.params.gid;
+        if (gameId != null) {
+            //console.log("data from client:", JSON.parse(req.params.datastring));
+            var data = JSON.parse(req.params.datastring);
+        }
 
-    var gameId = req.params.gid;
-    if (gameId != null){
-        //console.log("data from client:", JSON.parse(req.params.datastring));
-        var data = JSON.parse(req.params.datastring);
+        //console.log(req._remoteAddress + " purchases " + req.body.purchase );
+        res.send("1");
+
+        connectedCookies[req.sessionID].time = new Date();
+        removeExpiredConnections();
     }
-
-    //console.log(req._remoteAddress + " purchases " + req.body.purchase );
-    res.send("1");
-
-    connectedCookies[req.sessionID].time = new Date();
-    removeExpiredConnections();
-
 });
 
 http.createServer(app).listen(app.get('port'), function(){

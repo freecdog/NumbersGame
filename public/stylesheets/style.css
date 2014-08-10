@@ -5,11 +5,12 @@
 }
 
 body {
-    margin: 0px;
+    margin: 0 auto;
     padding: 0px;
     font: 1.5em "Segoe UI light", "Lucida Grande", Helvetica, Arial, sans-serif;
     color: #ECE9E9;
     background-color: #343434;
+    max-width: 600px;
 }
 a {
     color: #00B7FF;
@@ -110,70 +111,74 @@ table {
 }
 
 .dicesHolder {
-    height: 128px;
+    height: auto;
+    margin: 0 auto;
+    padding: 0px;
+    border: 0px;
+    text-align: center;
 }
 .dice1 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/1-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/1.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice1.selected {
     background-color: #4f4fff;
 }
 .dice2 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/2-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/2.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice2.selected {
     background-color: #4f4fff;
 }
 .dice3 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/3-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/3.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice3.selected {
     background-color: #4f4fff;
 }
 .dice4 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/4-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/4.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice4.selected {
     background-color: #4f4fff;
 }
 .dice5 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/5-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/5.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice5.selected {
     background-color: #4f4fff;
 }
 .dice6 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/6-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/6.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice6.selected {
     background-color: #4f4fff;
@@ -182,33 +187,33 @@ table {
 
 .dice0 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/0-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/0.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice7 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/7-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/7.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice8 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/8-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/8.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }
 .dice9 {
     display: inline-block;
-    height: 128px;
-    width: 128px;
-    background: url("../images/dices/white/9-128.png");
-    -moz-border-radius: 30px;
-    border-radius: 30px;
+    height: 100px;
+    width: 100px;
+    background: url("../images/dices/white/9.png");
+    -moz-border-radius: 20px;
+    border-radius: 20px;
 }

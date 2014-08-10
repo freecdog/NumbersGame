@@ -10,8 +10,6 @@
 
     $.numbers = {};
 
-    // TODO, Safari ans Zenfone browser fails with one-touch combination choose.
-
     // Models
 
     // status definition in rules
@@ -347,6 +345,7 @@
                     console.log("lastDices removed, combo added", combo);
 
                     //this.rerolled = false;
+                    this.unset("rerolled", {silent: true});
                     this.set({rerolled: false});
 
                     var self = this;
@@ -585,6 +584,7 @@
     });
 
     // Views
+    // TODO, dialog before restart (ruin) game
     $.numbers.RestartButton = Backbone.View.extend({
         tagName: 'div',
         className: 'restartGameButton',
@@ -912,8 +912,24 @@
                 this.deselectCombination(i, this.combinationsViews[i]);
             }
         },
+        getScreenSize: function() {
+            var winW = 555, winH = 333;
+            if (document.body && document.body.offsetWidth) {
+                winW = document.body.offsetWidth;
+                winH = document.body.offsetHeight;
+            }
+            if (document.compatMode=='CSS1Compat' && document.documentElement && document.documentElement.offsetWidth ) {
+                winW = document.documentElement.offsetWidth;
+                winH = document.documentElement.offsetHeight;
+            }
+            if (window.innerWidth && window.innerHeight) {
+                winW = window.innerWidth;
+                winH = window.innerHeight;
+            }
+            return {width: winW, height: winH};
+        },
 
-        dicesHolderTemplate:  _.template('<div id="dicesHolder"></div>'),
+        dicesHolderTemplate:  _.template('<div class="dicesHolder"></div>'),
         renderDices: function(element){
             for (var i = 0; i < this.model.attributes.dices.length; i++) {
                 var dice = new $.numbers.DiceView({model: {
@@ -983,10 +999,13 @@
                 this.combinationsViews.push(combo);
             }
 
+            var screenSize = this.getScreenSize();
+            var firstColumnHeight = 50; // percent
+            if (screenSize.width < 350) firstColumnHeight = 40;
             for (var k = 0; k < 7; k++){
                 var $tr = $('<tr/>');
-                var $td1 = $('<td style="width: 50%; padding: 0;"></td>');
-                var $td2 = $('<td style="width: 50%; padding: 0;"></td>');
+                var $td1 = $('<td style="width: ' + (  firstColumnHeight  ) +'%; padding: 0;"></td>');
+                var $td2 = $('<td style="width: ' + (100-firstColumnHeight) +'%; padding: 0;"></td>');
                 if (k!=6) $td1.append(combosElements[0 + k]);
                 $td2.append(combosElements[6 + k]);
                 $tr.append($td1);
@@ -1000,7 +1019,8 @@
             this.$el.empty();
             //this.$el.append(this.combinationsTemplate(this.model.attributes));
             this.$el.append(this.dicesHolderTemplate());
-            var dicesHolder = this.$el.find("#dicesHolder");
+            var dicesHolder = this.$el.find(".dicesHolder");
+            console.log("dicesHolder", dicesHolder);
 
             if (this.model.getUsedCombinations().length == 13){
                 this.renderResults(dicesHolder);
@@ -1190,8 +1210,8 @@
             var numbers = self.$el; //$('#combinations');
             numbers.append(comboView.render().el);
 
-            var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
-            this.$el.append(acceptCombinationButton.render().el);
+            //var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
+            //this.$el.append(acceptCombinationButton.render().el);
 
             //var inputView = new $.numbers.InputView({parent: $.numbers.app.combinationsView});
             //this.$el.append(inputView.render().el);
