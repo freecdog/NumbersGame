@@ -634,7 +634,6 @@ app.get("/api/changeName/:name", function(req, res){
 
             res.send(ans);
 
-            console.log(JSON.stringify(connectedCookies));
             removeExpiredConnections();
         } else {
             console.log("regexp fails");

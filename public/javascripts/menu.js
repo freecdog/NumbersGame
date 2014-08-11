@@ -19,7 +19,10 @@
         changeName: function(attributes, callback){
             var oldRoot = this.urlRoot;
             this.urlRoot += "/" + this.attributes.name;
-            this.fetch(attributes, callback);
+            //this.fetch(attributes, callback);
+            this.fetch(attributes)
+                .done(callback.success)
+                .fail(callback.error);
             this.urlRoot = oldRoot;
         }
     });
@@ -30,6 +33,8 @@
         tagName: 'input',
         className: 'inputView',
         initialize: function(){
+            var self = this;
+            console.log("this", this);
             //this.$el.attr('contentEditable',true);
             this.$el.attr('name', 'name');
             this.$el.attr('placeholder', "nickname");
@@ -38,6 +43,19 @@
             this.$el.attr('required', true);
             this.$el.attr('title', 'min 3, max 16');
             //this.listenTo(this.options.parent.model, "change:names", this.listener);
+            this.el.addEventListener('input', function(){
+                self.changeVisibility();
+            }, false);
+        },
+        // events won't work, so I use "addEventListener", so sad =/
+        //events: function(){console.log("anything");},
+        /*events: {
+            // https://developer.mozilla.org/en-US/docs/Web/Events
+            //"change" : "changeSmth"
+            "input" : "changeSmth"
+        },*/
+        changeVisibility: function(){
+            this.options.parent.inputSubmitView.changeVisibility(this);
         },
         render: function(){
             this.$el.empty();
@@ -52,8 +70,15 @@
             this.$el.attr('type','submit');
             this.$el.attr('value','[change]');
 
+            this.lastChanger = this.options.parent.inputLoginView;
             // impossible for mobile devices =/
             //this.$el.css('display','none');
+        },
+        changeVisibility: function(changer){
+            if (this.lastChanger != changer) {
+                this.$el.toggle("display");
+                this.lastChanger = changer;
+            }
         },
         buttonTemplate: _.template("[change]"),
         render: function() {
@@ -64,7 +89,7 @@
     });
     $.menu.InputFormView = Backbone.View.extend({
         tagName: 'form',
-        id: 'auth',
+        id: 'changeNameForm',
         //className: 'inputPasswordView',
 
         initialize: function () {
@@ -73,10 +98,10 @@
             this.render();
         },
         initViews: function(){
-            this.inputLoginView = new $.menu.InputLoginView({model: this.model});
+            this.inputLoginView = new $.menu.InputLoginView({model: this.model, parent: this});
             this.inputLoginView.render();
 
-            this.inputSubmitView = new $.menu.InputSubmitView();
+            this.inputSubmitView = new $.menu.InputSubmitView({parent: this});
             this.inputSubmitView.render();
         },
 
@@ -97,14 +122,9 @@
 
             this.model.changeName(null, {
                 success: function(model,values) {
-                    console.log("User created", model, values);
-                    alert("User created");
-
-                    //self.el.elements["login"].value.clear();
-                    //self.el.elements["password"].value.clear();
-
-                    console.log(123, self.inputSubmitView.text());
-
+                    console.log("User name changed", model, values);
+                    self.inputSubmitView.changeVisibility(self);
+                    //self.inputSubmitView.$el.toggle("display");
                     self.render();
                 },
                 error: function( model, response) {
