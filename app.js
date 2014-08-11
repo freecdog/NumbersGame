@@ -147,7 +147,8 @@ function prepareGame() {
                 //games[gameId].boxes = connectedCookies[wannaPlayers[i]].boxes;
             }
 
-            games[gameId].players.push(wannaPlayers[i]);
+            var userSessionId = wannaPlayers[i];
+            games[gameId].players.push(userSessionId);
             if (games[gameId].names == null) games[gameId].names = [];
 
             // No settings, no name
@@ -156,13 +157,19 @@ function prepareGame() {
               //  games[gameId].names.push("player" + (10000 * Math.random()).toFixed(0) );
             //else
                 //games[gameId].names.push(connectedCookies[wannaPlayers[i]].settings.name);
-            var playerName = "player" + (10000 * Math.random()).toFixed(0);
+            var connectedCookie = connectedCookies[userSessionId];
+            var playerName = "";
+            if (connectedCookie.name){
+                playerName = connectedCookie.name;
+            } else {
+                playerName = "player" + (10000 * Math.random()).toFixed(0);
+            }
             games[gameId].names.push(playerName);
 
             if (games[gameId].rounds == null) games[gameId].rounds = [];
             games[gameId].rounds.push([]);
 
-            connectedCookies[wannaPlayers[i]].status = 3;
+            connectedCookie.status = 3;
         }
         console.log("names:", games[gameId].names);
     }
@@ -284,9 +291,10 @@ function collectOnlineStatistics(){
     return data;
 }
 
+// TODO, now you can change user name, but no message showed to user
+
 // TODO, sometimes game falls with status == -1, and won't restart
 // TODO, giveup ruin game for another player, it's unfair
-// TODO, player name from main page should make sense
 
 app.get('/', routes.index);
 app.get('/play', function(req,res){
@@ -595,6 +603,47 @@ app.get("/api/rounds/:gid/:datastring", function(req, res){
 
         connectedCookies[req.sessionID].time = new Date();
         removeExpiredConnections();
+    }
+});
+
+app.get("/api/changeName/:name", function(req, res){
+
+    console.log(req._remoteAddress + ", changing name");
+
+    var ans = null;
+
+    var name = req.params.name;
+    if (name != null) {
+        var reLogin = new RegExp("^[A-z0-9_-]{3,16}$");
+        var loginMatch = reLogin.test(name);
+        if (loginMatch) {
+
+            if (connectedCookies.hasOwnProperty(req.sessionID)) {
+                connectedCookies[req.sessionID].name = name;
+                connectedCookies[req.sessionID].time = new Date();
+            } else {
+                var connectedCookie = {};
+                connectedCookie.name = name;
+                connectedCookie.time = new Date();
+                connectedCookie.status = 2; // 2 because we are skipping POST find game request
+
+                connectedCookies[req.sessionID] = connectedCookie;
+            }
+
+            ans = {login: name};
+
+            res.send(ans);
+
+            console.log(JSON.stringify(connectedCookies));
+            removeExpiredConnections();
+        } else {
+            console.log("regexp fails");
+            res.send(ans);
+        }
+
+    } else {
+        console.log("no name");
+        res.send(ans);
     }
 });
 

@@ -9,16 +9,18 @@
 
 
     $.menu.User = Backbone.Model.extend({
-        urlRoot: '/api/newUserSpecial',
+        urlRoot: '/api/changeName',
         defaults: {
-            login: 'player' + (10000 * Math.random()).toFixed(0)
+            name: 'player' + (10000 * Math.random()).toFixed(0)
         },
         initialize: function() {
             console.log('User initialized');
         },
-        login: function(attributes, callback){
-            this.save(attributes, callback);
-            this.unset('password');
+        changeName: function(attributes, callback){
+            var oldRoot = this.urlRoot;
+            this.urlRoot += "/" + this.attributes.name;
+            this.fetch(attributes, callback);
+            this.urlRoot = oldRoot;
         }
     });
 
@@ -29,8 +31,8 @@
         className: 'inputView',
         initialize: function(){
             //this.$el.attr('contentEditable',true);
-            this.$el.attr('name', 'login');
-            this.$el.attr('placeholder', this.model.attributes.login);
+            this.$el.attr('name', 'name');
+            this.$el.attr('placeholder', "nickname");
 
             this.$el.attr('pattern','.{3,16}');
             this.$el.attr('required', true);
@@ -40,6 +42,23 @@
         render: function(){
             this.$el.empty();
             //this.$el.append("asdf");
+            return this;
+        }
+    });
+    $.menu.InputSubmitView = Backbone.View.extend({
+        tagName: 'input',
+        className: 'inputSubmitView',
+        initialize: function(){
+            this.$el.attr('type','submit');
+            this.$el.attr('value','[change]');
+
+            // impossible for mobile devices =/
+            //this.$el.css('display','none');
+        },
+        buttonTemplate: _.template("[change]"),
+        render: function() {
+            this.$el.empty();
+            this.$el.append(this.buttonTemplate());
             return this;
         }
     });
@@ -56,31 +75,35 @@
         initViews: function(){
             this.inputLoginView = new $.menu.InputLoginView({model: this.model});
             this.inputLoginView.render();
+
+            this.inputSubmitView = new $.menu.InputSubmitView();
+            this.inputSubmitView.render();
         },
 
         events : {
             // https://developer.mozilla.org/en-US/docs/Web/Events
             //"change" : "change",
-            "submit" : "newUser"
+            "submit" : "tryChangeName"
         },
-        newUser : function(event) {
+        tryChangeName : function(event) {
             var self = this;
 
-            console.log('trying to create new user');
+            console.log('trying to change name');
             event.preventDefault();
 
             this.model.set({
-                login: this.el.elements["login"].value,
-                password: this.el.elements["password"].value
+                name: this.el.elements["name"].value
             });
 
-            this.model.login(null, {
+            this.model.changeName(null, {
                 success: function(model,values) {
                     console.log("User created", model, values);
                     alert("User created");
 
                     //self.el.elements["login"].value.clear();
                     //self.el.elements["password"].value.clear();
+
+                    console.log(123, self.inputSubmitView.text());
 
                     self.render();
                 },
@@ -100,6 +123,7 @@
 
             this.$el.append("<br>");
             this.$el.append(this.inputLoginView.el);
+            this.$el.append(this.inputSubmitView.el);
             //this.$el.append("<br>");
 
             return this;
