@@ -53,6 +53,8 @@
         }*/
     });
 
+    // TODO, work with game status == -1, when fires removeExpiredConnections()
+
     $.numbers.Combination = Backbone.Model.extend({
         urlRoot: '/api/dices',
         //idAttribute: 'id',
