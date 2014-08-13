@@ -1,13 +1,13 @@
 @font-face {
     /* http://webdesignerwall.com/general/font-face-solutions-suggestions */
-    font-family: 'Segoe UI light';
-    src: url('../fonts/segoeuil.ttf') format('truetype');
+    font-family: 'Open Sans Light';
+    src: url('../fonts/open-sans.light.ttf') format('truetype');
 }
 
 body {
     margin: 0 auto;
     padding: 0px;
-    font: 1.5em "Segoe UI light", "Lucida Grande", Helvetica, Arial, sans-serif;
+    font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
     color: #ECE9E9;
     background-color: #343434;
     max-width: 600px;
@@ -101,7 +101,7 @@ table {
 
     padding: 0px;
     border: 1px solid darkgray;
-    font: 1.5em "Segoe UI Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+    font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
     color: #ECE9E9;
     background-color: #343434;
 
@@ -115,7 +115,7 @@ table {
 
     padding: 0px;
     border: 1px solid darkgray;
-    font: 1.5em "Segoe UI Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+    font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
     color: darkgray;
     background-color: #343434;
 

@@ -26,7 +26,7 @@ function configure(){
         if (jsondata){
             var objectFieldsCounter = 0;
             for (var property in jsondata) {
-                if (jsondata.hasOwnProperty(property)) {
+                if (jsondata[property] !== undefined) {
                     objectFieldsCounter++;
 
                     config[property] = jsondata[property];
@@ -48,6 +48,10 @@ configure();
 app.set('port', process.env.PORT || 33322);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
+
+var staticFont = require('./staticFont');
+app.use(staticFont());
+
 app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
@@ -86,16 +90,24 @@ var games = {};
 var gamesInProgress = {};
 
 function removeExpiredConnections(){
+    var curTime = new Date();
+
+    // http://jsperf.com/stackoverflow-for-vs-hasownproperty/7
+    // V8 shows that hasOwnProperty is really slower than object[key] find
+
     for (var key in connectedCookies) {
-        if (connectedCookies.hasOwnProperty(key)) {
-            //console.log ( ((new Date()) - connectedCookies[key]).toString() );
-            if (Math.abs(new Date() - connectedCookies[key].time) > 600000) {   // 1 hour
+        //if (connectedCookies.hasOwnProperty(key)) {
+        if (connectedCookies[key] !== undefined) {
+            //console.log ( (curTime - connectedCookies[key]).toString() );
+            if (Math.abs(curTime - connectedCookies[key].time) > 600000) {   // 1 hour
 
                 for (var gInd in games) {
-                    if (games.hasOwnProperty(gInd)){
+                    //if (games.hasOwnProperty(gInd)){
+                    if (games[gInd] !== undefined){
                         var game = games[gInd];
                         for (var playerIndex in game.players) {
-                            if (game.players.hasOwnProperty(playerIndex)){
+                            //if (game.players.hasOwnProperty(playerIndex)){
+                            if (game.players[playerIndex] !== undefined){
                                 var player = game.players[playerIndex];
                                 if (player == key) {
                                     //console.log("games[" + gInd + "] deleted");
@@ -122,7 +134,7 @@ function prepareGame() {
     var wannaPlayers = [];
 
     for (var key in connectedCookies) {
-        if (connectedCookies.hasOwnProperty(key)) {
+        if (connectedCookies[key] !== undefined) {
             // if status "searching"
             var player = connectedCookies[key];
             player.id = key;
@@ -277,14 +289,14 @@ function collectOnlineStatistics(){
     data.playersSearching = 0;
     data.activeGames = 0;
     for(var player in connectedCookies) {
-        if (connectedCookies.hasOwnProperty(player)){
+        if (connectedCookies[player] !== undefined){
             if (connectedCookies[player].status == 1 || connectedCookies[player].status == 2) {
                 data.playersSearching++;
             }
         }
     }
     for (var game in games) {
-        if (games.hasOwnProperty(game)){
+        if (games[game] !== undefined){
             if (games[game].status == 1) data.activeGames++;
         }
     }
@@ -327,7 +339,7 @@ app.get('/about', function(req,res){
 
 // API
 app.get('/api/dices', function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)){
+    if (connectedCookies[req.sessionID] !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null) {
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
@@ -381,7 +393,7 @@ app.get('/api/dices', function(req, res){
     }
 });
 app.get('/api/dices/:dicesIndexes', function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)){
+    if (connectedCookies[req.sessionID] !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null) {
             var dlen = Math.min(6, req.params.dicesIndexes.length);
@@ -441,7 +453,7 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
     }
 });
 app.get('/api/combination/:comboIndex', function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)){
+    if (connectedCookies[req.sessionID] !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null) {
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
@@ -499,7 +511,7 @@ app.get('/api/combination/:comboIndex', function(req, res){
     }
 });
 app.get('/api/giveup', function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)){
+    if (connectedCookies[req.sessionID] !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null){
             if (game.status != 90) {
@@ -519,7 +531,7 @@ app.get('/api/giveup', function(req, res){
 });
 
 app.get("/api/connectPlayer", function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)){
+    if (connectedCookies[req.sessionID] !== undefined){
         connectedCookies[req.sessionID].time = new Date();
         //if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
     } else {
@@ -546,7 +558,7 @@ app.get("/api/disconnectPlayer", function(req, res){
 });
 
 app.get("/api/findGame", function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)){
+    if (connectedCookies[req.sessionID] !== undefined){
         connectedCookies[req.sessionID].time = new Date();
 
         console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
@@ -571,7 +583,7 @@ app.get("/api/rounds/:gid", function(req, res){
     var data = {};
     var game;
     var gid = req.params.gid;
-    if (gid != null && games.hasOwnProperty(gid)){
+    if (gid != null && games[gid] !== undefined){
         game = games[gid];
     } else {
         game = findGameById(req.sessionID);
@@ -582,7 +594,9 @@ app.get("/api/rounds/:gid", function(req, res){
 
         res.send(game);
 
-        connectedCookies[req.sessionID].time = new Date();
+        if (connectedCookies[req.sessionID] !== undefined) {
+            connectedCookies[req.sessionID].time = new Date();
+        }
         removeExpiredConnections();
     } else {
         res.send(data);
@@ -590,7 +604,7 @@ app.get("/api/rounds/:gid", function(req, res){
 
 });
 app.get("/api/rounds/:gid/:datastring", function(req, res){
-    if (connectedCookies.hasOwnProperty(req.sessionID)) {
+    if (connectedCookies[req.sessionID] !== undefined) {
 
         var gameId = req.params.gid;
         if (gameId != null) {
@@ -618,7 +632,7 @@ app.get("/api/changeName/:name", function(req, res){
         var loginMatch = reLogin.test(name);
         if (loginMatch) {
 
-            if (connectedCookies.hasOwnProperty(req.sessionID)) {
+            if (connectedCookies[req.sessionID] !== undefined) {
                 connectedCookies[req.sessionID].name = name;
                 connectedCookies[req.sessionID].time = new Date();
             } else {

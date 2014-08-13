@@ -119,6 +119,9 @@
                 needUpdate = false;
                 console.log("game is over");
                 //this.urlRoot = '/api/rounds/' + this.attributes._id;
+            } else if (status == -1) {
+                needUpdate = false;
+                console.log("game is abandoned");
             } else {
                 needUpdate = false;
                 console.warn("unknown game status:",this.attributes.status, this);
@@ -586,7 +589,6 @@
     });
 
     // Views
-    // TODO, dialog before restart (ruin) game
     $.numbers.RestartButton = Backbone.View.extend({
         tagName: 'div',
         className: 'restartGameButton',
@@ -597,7 +599,10 @@
             console.log("going to restart");
             //this.options.parent.model.restart();
             //$.numbers.app.combinationModel.restart();
-            $.numbers.app.doRestart();
+            var confirmed = confirm("Leave this game and start new one?");
+            if (confirmed) {
+                $.numbers.app.doRestart();
+            }
         },
         buttonTemplate: _.template("[restart]"),
         render: function() {
@@ -688,6 +693,7 @@
             else if (this.model.attributes.status == 10) value = "finding game";
             else if (this.model.attributes.status == 20) value = "rounds";
             else if (this.model.attributes.status == 90) value = "game is over";
+            else if (this.model.attributes.status == -1) value = "game is abandoned";
             else value = "unknown status";
 
             this.$el.append(this.meaningTemplate({value: value}));
