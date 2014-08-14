@@ -3,6 +3,7 @@ extends layout
 block content
     div(class="menuElement")
         a(href="/play") Play
+    div(class="menuElement", onclick="f1()") CLEAR STORAGE
     br
     div(class="menuElement")
         a(href="/onlineStatistics") Online statistics
@@ -23,3 +24,6 @@ block content
         (function($) {
             $.menu.bootstrap();
         })(jQuery);
+        function f1(){
+            localStorage.clear();
+        }

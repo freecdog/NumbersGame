@@ -20,7 +20,7 @@ block content
                 #pad2(onclick="toggle_visibility(this)") #{conState} — (#{diff}) #{connected[connection][conState]}
             else
                 #pad2(onclick="toggle_visibility(this)") #{conState} — #{connected[connection][conState]}
-    p Games[#{Object.keys(games).length}]:
+    p Games, #{Math.min(10,Object.keys(games).length)} last is showed:
     -for(var game in games)
         #pad1(onclick="toggle_visibility(this)") #{game}:
         -for(var gameState in games[game])
@@ -40,6 +40,8 @@ block content
                                     -for(var paramDetails in games[game][gameState][player][round][roundParams])
                                         #pad6 #{paramDetails}: #{games[game][gameState][player][round][roundParams][paramDetails]}
 
+            else if (gameState == "leftPlayers")
+                #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
             else if (gameState == "winner")
                 #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
             else

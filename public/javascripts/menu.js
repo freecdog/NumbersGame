@@ -129,7 +129,7 @@
                 },
                 error: function( model, response) {
                     console.log("Could not create user:", response);
-                    alert("Could not create user, no permission");
+                    alert("Try one more time please");
                 }
             });
             event.currentTarget.checkValidity();

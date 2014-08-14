@@ -262,6 +262,9 @@ function isEndOfGame(game){
 function endOfGame(game){
     game.status = 90;
 
+    var leftPlayers = game.leftPlayers;
+    leftPlayers = leftPlayers || {};
+
     game.results = [];
     game.winner = {index: "", name: "", result: 0};
     for (var i = 0; i < game.players.length; i++){
@@ -273,7 +276,8 @@ function endOfGame(game){
             game.winner.result = result;
         }
 
-        connectedCookies[game.players[i]].status = 80;
+        if (leftPlayers[game.players[i]] === undefined)
+            connectedCookies[game.players[i]].status = 80;
     }
 
     console.log("game ends:", game);
@@ -314,7 +318,6 @@ function collectOnlineStatistics(){
 }
 
 // TODO, sometimes game falls with status == -1, and won't restart
-// TODO, giveup ruin game for another player, it's unfair
 
 app.get('/', routes.index);
 app.get('/play', function(req,res){
@@ -323,10 +326,18 @@ app.get('/play', function(req,res){
 app.get('/onlineStatistics', function(req, res){
     removeExpiredConnections();
 
+    // 10 last games
+    var len = 10;
+    var gamesToSend = {};
+    for (var i = gamesIndex -1; i >=0 && Object.keys(gamesToSend).length < len; i--){
+        var gName = "g" + i.toString();
+        gamesToSend[gName] = games[gName];
+    }
+
     res.render("onlineStatistics", {
         serverTime: new Date(),
         connected: connectedCookies,
-        games: games
+        games: gamesToSend
     });
 });
 app.get("/dropAll", function(req, res){
@@ -530,9 +541,12 @@ app.get('/api/giveup', function(req, res){
             }
             game.leftPlayers[req.sessionID] = true;
 
+            var isEnd = isEndOfGame(game);
+            if (isEnd) endOfGame(game);
+
             // returning to find
             connectedCookies[req.sessionID].status = 2;
-            res.send(game);
+            res.send(null);
         } else {
             console.log("game not found (/api/giveup)");
             res.send(null);

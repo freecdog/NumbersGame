@@ -53,6 +53,7 @@
         }*/
     });
 
+    // TODO, develop syncStorageWithMemory
     // TODO, work with game status == -1, when fires removeExpiredConnections()
 
     $.numbers.Combination = Backbone.Model.extend({
@@ -139,9 +140,10 @@
         },
         updateModel: function(){
             var self = this;
+            var currentUrl = this.urlRoot;
             // if there are urlRoot and attributes.id it will be fetched urlRoot + / + id
             if (this.attributes.status != 20) {
-                console.log("going to fetch", this.urlRoot);
+                console.log("going to fetch", currentUrl);
             }
             this.fetch({
                 success: function(mdl, values){
@@ -194,12 +196,12 @@
                 },
                 error: function(mdl, values, xhr){
                     var status = self.attributes.status;
-                    console.warn("actually error", status);
+                    console.warn("actually error", status, currentUrl);
                     if (status == 10) {
                         if (values.status == 200) {
                             console.warn("there were case with fetching here, but now it's moved to success");
                         } else {
-                            console.error("Connection eRRoRR", mdl, values, xhr);
+                            console.warn("Connection eRRoRR", mdl, values, xhr);
                         }
                     } else if (status == 70) {
                         self.changeStatus(0);
@@ -208,7 +210,7 @@
                             self.changeStatus(0);
                         }
                     } else {
-                        console.error("Connection error, status:", status, mdl, values, xhr);
+                        console.warn("Connection error, status:", status, mdl, values, xhr);
                     }
                 }
             });
@@ -229,13 +231,13 @@
                     this.setDices(JSON.parse(this.getValue("lastDices")));
                 } else {
                     console.log("generating dices");
-                    this.generateCombination(null);
+                    this.generateCombination();
                 }
             } else {
                 console.log("fetching dices");
                 var prevUrlRoot = this.urlRoot;
                 this.urlRoot = "/api/dices";
-                this.generateCombination(null);
+                this.generateCombination();
                 this.urlRoot = prevUrlRoot;
             }
             /*if (this.existValue("lastDices")){
@@ -251,7 +253,7 @@
                 var prevUrlRoot = this.urlRoot;
                 this.urlRoot = "/api/dices";
 
-                this.generateCombination(null);
+                this.generateCombination();
 
                 this.urlRoot = prevUrlRoot;
             }*/
@@ -259,7 +261,7 @@
             var prevUrlRoot = this.urlRoot;
             this.urlRoot = "/api/dices";
 
-            this.generateCombination(null);
+            this.generateCombination();
             this.urlRoot = prevUrlRoot;*/
         },
         getDices: function(callback) {
@@ -274,7 +276,10 @@
                         callback(ans);
                     },
                     error: function(mdl, values){
-                        console.error("connection error in getDice",mdl, values);
+                        if (values.status == 200)
+                            console.warn("connection error in getDice",mdl, values);
+                        else
+                            console.error("connection error in getDice",mdl, values);
                         callback();
                     }
                 });
@@ -380,7 +385,7 @@
                     });
 
                     // generating new combination
-                    //this.generateCombination(null);
+                    //this.generateCombination();
                     //this.updateDices();
                     return true;
                 } else {
@@ -392,20 +397,17 @@
                 return false;
             }
         },
-        generateCombination: function(callback){
-            if (callback == null) callback = function(){};
+        generateCombination: function(){
             var self = this;
             self.getDices(function(dices){
                 if (typeof dices == "undefined") {
                     console.warn("fetched dices are undefined");
-                    return;
                     //self.addValue("lastDices", JSON.stringify(dices));
                     //self.setDices(dices);
                 } else {
                     self.addValue("lastDices", JSON.stringify(dices));
                     self.setDices(dices);
                 }
-                callback();
             });
         },
         checkCombination: function(index){
@@ -566,6 +568,53 @@
             this.set({clickable: ans.clickable, observerIndex: ans.observerIndex});
         },
 
+        syncStorageWithMemory: function(){
+            if (this.attributes.rounds &&
+                this.existValue("combinations") &&
+                this.existValue("lastDices"))
+            {
+                console.log("syncing local storage with server");
+
+                var turns = JSON.parse(this.getValue("combinations"));
+                var lastDices = JSON.parse(this.getValue("lastDices"));
+
+                var playerIndex = this.getOwnPlayerIndex();
+                var rounds = this.attributes.rounds[playerIndex];
+
+                var isEqual = true;
+                if (turns.length != rounds.length) {
+                    isEqual = false;
+                }
+                if (isEqual) {
+                    function equalArrays(a1, a2){
+                        if (!a2 || a1.length != a2.length) {
+                            return false;
+                        }
+                        for (var i = 0; i < a1.length; i++) {
+                            if (a1[i] !== a2[i]) {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+
+                    // equality of two objects
+                    for (var i = 0; i < turns.length; i++) {
+                        for (var j = 0; j < rounds.length; j++) {
+                        }
+                    }
+                }
+
+                if (isEqual == false) {
+                    // feel turns
+                }
+
+                return true;
+            } else {
+                console.warn("sync storage failed");
+                return false;
+            }
+        },
         // storage
         addValue: function(name,value){
             this.storage.setItem(name, value);
@@ -612,8 +661,15 @@
             console.log("going to restart");
             //this.options.parent.model.restart();
             //$.numbers.app.combinationModel.restart();
-            var confirmed = confirm("Leave this game and start new one?");
-            if (confirmed) {
+            var model = this.options.parent.model;
+            var status = model.attributes.status;
+            var needConfirmation = status != 90 && status != -1;
+            if (needConfirmation) {
+                var confirmed = confirm("Leave this game and start new one?");
+                if (confirmed) {
+                    $.numbers.app.doRestart();
+                }
+            } else {
                 $.numbers.app.doRestart();
             }
         },
@@ -1182,7 +1238,11 @@
                 if (usedCombinations.length == 13){
                     this.renderResults(this.$el);
                 } else {
-                    this.renderDices(this.$el, dices);
+                    var $dicesHolder = $('<div />', {
+                        "class": 'dicesHolder'
+                    });
+                    this.$el.append($dicesHolder);
+                    this.renderDices($dicesHolder, dices);
                 }
 
                 var combinations = checkCombinations(dices);
