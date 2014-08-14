@@ -183,7 +183,7 @@ function prepareGame() {
 
             connectedCookie.status = 3;
         }
-        console.log("names:", games[gameId].names);
+        console.log("names:", games[gameId].names, JSON.stringify(games[gameId]));
     }
 }
 // TODO, now it returns last game of player while iterating through ALL amount of games
@@ -193,9 +193,14 @@ function findGameById(sessionId) {
 
     function isThisGameMine(game){
         var isIt = false;
-        for (var j = 0; j < game.players.length; j++) {
-            if (sessionId == game.players[j]) {
-                isIt = true;
+
+        var leftPlayers = game.leftPlayers;
+        leftPlayers = leftPlayers || {};
+        if (leftPlayers[sessionId] === undefined) {
+            for (var j = 0; j < game.players.length; j++) {
+                if (sessionId == game.players[j]) {
+                    isIt = true;
+                }
             }
         }
         return isIt;
@@ -241,7 +246,12 @@ function getPlayerIndexInGame(game, sessionID){
 }
 
 function isEndOfGame(game){
+    var leftPlayers = game.leftPlayers;
+    leftPlayers = leftPlayers || {};
     for (var i = 0; i < game.rounds.length; i++) {
+        // if player left so end of game is closer
+        if (leftPlayers[game.players[i]] !== undefined) continue;
+
         var len = game.rounds[i].length;
         if (len < 13 || game.rounds[i][len-1].combinationIndex == null) {
             return false;
@@ -302,8 +312,6 @@ function collectOnlineStatistics(){
     }
     return data;
 }
-
-// TODO, now you can change user name, but no message showed to user
 
 // TODO, sometimes game falls with status == -1, and won't restart
 // TODO, giveup ruin game for another player, it's unfair
@@ -514,9 +522,14 @@ app.get('/api/giveup', function(req, res){
     if (connectedCookies[req.sessionID] !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null){
-            if (game.status != 90) {
-                endOfGame(game);
+
+            // why game should finished for another one?
+            //if (game.status != 90) { endOfGame(game); }
+            if (game.leftPlayers === undefined) {
+                game.leftPlayers = {};
             }
+            game.leftPlayers[req.sessionID] = true;
+
             // returning to find
             connectedCookies[req.sessionID].status = 2;
             res.send(game);
@@ -533,6 +546,9 @@ app.get('/api/giveup', function(req, res){
 app.get("/api/connectPlayer", function(req, res){
     if (connectedCookies[req.sessionID] !== undefined){
         connectedCookies[req.sessionID].time = new Date();
+        if (connectedCookies[req.sessionID].status === undefined) {
+            connectedCookies[req.sessionID].status = 2;
+        }
         //if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
     } else {
         connectedCookies[req.sessionID] = {};
@@ -565,6 +581,7 @@ app.get("/api/findGame", function(req, res){
 
         prepareGame();
         var game = findGameById(req.sessionID);
+        console.log("game:", JSON.stringify(game));
         if (game == null) game = collectOnlineStatistics();
         else console.log("game to send:", game);
         res.send(game);
@@ -599,6 +616,7 @@ app.get("/api/rounds/:gid", function(req, res){
         }
         removeExpiredConnections();
     } else {
+        console.log("sending empty data:", data);
         res.send(data);
     }
 
@@ -639,7 +657,7 @@ app.get("/api/changeName/:name", function(req, res){
                 var connectedCookie = {};
                 connectedCookie.name = name;
                 connectedCookie.time = new Date();
-                connectedCookie.status = 2; // 2 because we are skipping POST find game request
+                //connectedCookie.status = 2; // 2 because we are skipping POST find game request
 
                 connectedCookies[req.sessionID] = connectedCookie;
             }

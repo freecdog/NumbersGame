@@ -79,17 +79,24 @@
             this.restartListener();
             this.statusChanged();
 
-            // it doesn't looks like good code
-            //this.rerolled = false;
-            this.set({rerolled: false});
-            //this.currentSelected = [false, false, false, false, false, false];
-            this.set({currentSelected: [false, false, false, false, false, false]});
-
-            this.set({clickable: true});
-            this.set({observerIndex: -1});
+            this.clearStates();
 
             // is it needed on init? Think no, but may be it should be "on" for offline version
             //this.updateDices();
+        },
+
+        clearStates: function(){
+            // it doesn't looks like good code
+            //this.rerolled = false;
+            this.unset("rerolled");
+            this.set({rerolled: false});
+            this.unset("currentSelected");
+            this.set({currentSelected: [false, false, false, false, false, false]});
+
+            this.unset("clickable");
+            this.set({clickable: true});
+            this.unset("observerIndex");
+            this.set({observerIndex: -1});
         },
 
         restartListener: function(){
@@ -157,16 +164,22 @@
                             console.log("going to update too early", status);
                         }
                     } else if (status == 20) {
-                        //console.log("process fetched:", mdl, values);
-                        // there were a problem about twice fetching, but with this if it looks fine
-                        if (new Date() - self.lastUpdateTime > self.updateRate) {
-                            self.lastUpdateTime = new Date();
-                            setTimeout(function(){
-                                self.updateModel();
-                            }, self.updateRate);
+                        if (self._previousAttributes.status == 70) {
+                            self.changeStatus(10);
                         } else {
-                            console.log("going to update too early", status);
+
+                            //console.log("process fetched:", mdl, values);
+                            // there were a problem about twice fetching, but with this if it looks fine
+                            if (new Date() - self.lastUpdateTime > self.updateRate) {
+                                self.lastUpdateTime = new Date();
+                                setTimeout(function(){
+                                    self.updateModel();
+                                }, self.updateRate);
+                            } else {
+                                console.log("going to update too early", status);
+                            }
                         }
+
                     } else if (status == 90) {
                         if (self._previousAttributes.status == 70) {
                             self.changeStatus(0);
@@ -195,7 +208,7 @@
                             self.changeStatus(0);
                         }
                     } else {
-                        console.error("Connection error", mdl, values, xhr);
+                        console.error("Connection error, status:", status, mdl, values, xhr);
                     }
                 }
             });
@@ -261,7 +274,7 @@
                         callback(ans);
                     },
                     error: function(mdl, values){
-                        console.error("connection error",mdl, values);
+                        console.error("connection error in getDice",mdl, values);
                         callback();
                     }
                 });
@@ -1158,6 +1171,10 @@
 
             var playerIndex = this.model.attributes.observerIndex;
             if (playerIndex != -1){
+                if (this.model.attributes.rounds == null || this.model.attributes.rounds[playerIndex] == null){
+                    console.warn("undefined is here");
+                    return this;
+                }
                 var rlen = this.model.attributes.rounds[playerIndex].length;
                 var dices = this.model.attributes.rounds[playerIndex][rlen - 1].dices;
 
