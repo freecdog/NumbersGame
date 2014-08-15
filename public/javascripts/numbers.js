@@ -885,6 +885,11 @@
         },
         clicked: function(){
             if (this.model.parent.model.attributes.clickable){
+                if (this.model.parent.model.attributes.status != 20) {
+                    console.log("wait while game starts");
+                    return;
+                }
+
                 //console.log("click", this.model.value, event);
                 this.model.selected = !this.model.selected;
                 if (this.model.selected) this.select();
@@ -924,6 +929,11 @@
         },
         clicked: function(){
             if (this.model.parent.model.attributes.clickable){
+                if (this.model.parent.model.attributes.status != 20) {
+                    console.log("wait while game starts");
+                    return;
+                }
+
                 if (this.model.usedCombination == false) {
                     //console.log("click", this.model.name, this.model.value, event);
                     this.selected = !this.selected;
