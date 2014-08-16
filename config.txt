@@ -1,4 +1,4 @@
 ﻿{
-	"minPlayers": 2,
+	"minPlayers": 1,
 	"secret": "someSecret"
 }

@@ -728,7 +728,7 @@
             //this.options.parent.model.acceptCombination(ind);
             $.numbers.app.doAccept(ind);
         },
-        buttonTemplate: _.template("[accept combination]"),
+        buttonTemplate: _.template("[accept]"),
         render: function(){
             this.$el.empty();
             this.$el.append(this.buttonTemplate());
@@ -866,7 +866,7 @@
     $.numbers.ResultView = Backbone.View.extend({
         tagName: 'div',
         initialize: function(){
-            this.$el.attr("class", "dice"+this.model.value.toString() );
+            this.$el.attr("class", "dice d"+this.model.value.toString() );
         },
         render: function() {
             this.$el.empty();
@@ -877,7 +877,7 @@
     $.numbers.DiceView = Backbone.View.extend({
         tagName: 'div',
         initialize: function(){
-            this.$el.attr("class", "dice"+this.model.value.toString() );
+            this.$el.attr("class", "dice d"+this.model.value.toString() );
             //this.$el.css("display", "inline-block");
         },
         events: {
@@ -927,7 +927,7 @@
         events: {
             "click": "clicked"
         },
-        clicked: function(){
+        clicked: function(e){
             if (this.model.parent.model.attributes.clickable){
                 if (this.model.parent.model.attributes.status != 20) {
                     console.log("wait while game starts");
@@ -948,9 +948,14 @@
                         this.model.parent.deselectCombination(this.model.index, this);
                     }
 
-                    console.log("quick click");
-                    var ind = this.model.index;
-                    $.numbers.app.doAccept(ind);
+                    if (e.ctrlKey){
+                        console.log("quick click with ctrl");
+                        var ind = this.model.index;
+                        $.numbers.app.doAccept(ind);
+                    }
+                    //console.log("quick click");
+                    //var ind = this.model.index;
+                    //$.numbers.app.doAccept(ind);
                 }
             } else {
                 console.log("You can only observe game process of other player");
@@ -1305,8 +1310,8 @@
             var numbers = self.$el; //$('#combinations');
             numbers.append(comboView.render().el);
 
-            //var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
-            //this.$el.append(acceptCombinationButton.render().el);
+            var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
+            this.$el.append(acceptCombinationButton.render().el);
 
             //var inputView = new $.numbers.InputView({parent: $.numbers.app.combinationsView});
             //this.$el.append(inputView.render().el);

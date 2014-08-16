@@ -3,7 +3,11 @@
     font-family: 'Open Sans Light';
     src: url('../fonts/open-sans.light.ttf') format('truetype');
 }
-
+/*
+    many thanks to
+    http://labs.tineye.com/multicolr
+    https://kuler.adobe.com/
+*/
 body {
     margin: 0 auto;
     padding: 0px;
@@ -11,9 +15,19 @@ body {
     color: #ECE9E9;
     background-color: #343434;
     max-width: 600px;
+    background: url('../images/flickr.com_photos_40422902@N00_2580014287.jpg') no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+p {
+    padding-left: 5%;
+    padding-right: 5%;
 }
 a {
-    color: #00B7FF;
+    /*color: #00B7FF;*/
+    color: #ECE9E9;
     font-size: 1.5em;
 
     display: block;
@@ -52,19 +66,35 @@ table {
 .restartGameButton {
     text-align: right;
     font-size: 2em;
-    background-color: #ff4f4f;
+    /*background-color: #ff4f4f;*/
+    background-color: #ff362b;
+    background-color: rgba(255, 54, 43, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99ff362b, endColorstr=#99ff362b);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99ff362b, endColorstr=#99ff362b)";
 }
 .rerollButton {
     text-align: left;
     font-size: 2em;
-    background-color: #4f4fff;
+    /*background-color: #4f4fff*/;
+    background-color: #3eff89;
+    background-color: rgba(62, 255, 137, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#993eff89, endColorstr=#993eff89);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#993eff89, endColorstr=#993eff89)";
 }
 .rerollButton.selected {
     background-color: #4f4f4f;
+    background-color: rgba(79, 79, 79, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#994F4F4F, endColorstr=#994F4F4F);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#994F4F4F, endColorstr=#994F4F4F)";
 }
 .acceptCombinationButton {
+    text-align: center;
     font-size: 2em;
-    background-color: #2fdf2f;
+    /*background-color: #2fdf2f;*/
+    background-color: #68ffa3;
+    background-color: rgba(104, 255, 163, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#9968ffa3, endColorstr=#9968ffa3);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#9968ffa3, endColorstr=#9968ffa3)";
 }
 .testButton {
     font-size: 4em;
@@ -72,24 +102,22 @@ table {
 }
 
 .combination.selected {
-    background-color: #4f4fff;
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
 .combination.used {
-    background-color: #4f4f4f;
-}
-
-.inputView {
-    -moz-appearance: textfield;
-    -webkit-appearance: textfield;
-    /*background-color: #00eeff;*/
-    background-color: -moz-field;
-    border: 0px solid darkgray;
-    /*box-shadow: 1px 1px 1px 0 lightgray inset;*/
-    /*font: -moz-field;
-    font: -webkit-small-control;*/
-    /*margin-top: 5px;
-    padding: 2px 3px;*/
-    width: 398px;
+    /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+    /* Fallback for web browsers that don't support RGBa */
+    background-color: rgb(153, 153, 153);
+    /* RGBa with 0.6 opacity */
+    background-color: rgba(153, 153, 153, 0.618);
+    /* For IE 5.5 - 7*/
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f);
+    /* For IE 8*/
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f)";
 }
 
 .menuElement {
@@ -101,7 +129,21 @@ table {
     max-width: 512px;
     text-decoration: none !important;
 }
+.menuPad {
+    /* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
+    /*opacity: 0.618;
+    background: url("../images/pad2.jpg") no-repeat center center;*/
+
+    background-color: rgb(153, 153, 153);
+    background-color: rgba(153, 153, 153, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f)";
+}
+
 .inputView {
+    -moz-appearance: textfield;
+    -webkit-appearance: textfield;
+
     display: block;
     margin: 0 auto;
 
@@ -111,9 +153,10 @@ table {
     color: #ECE9E9;
     background-color: #343434;
 
-    width: 90%;
-    max-width: 512px;
-    top: 300px;
+    width: 89.5%;
+    max-width: 510px;
+
+    text-align: center;
 }
 .inputSubmitView {
     display: block;
@@ -125,8 +168,8 @@ table {
     color: darkgray;
     background-color: #343434;
 
-    width: 90.5%;
-    max-width: 514px;
+    width: 90%;
+    max-width: 512px;
 }
 
 .dicesHolder {
@@ -136,105 +179,85 @@ table {
     border: 0px;
     text-align: center;
 }
-.dice1 {
+.dice {
     display: inline-block;
     height: 100px;
     width: 100px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+}
+.dice.d1 {
     background: url("../images/dices/white/1.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice1.selected {
-    background-color: #4f4fff;
+.dice.d1.selected {
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
-.dice2 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d2 {
     background: url("../images/dices/white/2.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice2.selected {
-    background-color: #4f4fff;
+.dice.d2.selected {
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
-.dice3 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d3 {
     background: url("../images/dices/white/3.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice3.selected {
-    background-color: #4f4fff;
+.dice.d3.selected {
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
-.dice4 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d4 {
     background: url("../images/dices/white/4.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice4.selected {
-    background-color: #4f4fff;
+.dice.d4.selected {
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
-.dice5 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d5 {
     background: url("../images/dices/white/5.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice5.selected {
-    background-color: #4f4fff;
+.dice.d5.selected {
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
-.dice6 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d6 {
     background: url("../images/dices/white/6.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice6.selected {
-    background-color: #4f4fff;
+.dice.d6.selected {
+    /*background-color: #4f4fff;*/
+    background-color: #b27571;
+    background-color: rgba(178, 117, 113, 0.618);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
 }
 
-
-.dice0 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d0 {
     background: url("../images/dices/white/0.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice7 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d7 {
     background: url("../images/dices/white/7.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice8 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d8 {
     background: url("../images/dices/white/8.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
-.dice9 {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
+.dice.d9 {
     background: url("../images/dices/white/9.png");
-    -moz-border-radius: 20px;
-    border-radius: 20px;
 }
 
 .textDice {

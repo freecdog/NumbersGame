@@ -4,9 +4,13 @@
 extends layout
 block content
 
+    br
+
+    div(class="menuElement menuPad")
+        a(href="/") Menu
+
     p Server time: #{serverTime}
 
-    a(href="/") Menu
     //-
         br
         a(href="/dropAll") Drop all
@@ -41,9 +45,15 @@ block content
                                         #pad6 #{paramDetails}: #{games[game][gameState][player][round][roundParams][paramDetails]}
 
             else if (gameState == "leftPlayers")
-                #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
+                //-
+                    #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
+                #pad2(onclick="toggle_visibility(this)") #{gameState}:
+                -for(var leaverParam in games[game][gameState])
+                    #pad3(onclick="toggle_visibility(this)") #{leaverParam}: #{games[game][gameState][leaverParam]}
             else if (gameState == "winner")
-                #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
+                #pad2(onclick="toggle_visibility(this)") #{gameState}:
+                -for(var winnerParam in games[game][gameState])
+                    #pad3(onclick="toggle_visibility(this)") #{winnerParam}: #{games[game][gameState][winnerParam]}
             else
                 #pad2 #{gameState} — #{games[game][gameState]}
 

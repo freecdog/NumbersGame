@@ -214,12 +214,13 @@ function findGameById(sessionId) {
 
         var game = games[gInd];
         // if in game
-        if (connectedCookies[sessionId].status == 80){
-            if (isThisGameMine(game)) {
-                //return game;
-                ans = game;
-            }
-        } else {
+        //if (connectedCookies[sessionId].status == 80){
+        //    if (isThisGameMine(game)) {
+        //        //return game;
+        //        ans = game;
+        //    }
+        //} else
+        {
             if (game.status != 90 && game.status != -1) {
                 if (isThisGameMine(game)) {
                     //return game;
@@ -314,8 +315,6 @@ function collectOnlineStatistics(){
     }
     return data;
 }
-
-// TODO, sometimes game falls with status == -1, and won't restart
 
 app.get('/', function(req, res){
     var stats = collectOnlineStatistics();
