@@ -1,6 +1,4 @@
 var express = require('express');
-var routes = require('./routes');
-var user = require('./routes/user');
 var http = require('http');
 var path = require('path');
 
@@ -276,8 +274,8 @@ function endOfGame(game){
             game.winner.result = result;
         }
 
-        if (leftPlayers[game.players[i]] === undefined)
-            connectedCookies[game.players[i]].status = 80;
+        //if (leftPlayers[game.players[i]] === undefined)
+        //    connectedCookies[game.players[i]].status = 1;
     }
 
     console.log("game ends:", game);
@@ -304,14 +302,14 @@ function collectOnlineStatistics(){
     data.activeGames = 0;
     for(var player in connectedCookies) {
         if (connectedCookies[player] !== undefined){
-            if (connectedCookies[player].status == 1 || connectedCookies[player].status == 2) {
+            if (connectedCookies[player].status == 2) {
                 data.playersSearching++;
             }
         }
     }
     for (var game in games) {
         if (games[game] !== undefined){
-            if (games[game].status == 1) data.activeGames++;
+            if (games[game].status == 20) data.activeGames++;
         }
     }
     return data;
@@ -319,7 +317,10 @@ function collectOnlineStatistics(){
 
 // TODO, sometimes game falls with status == -1, and won't restart
 
-app.get('/', routes.index);
+app.get('/', function(req, res){
+    var stats = collectOnlineStatistics();
+    res.render('index', { title: 'NumbersGame', onlineStatistics: stats });
+});
 app.get('/play', function(req,res){
     res.render("play");
 });
@@ -531,6 +532,8 @@ app.get('/api/combination/:comboIndex', function(req, res){
 });
 app.get('/api/giveup', function(req, res){
     if (connectedCookies[req.sessionID] !== undefined){
+        connectedCookies[req.sessionID].status = 1;
+
         var game = findGameById(req.sessionID);
         if (game != null){
 
@@ -544,8 +547,6 @@ app.get('/api/giveup', function(req, res){
             var isEnd = isEndOfGame(game);
             if (isEnd) endOfGame(game);
 
-            // returning to find
-            connectedCookies[req.sessionID].status = 2;
             res.send(null);
         } else {
             console.log("game not found (/api/giveup)");
@@ -561,14 +562,15 @@ app.get("/api/connectPlayer", function(req, res){
     if (connectedCookies[req.sessionID] !== undefined){
         connectedCookies[req.sessionID].time = new Date();
         if (connectedCookies[req.sessionID].status === undefined) {
-            connectedCookies[req.sessionID].status = 2;
+            //connectedCookies[req.sessionID].status = 2;
+            connectedCookies[req.sessionID].status = 1;
         }
         //if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
     } else {
         connectedCookies[req.sessionID] = {};
         connectedCookies[req.sessionID].time = new Date();
-        //connectedCookies[req.sessionID].status = 1; // connected
-        connectedCookies[req.sessionID].status = 2; // 2 because we are skipping POST find game request
+        connectedCookies[req.sessionID].status = 1; // connected
+        //connectedCookies[req.sessionID].status = 2; // 2 because we are skipping POST find game request
     }
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
@@ -590,6 +592,8 @@ app.get("/api/disconnectPlayer", function(req, res){
 app.get("/api/findGame", function(req, res){
     if (connectedCookies[req.sessionID] !== undefined){
         connectedCookies[req.sessionID].time = new Date();
+        if (connectedCookies[req.sessionID].status == 1)
+            connectedCookies[req.sessionID].status = 2;
 
         console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
 

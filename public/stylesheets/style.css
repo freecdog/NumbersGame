@@ -93,7 +93,13 @@ table {
 }
 
 .menuElement {
+    display: block;
+    margin: 0 auto;
 
+    text-align: center;
+    width: 90%;
+    max-width: 512px;
+    text-decoration: none !important;
 }
 .inputView {
     display: block;
@@ -229,4 +235,31 @@ table {
     background: url("../images/dices/white/9.png");
     -moz-border-radius: 20px;
     border-radius: 20px;
+}
+
+.textDice {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: 17px;
+    height: 17px;
+    alt: "author: http://thenounproject.com/alexfuller";
+}
+.textDice.d1 {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAApklEQVQ4T2NkoAJgpIIZDHBD3r9/L/Dv1698ogz9//8DEzv7QkFBwQ8g9XBDXr982QDk1BNlCEjj//+FwhISEygy5D8DQ6OouHjDUDKEkTFRRExswZtXrxIY/v+fjxxeRHtHRFwcHvBvXr4E6kMAog1hoIZL8EU38S7BYwrtDHn74kXBf0bGfopSLDjv/PyZ8I+RUYCQQUyQvLMAI+8Q0ohPnipFAQBhnG4SJnWS9wAAAABJRU5ErkJggg==");
+}
+.textDice.d2 {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAuElEQVQ4T2NkoAJgpIIZDHBD3r9/L/Dv1698ogz9//8DEzv7QkFBwQ8g9XBDXr982QDk1BNlCEjj//+FwhISE0gyBKbpzcuXAUCN6/8zMDSKios3kGSIiLg43NVAg/6TZQjQxgVAgxLfvnhR8J+RsZ9cQ1CCa4gYghQLC4Duj8cV5Xi9gx4LZBkC1BQINGgDLBZIMoSQJnTDsKZYcN75+TPhHyOjAKGkzwTJOwsw8g4hjfjkqVIUAAB7X34Svlc38QAAAABJRU5ErkJggg==");
+}
+.textDice.d3 {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAzUlEQVQ4T62UQRKCMAxFGzZsYUTKsfQEwgnUE4gn0BtYT6DHoogDW1gQgw4Mg1pahu467X/Jb5ICm2HBDAzWQfI8d+qq2mpBEQvLtq+u6xbN/Q7ykDKmzUEL0ggR94sgOBtBWlEm5YqEN2TsuOQ8NoJ4nHdZEwgnQSiiIFD0TJIdApz0IQCR5/siS9OQIV7676UNGVqYBGFTM+lVQVDkzb+SK+2oLJjYWRPo3lbBKJMx0RD2s2Pfs1OWYQ3gjLW+9Zkd8TU7Y0LV+SxfwQtbMpASADGG+gAAAABJRU5ErkJggg==");
+}
+.textDice.d4 {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAx0lEQVQ4T2NkoAJgpIIZDHBD3r9/L/Dv1698ogz9//8DEzv7QkFBwQ8g9XBDXr982QDk1BNlCEjj//+FwhISE3AZEigiLr7h7YsXBf8ZGfthhsI0vXn5MgAotv4/A0OjqLh4A1ZDgAbAXQfUAFQLAejieA0B2lgAdOZEoAELgHrjkby3AGhQIsyFeA0hNkyGiCFIsYASJjDnExUmVIkdYMCSn07QExehWMKaYsF55+fPhH+MjAKEDGCC5J0FGHmHkEZ88lQpCgAagKESYqPWwgAAAABJRU5ErkJggg==");
+}
+.textDice.d5 {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAA30lEQVQ4T62UyxGCMBCGEy9cYURCWVqBUIFYgViBWoGxAi2LIA5c4cC6yIQB5JFhkluS/b/sM5RoWFQDgzSQNE3NsigOSlCAbGUYD8uyssq+gbyFCHFzUoJUQoDj2nWvY5CdzdjrE0UBUHqRUClKhNji2RMIOW8YCwchCGi8QwHa1qt/PgnBFwN084YAjtp9KzyOIF96OAnp5IRS33YcnsSxRwDu7TtlyFhoFUwZQpZ60qpCJyfyZaWcaKkOhru8T/rNNde5gx37m50890pKzTnAqp4d/jc7c8Kpey1fwRf6RLMSOt/q4gAAAABJRU5ErkJggg==");
+}
+.textDice.d6 {
+    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAA4klEQVQ4T7WUyxGCMBRF89iwhQEJZWkFQgViBUIFagViBVoWQRzYwoL4kAmDyCfjxOzyuSc37xMgCgYoYJAOkue5UVfVTgrKeaHp+tU0zaI530EejIU4OUhBGiHne8t1T1OQjU3p/ZkkAQc4CqgQZYytce3GCYlWlIajEAR07lCAZ9sxXJ+F4I0B2jwjIEbttve8GEG+cDgLIQC+7TjxMEZClKWpRzi//P85U04wUKFFaSTlpJeFj5gI+1IxUZIdzMbvdTIsrqXKHa3Yd++UpVcDGEsAre2d+Kt3loRz+0q+ghcqkcIShC659gAAAABJRU5ErkJggg==");
 }

@@ -9,6 +9,8 @@ block content
     div(class="menuElement")
         a(href="/onlineStatistics") Online statistics
     div(class="menuElement")
+        | (online: #{onlineStatistics.playersOnline}, searching: #{onlineStatistics.playersSearching})
+    div(class="menuElement")
         a(href="/rules") Rules
     div(class="menuElement")
         a(href="/about") About
