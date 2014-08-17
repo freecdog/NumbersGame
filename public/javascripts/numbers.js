@@ -54,6 +54,8 @@
     });
 
     // TODO, develop syncStorageWithMemory
+    // TODO, scroll top after choosing combo isn't correct behaviour
+    // TODO, refresh page (f5) when game was end leeds to api/findGame but game can't be find (because status 3 of player), so user see Status 10 findGame forever =)
     // TODO, work with game status == -1, when fires removeExpiredConnections()
 
     $.numbers.Combination = Backbone.Model.extend({
@@ -90,13 +92,17 @@
             // it doesn't looks like good code
             //this.rerolled = false;
             this.unset("rerolled");
+            this.rerolled = false;
             this.set({rerolled: false});
             this.unset("currentSelected");
+            this.currentSelected = [false, false, false, false, false, false];
             this.set({currentSelected: [false, false, false, false, false, false]});
 
             this.unset("clickable");
+            this.clickable = true;
             this.set({clickable: true});
             this.unset("observerIndex");
+            this.observerIndex = -1;
             this.set({observerIndex: -1});
         },
 
@@ -290,9 +296,12 @@
             // from http://stackoverflow.com/questions/15336801/backbone-js-change-event-not-firing-when-value-is-same-as-previous-value-prior-t
             // unset should lead to set event even if new dice are same to previous one
             this.unset("dices", {silent: true});
+            this.dices = dices;
             this.set({dices: dices});
+            var cmbs = checkCombinations(dices);
             this.unset("combinations", {silent: true});
-            this.set({combinations: checkCombinations(dices)});
+            this.combinations = cmbs;
+            this.set({combinations: cmbs});
         },
 
         toggleDice: function(index, value){
@@ -369,6 +378,7 @@
 
                     //this.rerolled = false;
                     this.unset("rerolled", {silent: true});
+                    this.rerolled = false;
                     this.set({rerolled: false});
 
                     var self = this;
@@ -948,11 +958,9 @@
                         this.model.parent.deselectCombination(this.model.index, this);
                     }
 
-                    if (e.ctrlKey){
-                        console.log("quick click with ctrl");
-                        var ind = this.model.index;
-                        $.numbers.app.doAccept(ind);
-                    }
+                    console.log("quick click with ctrl");
+                    var ind = this.model.index;
+                    $.numbers.app.doAccept(ind);
                     //console.log("quick click");
                     //var ind = this.model.index;
                     //$.numbers.app.doAccept(ind);
@@ -1310,13 +1318,28 @@
             var numbers = self.$el; //$('#combinations');
             numbers.append(comboView.render().el);
 
-            var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
-            this.$el.append(acceptCombinationButton.render().el);
+            //var acceptCombinationButton = new $.numbers.AcceptCombinationButton({parent: $.numbers.app.combinationsView});
+            //this.$el.append(acceptCombinationButton.render().el);
 
             //var inputView = new $.numbers.InputView({parent: $.numbers.app.combinationsView});
             //this.$el.append(inputView.render().el);
 
             console.log('gameView rendered');
+            return this;
+        }
+    });
+    $.numbers.DebugView = Backbone.View.extend({
+        tagName: 'div',
+        initialize: function(){
+            this.listenTo(this.model, 'change', this.render);
+        },
+        render: function(){
+            var self = this;
+            this.$el.empty();
+            var pre = _.extend({}, this.model.attributes);
+            pre.rounds = {};
+            this.$el.append(JSON.stringify(pre));
+
             return this;
         }
     });
@@ -1353,6 +1376,9 @@
                 self.gameView.render();
 
                 $body.append(self.gameView.el);
+
+                //self.debugView = new $.numbers.DebugView({model: self.combinationModel});
+                //$body.append(self.debugView.el);
 
                 self.gameObserver = new $.numbers.GameObserve({model: self.combinationModel});
                 $body.append(self.gameObserver.render().el);

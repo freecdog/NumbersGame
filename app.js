@@ -389,7 +389,7 @@ app.get('/api/dices', function(req, res){
                     game.rounds[playerIndex].push(round);
 
                     console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
-                    res.send({dices: dices});
+                    res.send({dices: dices, rerolled: round.rerolled});
                 } else {
                     var lastDices = game.rounds[playerIndex][game.rounds[playerIndex].length-1].dices;
                     console.log("asking extra dices while game was over", lastDices);
