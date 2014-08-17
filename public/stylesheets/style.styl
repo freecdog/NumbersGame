@@ -13,28 +13,29 @@ $fonts = 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
 $colorFont = #ECE9E9;
 $colorBackground = #343434;
 $colorInput = #999999;
+$transparency = 0.618;
 
 /*mixins*/
 colorUsed() {
   background-color: #999999;
-  background-color: rgba(153, 153, 153, 0.618);
+  background-color: rgba(153, 153, 153, $transparency);
 }
 colorSelected() {
   background-color: #b27571;
-  background-color: rgba(178, 117, 113, 0.618);
+  background-color: rgba(178, 117, 113, $transparency);
 }
 
 colorRestartButton(){
   background-color: #ff362b;
-  background-color: rgba(255, 54, 43, 0.618);
+  background-color: rgba(255, 54, 43, $transparency);
 }
 colorAcceptButton(){
   background-color: #68ffa3;
-  background-color: rgba(104, 255, 163, 0.618);
+  background-color: rgba(104, 255, 163, $transparency);
 }
 colorRerollButton(){
   background-color: #3eff89;
-  background-color: rgba(62, 255, 137, 0.618);
+  background-color: rgba(62, 255, 137, $transparency);
 }
 colorRerollButtonUsed(){
   colorUsed();
