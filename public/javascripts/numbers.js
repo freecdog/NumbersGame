@@ -705,12 +705,12 @@
             this.$el.append(this.buttonTemplate());
             if (this.model.attributes.rerolled) {
                 //console.log("adding class Selected to reroll button");
-                this.$el.addClass('selected');
+                this.$el.addClass('used');
                 //this.$el.removeAttr("background-color");
                 //this.$el.css("background-color", "#fff");
                 //this.$el.empty();
             } else {
-                this.$el.removeClass('selected');
+                this.$el.removeClass('used');
                 //console.log("reroll button rerendered");
             }
             return this;

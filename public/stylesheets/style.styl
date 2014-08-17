@@ -1,0 +1,205 @@
+@font-face
+  /* http://webdesignerwall.com/general/font-face-solutions-suggestions */
+  font-family: 'Open Sans Light';
+  src: url('../fonts/open-sans.light.ttf') format('truetype');
+/*
+    many thanks to
+    http://labs.tineye.com/multicolr
+    https://kuler.adobe.com/
+*/
+
+/*vars*/
+$fonts = 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+$colorFont = #ECE9E9;
+$colorBackground = #343434;
+$colorInput = #999999;
+
+/*mixins*/
+colorUsed() {
+  background-color: #999999;
+  background-color: rgba(153, 153, 153, 0.618);
+}
+colorSelected() {
+  background-color: #b27571;
+  background-color: rgba(178, 117, 113, 0.618);
+}
+
+colorRestartButton(){
+  background-color: #ff362b;
+  background-color: rgba(255, 54, 43, 0.618);
+}
+colorAcceptButton(){
+  background-color: #68ffa3;
+  background-color: rgba(104, 255, 163, 0.618);
+}
+colorRerollButton(){
+  background-color: #3eff89;
+  background-color: rgba(62, 255, 137, 0.618);
+}
+colorRerollButtonUsed(){
+  colorUsed();
+}
+colorDiceSelected() {
+  colorSelected();
+}
+colorCombinationSelected(){
+  colorSelected();
+}
+colorCombinationUsed(){
+  colorUsed();
+}
+colorMenuPad(){
+  colorUsed();
+}
+
+$c1 = #ff362b;
+::selection
+  background: lighten($c1, 50%); /* Safari */
+::-moz-selection
+  background: lighten($c1, 50%); /* Firefox */
+body
+  margin: 0 auto;
+  padding: 0px;
+  font: $fonts;
+  color: $colorFont;
+  background-color: $colorBackground;
+  max-width: 600px;
+  background: url('../images/flickr.com_photos_40422902@N00_2580014287.jpg') no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
+p
+  padding-left: 5%;
+  padding-right: 5%;
+a
+  /*color: #00B7FF;*/
+  color: $colorFont;
+  font-size: 1.5em;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+  max-width: 512px;
+  text-decoration: none !important;
+table
+  border: 0;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
+
+#pad1
+  padding-left: 40px;
+#pad2
+  padding-left: 80px;
+#pad3
+  padding-left: 120px;
+#pad4
+  padding-left: 160px;
+#pad5
+  padding-left: 200px;
+
+.restartGameButton
+  text-align: right;
+  font-size: 2em;
+  colorRestartButton();
+.rerollButton
+  text-align: left;
+  font-size: 2em;
+  colorRerollButton();
+.rerollButton.used
+  colorRerollButtonUsed();
+.acceptCombinationButton
+  text-align: center;
+  font-size: 2em;
+  colorAcceptButton();
+.combination.selected
+  colorCombinationSelected();
+.combination.used
+  /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+  colorCombinationUsed();
+
+.menuElement
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+  max-width: 512px;
+  text-decoration: none !important;
+.menuPad
+  /* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
+  /*opacity: 0.618;
+  background: url("../images/pad2.jpg") no-repeat center center;*/
+  colorMenuPad();
+
+.inputView
+  -moz-appearance: textfield;
+  -webkit-appearance: textfield;
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid $colorInput;
+  font: $fonts;
+  color: $colorFont;
+  background-color: $colorBackground;
+  width: 89.5%;
+  max-width: 510px;
+  text-align: center;
+.inputSubmitView
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid $colorInput;
+  font: $fonts;
+  color: $colorInput;
+  background-color: $colorBackground;
+  width: 90%;
+  max-width: 512px;
+.dicesHolder
+  height: auto;
+  margin: 0 auto;
+  padding: 0px;
+  border: 0px;
+  text-align: center;
+.dice
+  display: inline-block;
+  height: 100px;
+  width: 100px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+.dice.d1
+  background: url("../images/dices/white/1.png");
+.dice.d1.selected
+  colorDiceSelected();
+.dice.d2
+  background: url("../images/dices/white/2.png");
+.dice.d2.selected
+  colorDiceSelected();
+.dice.d3
+  background: url("../images/dices/white/3.png");
+.dice.d3.selected
+  colorDiceSelected();
+.dice.d4
+  background: url("../images/dices/white/4.png");
+.dice.d4.selected
+  colorDiceSelected();
+.dice.d5
+  background: url("../images/dices/white/5.png");
+.dice.d5.selected
+  colorDiceSelected();
+.dice.d6
+  background: url("../images/dices/white/6.png");
+.dice.d6.selected
+  colorDiceSelected();
+
+.dice.d0
+  background: url("../images/dices/white/0.png");
+.dice.d7
+  background: url("../images/dices/white/7.png");
+.dice.d8
+  background: url("../images/dices/white/8.png");
+.dice.d9
+  background: url("../images/dices/white/9.png");
+

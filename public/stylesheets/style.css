@@ -1,289 +1,210 @@
 @font-face {
-    /* http://webdesignerwall.com/general/font-face-solutions-suggestions */
-    font-family: 'Open Sans Light';
-    src: url('../fonts/open-sans.light.ttf') format('truetype');
+/* http://webdesignerwall.com/general/font-face-solutions-suggestions */
+  font-family: 'Open Sans Light';
+  src: url("../fonts/open-sans.light.ttf") format('truetype');
 }
 /*
     many thanks to
     http://labs.tineye.com/multicolr
     https://kuler.adobe.com/
 */
+/*vars*/
+/*mixins*/
 ::selection {
-    background: #e69e9a; /* Safari */
+  background: #ff9b95;
+/* Safari */
 }
 ::-moz-selection {
-    background: #e69e9a; /* Firefox */
+  background: #ff9b95;
+/* Firefox */
 }
 body {
-    margin: 0 auto;
-    padding: 0px;
-    font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
-    color: #ECE9E9;
-    background-color: #343434;
-    max-width: 600px;
-    background: url('../images/flickr.com_photos_40422902@N00_2580014287.jpg') no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
+  margin: 0 auto;
+  padding: 0px;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #ece9e9;
+  background-color: #343434;
+  max-width: 600px;
+  background: url("../images/flickr.com_photos_40422902@N00_2580014287.jpg") no-repeat center center fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover;
 }
 p {
-    padding-left: 5%;
-    padding-right: 5%;
+  padding-left: 5%;
+  padding-right: 5%;
 }
 a {
-    /*color: #00B7FF;*/
-    color: #ECE9E9;
-    font-size: 1.5em;
-
-    display: block;
-    margin: 0 auto;
-
-    text-align: center;
-    width: 90%;
-    max-width: 512px;
-    text-decoration: none !important;
+/*color: #00B7FF;*/
+  color: #ece9e9;
+  font-size: 1.5em;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+  max-width: 512px;
+  text-decoration: none !important;
 }
 table {
-    border: 0;
-    margin: 0px;
-    padding: 0px;
-    width: 100%;
-    border-spacing: 0;
-    border-collapse: collapse;
+  border: 0;
+  margin: 0px;
+  padding: 0px;
+  width: 100%;
+  border-spacing: 0;
+  border-collapse: collapse;
 }
-
 #pad1 {
-    padding-left: 40px;
+  padding-left: 40px;
 }
 #pad2 {
-    padding-left: 80px;
+  padding-left: 80px;
 }
 #pad3 {
-    padding-left: 120px;
+  padding-left: 120px;
 }
 #pad4 {
-    padding-left: 160px;
+  padding-left: 160px;
 }
 #pad5 {
-    padding-left: 200px;
+  padding-left: 200px;
 }
-
 .restartGameButton {
-    text-align: right;
-    font-size: 2em;
-    /*background-color: #ff4f4f;*/
-    background-color: #ff362b;
-    background-color: rgba(255, 54, 43, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99ff362b, endColorstr=#99ff362b);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99ff362b, endColorstr=#99ff362b)";
+  text-align: right;
+  font-size: 2em;
+  background-color: #ff362b;
+  background-color: rgba(255,54,43,0.618);
 }
 .rerollButton {
-    text-align: left;
-    font-size: 2em;
-    /*background-color: #4f4fff*/;
-    background-color: #3eff89;
-    background-color: rgba(62, 255, 137, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#993eff89, endColorstr=#993eff89);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#993eff89, endColorstr=#993eff89)";
+  text-align: left;
+  font-size: 2em;
+  background-color: #3eff89;
+  background-color: rgba(62,255,137,0.618);
 }
-.rerollButton.selected {
-    background-color: #4f4f4f;
-    background-color: rgba(79, 79, 79, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#994F4F4F, endColorstr=#994F4F4F);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#994F4F4F, endColorstr=#994F4F4F)";
+.rerollButton.used {
+  background-color: #999;
+  background-color: rgba(153,153,153,0.618);
 }
 .acceptCombinationButton {
-    text-align: center;
-    font-size: 2em;
-    /*background-color: #2fdf2f;*/
-    background-color: #68ffa3;
-    background-color: rgba(104, 255, 163, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#9968ffa3, endColorstr=#9968ffa3);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#9968ffa3, endColorstr=#9968ffa3)";
+  text-align: center;
+  font-size: 2em;
+  background-color: #68ffa3;
+  background-color: rgba(104,255,163,0.618);
 }
 .combination.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
 .combination.used {
-    /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
-    /* Fallback for web browsers that don't support RGBa */
-    background-color: rgb(153, 153, 153);
-    /* RGBa with 0.6 opacity */
-    background-color: rgba(153, 153, 153, 0.618);
-    /* For IE 5.5 - 7*/
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f);
-    /* For IE 8*/
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f)";
+/* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+  background-color: #999;
+  background-color: rgba(153,153,153,0.618);
 }
-
 .menuElement {
-    display: block;
-    margin: 0 auto;
-
-    text-align: center;
-    width: 90%;
-    max-width: 512px;
-    text-decoration: none !important;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+  max-width: 512px;
+  text-decoration: none !important;
 }
 .menuPad {
-    /* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
-    /*opacity: 0.618;
-    background: url("../images/pad2.jpg") no-repeat center center;*/
-
-    background-color: rgb(153, 153, 153);
-    background-color: rgba(153, 153, 153, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#998f8f8f, endColorstr=#998f8f8f)";
+/* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
+/*opacity: 0.618;
+  background: url("../images/pad2.jpg") no-repeat center center;*/
+  background-color: #999;
+  background-color: rgba(153,153,153,0.618);
 }
-
 .inputView {
-    -moz-appearance: textfield;
-    -webkit-appearance: textfield;
-
-    display: block;
-    margin: 0 auto;
-
-    padding: 0px;
-    border: 1px solid darkgray;
-    font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
-    color: #ECE9E9;
-    background-color: #343434;
-
-    width: 89.5%;
-    max-width: 510px;
-
-    text-align: center;
+  -moz-appearance: textfield;
+  -webkit-appearance: textfield;
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid #999;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #ece9e9;
+  background-color: #343434;
+  width: 89.5%;
+  max-width: 510px;
+  text-align: center;
 }
 .inputSubmitView {
-    display: block;
-    margin: 0 auto;
-
-    padding: 0px;
-    border: 1px solid darkgray;
-    font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
-    color: darkgray;
-    background-color: #343434;
-
-    width: 90%;
-    max-width: 512px;
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid #999;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #999;
+  background-color: #343434;
+  width: 90%;
+  max-width: 512px;
 }
-
 .dicesHolder {
-    height: auto;
-    margin: 0 auto;
-    padding: 0px;
-    border: 0px;
-    text-align: center;
+  height: auto;
+  margin: 0 auto;
+  padding: 0px;
+  border: 0px;
+  text-align: center;
 }
 .dice {
-    display: inline-block;
-    height: 100px;
-    width: 100px;
-    -moz-border-radius: 20px;
-    border-radius: 20px;
+  display: inline-block;
+  height: 100px;
+  width: 100px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
 }
 .dice.d1 {
-    background: url("../images/dices/white/1.png");
+  background: url("../images/dices/white/1.png");
 }
 .dice.d1.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
 .dice.d2 {
-    background: url("../images/dices/white/2.png");
+  background: url("../images/dices/white/2.png");
 }
 .dice.d2.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
 .dice.d3 {
-    background: url("../images/dices/white/3.png");
+  background: url("../images/dices/white/3.png");
 }
 .dice.d3.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
 .dice.d4 {
-    background: url("../images/dices/white/4.png");
+  background: url("../images/dices/white/4.png");
 }
 .dice.d4.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
 .dice.d5 {
-    background: url("../images/dices/white/5.png");
+  background: url("../images/dices/white/5.png");
 }
 .dice.d5.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
 .dice.d6 {
-    background: url("../images/dices/white/6.png");
+  background: url("../images/dices/white/6.png");
 }
 .dice.d6.selected {
-    /*background-color: #4f4fff;*/
-    background-color: #b27571;
-    background-color: rgba(178, 117, 113, 0.618);
-    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571);
-    -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#99b27571, endColorstr=#99b27571)";
+  background-color: #b27571;
+  background-color: rgba(178,117,113,0.618);
 }
-
 .dice.d0 {
-    background: url("../images/dices/white/0.png");
+  background: url("../images/dices/white/0.png");
 }
 .dice.d7 {
-    background: url("../images/dices/white/7.png");
+  background: url("../images/dices/white/7.png");
 }
 .dice.d8 {
-    background: url("../images/dices/white/8.png");
+  background: url("../images/dices/white/8.png");
 }
 .dice.d9 {
-    background: url("../images/dices/white/9.png");
-}
-
-.textDice {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    width: 17px;
-    height: 17px;
-    alt: "author: http://thenounproject.com/alexfuller";
-}
-.textDice.d1 {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAApklEQVQ4T2NkoAJgpIIZDHBD3r9/L/Dv1698ogz9//8DEzv7QkFBwQ8g9XBDXr982QDk1BNlCEjj//+FwhISEygy5D8DQ6OouHjDUDKEkTFRRExswZtXrxIY/v+fjxxeRHtHRFwcHvBvXr4E6kMAog1hoIZL8EU38S7BYwrtDHn74kXBf0bGfopSLDjv/PyZ8I+RUYCQQUyQvLMAI+8Q0ohPnipFAQBhnG4SJnWS9wAAAABJRU5ErkJggg==");
-}
-.textDice.d2 {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAuElEQVQ4T2NkoAJgpIIZDHBD3r9/L/Dv1698ogz9//8DEzv7QkFBwQ8g9XBDXr982QDk1BNlCEjj//+FwhISE0gyBKbpzcuXAUCN6/8zMDSKios3kGSIiLg43NVAg/6TZQjQxgVAgxLfvnhR8J+RsZ9cQ1CCa4gYghQLC4Duj8cV5Xi9gx4LZBkC1BQINGgDLBZIMoSQJnTDsKZYcN75+TPhHyOjAKGkzwTJOwsw8g4hjfjkqVIUAAB7X34Svlc38QAAAABJRU5ErkJggg==");
-}
-.textDice.d3 {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAzUlEQVQ4T62UQRKCMAxFGzZsYUTKsfQEwgnUE4gn0BtYT6DHoogDW1gQgw4Mg1pahu467X/Jb5ICm2HBDAzWQfI8d+qq2mpBEQvLtq+u6xbN/Q7ykDKmzUEL0ggR94sgOBtBWlEm5YqEN2TsuOQ8NoJ4nHdZEwgnQSiiIFD0TJIdApz0IQCR5/siS9OQIV7676UNGVqYBGFTM+lVQVDkzb+SK+2oLJjYWRPo3lbBKJMx0RD2s2Pfs1OWYQ3gjLW+9Zkd8TU7Y0LV+SxfwQtbMpASADGG+gAAAABJRU5ErkJggg==");
-}
-.textDice.d4 {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAAx0lEQVQ4T2NkoAJgpIIZDHBD3r9/L/Dv1698ogz9//8DEzv7QkFBwQ8g9XBDXr982QDk1BNlCEjj//+FwhISE3AZEigiLr7h7YsXBf8ZGfthhsI0vXn5MgAotv4/A0OjqLh4A1ZDgAbAXQfUAFQLAejieA0B2lgAdOZEoAELgHrjkby3AGhQIsyFeA0hNkyGiCFIsYASJjDnExUmVIkdYMCSn07QExehWMKaYsF55+fPhH+MjAKEDGCC5J0FGHmHkEZ88lQpCgAagKESYqPWwgAAAABJRU5ErkJggg==");
-}
-.textDice.d5 {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAA30lEQVQ4T62UyxGCMBCGEy9cYURCWVqBUIFYgViBWoGxAi2LIA5c4cC6yIQB5JFhkluS/b/sM5RoWFQDgzSQNE3NsigOSlCAbGUYD8uyssq+gbyFCHFzUoJUQoDj2nWvY5CdzdjrE0UBUHqRUClKhNji2RMIOW8YCwchCGi8QwHa1qt/PgnBFwN084YAjtp9KzyOIF96OAnp5IRS33YcnsSxRwDu7TtlyFhoFUwZQpZ60qpCJyfyZaWcaKkOhru8T/rNNde5gx37m50890pKzTnAqp4d/jc7c8Kpey1fwRf6RLMSOt/q4gAAAABJRU5ErkJggg==");
-}
-.textDice.d6 {
-    background-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABEAAAARCAYAAAA7bUf6AAAA4klEQVQ4T7WUyxGCMBRF89iwhQEJZWkFQgViBUIFagViBVoWQRzYwoL4kAmDyCfjxOzyuSc37xMgCgYoYJAOkue5UVfVTgrKeaHp+tU0zaI530EejIU4OUhBGiHne8t1T1OQjU3p/ZkkAQc4CqgQZYytce3GCYlWlIajEAR07lCAZ9sxXJ+F4I0B2jwjIEbttve8GEG+cDgLIQC+7TjxMEZClKWpRzi//P85U04wUKFFaSTlpJeFj5gI+1IxUZIdzMbvdTIsrqXKHa3Yd++UpVcDGEsAre2d+Kt3loRz+0q+ghcqkcIShC659gAAAABJRU5ErkJggg==");
+  background: url("../images/dices/white/9.png");
 }
