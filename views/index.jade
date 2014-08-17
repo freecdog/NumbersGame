@@ -1,13 +1,15 @@
 extends layout
 
 block content
+    p(id="nameForm")
+
     div(class="menuElement menuPad")
         a(href="/play") Play
     //-
         div(class="menuElement", onclick="f1()") CLEAR STORAGE
-    br
-    div(class="menuElement")
-        | (online: #{onlineStatistics.playersOnline}, searching: #{onlineStatistics.playersSearching})
+    p
+        div(class="menuElement")
+            | (online: #{onlineStatistics.playersOnline}, searching: #{onlineStatistics.playersSearching})
     div(class="menuElement menuPad")
         a(href="/onlineStatistics") Online statistics
     div(class="menuElement menuPad")
@@ -19,11 +21,12 @@ block content
         div(class="menuElement")
             a(href="/reconfigure") Reconfigure
 
-    br
-    br
-    br
-    br
-    br
+    p
+        | &nbsp;
+    p
+        | &nbsp;
+    p
+        | &nbsp;
 
     script(src="/javascripts/jquery-1.9.1.js")
     script(src="/javascripts/underscore.js")

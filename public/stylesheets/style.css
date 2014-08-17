@@ -8,6 +8,12 @@
     http://labs.tineye.com/multicolr
     https://kuler.adobe.com/
 */
+::selection {
+    background: #e69e9a; /* Safari */
+}
+::-moz-selection {
+    background: #e69e9a; /* Firefox */
+}
 body {
     margin: 0 auto;
     padding: 0px;
@@ -96,11 +102,6 @@ table {
     filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#9968ffa3, endColorstr=#9968ffa3);
     -ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#9968ffa3, endColorstr=#9968ffa3)";
 }
-.testButton {
-    font-size: 4em;
-    background-color: #ff4fff;
-}
-
 .combination.selected {
     /*background-color: #4f4fff;*/
     background-color: #b27571;

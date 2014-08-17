@@ -141,7 +141,6 @@
 
             //this.$el.append(this.titleTemplate());
 
-            this.$el.append("<br>");
             this.$el.append(this.inputLoginView.el);
             this.$el.append(this.inputSubmitView.el);
             //this.$el.append("<br>");
@@ -168,7 +167,7 @@
 
             this.userModel = new $.menu.User();
             var inputFormView = new $.menu.InputFormView({model: this.userModel});
-            $body.prepend(inputFormView.render().el);
+            $('#nameForm').prepend(inputFormView.render().el);
         }
     });
 
