@@ -26,10 +26,10 @@ body {
   background-color: #343434;
   max-width: 600px;
   background: url("../images/flickr.com_photos_40422902@N00_2580014287.jpg") no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover;
+  -webkit-background-size: cover !important;
+  -moz-background-size: cover !important;
+  -o-background-size: cover !important;
+  background-size: cover !important;
 }
 p {
   padding-left: 5%;
