@@ -11,6 +11,9 @@ html(ng-app='jApp')
         script(src="/javascripts/underscore.js")
 
         link(rel='stylesheet', href='stylesheets/style.css')
+
+        meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
+
     body
         p
             div(class="menuElement menuPad")
@@ -23,7 +26,7 @@ html(ng-app='jApp')
             table
                 tr
                     td(style='width: 50%; padding: 0;')
-                        div(class='rerollButton', ng-click='reroll()', value='reroll')
+                        div(class='rerollButton', ng-class='{used: game.rerolled}', ng-click='reroll()', value='reroll')
                             | [reroll]
                     td(style='width: 50%; padding: 0;')
                         div(class='restartGameButton', ng-click='restart()', value='restart')

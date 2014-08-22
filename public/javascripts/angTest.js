@@ -11,11 +11,6 @@
     var jApp = angular.module('jApp', []);
     console.log("jApp", jApp);
 
-    var jMemory = {};
-
-    // Not necessary to have this bridge, SHOULD BE CHANGED TO $scope
-    window.jMemory = jMemory;
-
     jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
 
         // till http request doesn't processed there will be temp data
@@ -31,7 +26,7 @@
         $scope.connect = function(){
             $http.get('/api/connectPlayer').success(function(data){
                 console.log("data fetched, from connect", data);
-                jMemory.sessionID = data.sessionID;
+                $scope.sessionID = data.sessionID;
 
                 $scope.findGame();
             });
@@ -40,9 +35,9 @@
         $scope.findGame = function(){
             $http.get('/api/findGame').success(function(data){
                 console.log("data fetched, from find:", data);
-                jMemory.game = data;
+                $scope.game = data;
 
-                if (jMemory.game.playersOnline == null) {
+                if ($scope.game.playersOnline == null) {
                     clearPlayground();
                     $scope.getDice();
                 } else
@@ -53,22 +48,22 @@
         $scope.getDice = function(){
             $http.get('/api/dices').success(function(data){
                 console.log("data fetched, from dice", data);
-                _.extend(jMemory.game, data);
+                _.extend($scope.game, data);
 
                 $scope.getGameData();
             });
         };
 
         $scope.getGameData = function(){
-            $http.get('/api/rounds/' + jMemory.game._id).success(function(data){
+            $http.get('/api/rounds/' + $scope.game._id).success(function(data){
                 console.log("data fetched, from getdata", data);
-                _.extend(jMemory.game, data);
+                _.extend($scope.game, data);
 
                 updateCurrentRound();
                 getUsedCombinations();
 
-                if (jMemory.game.winner != null) {
-                    alert(JSON.stringify(jMemory.game.winner));
+                if ($scope.game.winner != null) {
+                    alert(JSON.stringify($scope.game.winner));
                 }
             });
         };
@@ -80,7 +75,7 @@
         };
 
         $scope.reroll = function(){
-            if (jMemory.game.rerolled) {
+            if ($scope.game.rerolled) {
                 console.log('already rerolled');
                 return;
             }
@@ -94,11 +89,11 @@
             }
 
             $http.get('/api/dices/'+str).success(function(data){
-                jMemory.game.rerolled = true;
+                $scope.game.rerolled = true;
                 $scope.currentSelected = [false, false, false, false, false, false];
 
                 console.log("data fetched, from reroll", data);
-                _.extend(jMemory.game, data);
+                _.extend($scope.game, data);
 
                 $scope.getGameData();
             });
@@ -114,22 +109,22 @@
             }
 
             $http.get('/api/combination/'+index.toString()).success(function(data){
-                jMemory.game.rerolled = false;
+                $scope.game.rerolled = false;
                 $scope.currentSelected = [false, false, false, false, false, false];
 
                 console.log("data fetched", data);
-                _.extend(jMemory.game, data);
+                _.extend($scope.game, data);
 
                 $scope.getDice();
             });
         };
 
         function updateCurrentRound(){
-            console.log("jM", jMemory);
-            var pId = jMemory.game.playerIndex;
-            var rounds = jMemory.game.rounds[pId];
+            console.log("jM", $scope);
+            var pId = $scope.game.playerIndex;
+            var rounds = $scope.game.rounds[pId];
 
-            console.log(jMemory.game.rounds, pId);
+            console.log($scope.game.rounds, pId);
             var lastRound = rounds[ rounds.length-1 ];
             var usedCombos = getUsedCombinations();
             for (var i = 0; i < usedCombos.length; i++){
@@ -141,8 +136,8 @@
         }
 
         function getUsedCombinations(){
-            var pId = jMemory.game.playerIndex;
-            var rounds = jMemory.game.rounds[pId];
+            var pId = $scope.game.playerIndex;
+            var rounds = $scope.game.rounds[pId];
 
             var usedCombos = [];
             for (var i = 0; i < rounds.length; i++){
@@ -155,8 +150,8 @@
         }
 
         function getRound(index){
-            var pId = jMemory.game.playerIndex;
-            var rounds = jMemory.game.rounds[pId];
+            var pId = $scope.game.playerIndex;
+            var rounds = $scope.game.rounds[pId];
 
             for (var i = 0; i < rounds.length; i++){
                 if (rounds[i].combinationIndex == index) return rounds[i];
