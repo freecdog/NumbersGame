@@ -65,7 +65,7 @@
         };
 
         $scope.restart = function(){
-            $http.get('/api/giveup').success(function(data){
+            $http.get('/api/giveup').success(function(){
                 $scope.findGame();
             });
         };
