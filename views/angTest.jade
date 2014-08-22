@@ -1,0 +1,45 @@
+//
+   Created by yarvyk on 22.08.2014.
+
+html(ng-app='jApp')
+    head
+        title
+            | ang test
+        script(src='javascripts/angular.js')
+        script(src='javascripts/angTest.js')
+
+        script(src="/javascripts/underscore.js")
+
+        link(rel='stylesheet', href='stylesheets/style.css')
+    body
+        p
+            div(class="menuElement menuPad")
+                a(href="/") Menu
+        div(ng-controller='jController')
+
+            //-input(class='inputSubmitView', ng-click='connect()', value='connect')
+            //-input(class='inputSubmitView', ng-click='findGame()', value='find')
+            //-input(class='inputSubmitView', ng-click='getDice()', value='get dice')
+            table
+                tr
+                    td(style='width: 50%; padding: 0;')
+                        div(class='rerollButton', ng-click='reroll()', value='reroll')
+                            | [reroll]
+                    td(style='width: 50%; padding: 0;')
+                        div(class='restartGameButton', ng-click='restart()', value='restart')
+                            | [restart]
+
+            div
+                div(
+                    ng-repeat='die in currentRound.dices track by $index',
+                    class='dice d{{die}}',
+                    ng-class='{selected: currentSelected[$index]}',
+                    ng-click='toggleDie($index)'
+                )
+            div
+                div(
+                    ng-repeat='combo in currentRound.combinations track by $index',
+                    class='combination',
+                    ng-class='{used: usedCombinations[$index]}',
+                    ng-click='accpetCombination($index)'
+                ) {{names[$index]}}: {{combo}}

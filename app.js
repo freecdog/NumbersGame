@@ -492,7 +492,7 @@ app.get('/api/combination/:comboIndex', function(req, res){
 
                 if (validComboIndex){
                     var rIndex = game.rounds[playerIndex].length - 1;
-                    game.rounds[playerIndex][rIndex].combinationIndex = req.params.comboIndex;
+                    game.rounds[playerIndex][rIndex].combinationIndex = comboIndex;
                     game.rounds[playerIndex][rIndex].points = game.rounds[playerIndex][rIndex].combinations[game.rounds[playerIndex][rIndex].combinationIndex];
 
                     // end of game
@@ -600,7 +600,17 @@ app.get("/api/findGame", function(req, res){
         var game = findGameById(req.sessionID);
         console.log("game:", JSON.stringify(game));
         if (game == null) game = collectOnlineStatistics();
-        else console.log("game to send:", game);
+        else {
+            game.playerIndex = -1;
+            for (var i = 0; i < game.players.length; i++){
+                if (game.players[i] == req.sessionID) {
+                    game.playerIndex = i;
+                    break;
+                }
+            }
+            console.log("game to send:", game);
+        }
+
         res.send(game);
 
         removeExpiredConnections();
@@ -693,6 +703,10 @@ app.get("/api/changeName/:name", function(req, res){
         console.log("no name");
         res.send(ans);
     }
+});
+
+app.get('/ang',function(req,res){
+    res.render('angTest');
 });
 
 http.createServer(app).listen(app.get('port'), function(){
