@@ -19,10 +19,6 @@
             "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
         clearPlayground();
 
-        $scope.toggleDie = function(index){
-            $scope.currentSelected[index] = !$scope.currentSelected[index];
-        };
-
         $scope.connect = function(){
             $http.get('/api/connectPlayer').success(function(data){
                 console.log("data fetched, from connect", data);
@@ -119,12 +115,14 @@
             });
         };
 
+        $scope.toggleDie = function(index){
+            $scope.currentSelected[index] = !$scope.currentSelected[index];
+        };
+
         function updateCurrentRound(){
-            console.log("jM", $scope);
             var pId = $scope.game.playerIndex;
             var rounds = $scope.game.rounds[pId];
 
-            console.log($scope.game.rounds, pId);
             var lastRound = rounds[ rounds.length-1 ];
             var usedCombos = getUsedCombinations();
             for (var i = 0; i < usedCombos.length; i++){
@@ -141,7 +139,7 @@
 
             var usedCombos = [];
             for (var i = 0; i < rounds.length; i++){
-                if (rounds[i].combinationIndex !== null) {
+                if (rounds[i].combinationIndex != null) {
                     usedCombos.push(rounds[i].combinationIndex);
                     $scope.usedCombinations[rounds[i].combinationIndex] = true;
                 }
@@ -167,6 +165,13 @@
 
         // Start!!!
         $scope.connect();
+
+        // auto update
+        function f1(){
+            $scope.getGameData();
+            setTimeout(f1, 1000);
+        }
+        setTimeout(f1, 1000);
     }]);
 
 })(angular);

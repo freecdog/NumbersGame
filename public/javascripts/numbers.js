@@ -479,7 +479,7 @@
             var combos;
             combos = this.attributes.rounds[index];
             for (var i = 0; i < combos.length; i++) {
-                if (combos[i].combinationIndex) {
+                if (combos[i].combinationIndex != null) {
                     combosIndexes.push(combos[i].combinationIndex);
                 }
             }
