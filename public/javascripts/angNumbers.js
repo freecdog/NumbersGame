@@ -115,7 +115,7 @@
             });
         };
 
-        $scope.toggleDie = function(index){
+        $scope.toggleDice = function(index){
             $scope.currentSelected[index] = !$scope.currentSelected[index];
         };
 

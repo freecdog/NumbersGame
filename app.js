@@ -706,7 +706,7 @@ app.get("/api/changeName/:name", function(req, res){
 });
 
 app.get('/ang',function(req,res){
-    res.render('angTest');
+    res.render('angNumbers');
 });
 
 http.createServer(app).listen(app.get('port'), function(){

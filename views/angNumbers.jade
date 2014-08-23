@@ -6,7 +6,7 @@ html(ng-app='jApp')
         title
             | ang test
         script(src='javascripts/angular.js')
-        script(src='javascripts/angTest.js')
+        script(src='javascripts/angNumbers.js')
 
         script(src="/javascripts/underscore.js")
 
@@ -34,10 +34,10 @@ html(ng-app='jApp')
 
             div
                 div(
-                    ng-repeat='die in currentRound.dices track by $index',
-                    class='dice d{{die}}',
+                    ng-repeat='dice in currentRound.dices track by $index',
+                    class='dice d{{dice}}',
                     ng-class='{selected: currentSelected[$index]}',
-                    ng-click='toggleDie($index)'
+                    ng-click='toggleDice($index)'
                 )
             div
                 div(
