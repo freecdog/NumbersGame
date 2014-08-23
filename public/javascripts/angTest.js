@@ -167,11 +167,11 @@
         $scope.connect();
 
         // auto update
-        function f1(){
+        function autoUpdater(){
             $scope.getGameData();
-            setTimeout(f1, 1000);
+            setTimeout(autoUpdater, 1000);
         }
-        setTimeout(f1, 1000);
+        setTimeout(autoUpdater, 1000);
     }]);
 
 })(angular);

@@ -25,8 +25,9 @@ colorSelected() {
   background-color: rgba(178, 117, 113, $transparency);
 }
 
+$c1 = #ff362b;
 colorRestartButton(){
-  background-color: #ff362b;
+  background-color: $c1;
   background-color: rgba(255, 54, 43, $transparency);
 }
 colorAcceptButton(){
@@ -53,7 +54,6 @@ colorMenuPad(){
   colorUsed();
 }
 
-$c1 = #ff362b;
 ::selection
   background: lighten($c1, 50%); /* Safari */
 ::-moz-selection
