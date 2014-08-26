@@ -125,8 +125,20 @@ table {
   font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
   color: #ece9e9;
   background-color: #343434;
-  width: 89.5%;
-  max-width: 510px;
+  width: 90%;
+  max-width: 512px;
+  text-align: center;
+}
+.inputPasswordView {
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid #a9a9a9;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #ece9e9;
+  background-color: #343434;
+  width: 90%;
+  max-width: 512px;
   text-align: center;
 }
 .inputSubmitView {
@@ -139,6 +151,7 @@ table {
   background-color: #343434;
   width: 90%;
   max-width: 512px;
+  text-align: center;
 }
 .dicesHolder {
   height: auto;

@@ -1,0 +1,24 @@
+//
+   Created by jaric on 27.08.2014.
+
+extends layout
+block content
+    form(action='/restartServer', method='post')
+        input(
+            class='inputView',
+            name='name',
+            placeholder='name',
+            required,
+            pattern='.{3,16}',
+            title='min3max16'
+        )
+        input(
+            type='password',
+            class='inputPasswordView',
+            name='password',
+            placeholder='password',
+            required,
+            pattern='.{3,16}',
+            title='min3max16'
+        )
+        input(type='submit', class='inputSubmitView', value='[submit]')

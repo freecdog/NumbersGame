@@ -42,6 +42,15 @@ function configure(){
 // now default config should be loaded from config.txt file
 configure();
 
+var exec = require('child_process').exec;
+function restartServer(){
+    exec("sudo service node29 restart", function (error, stdout, stderr) {
+        if (error !== null) {
+            console.log('exec error: ' + error);
+        }
+    });
+}
+
 // all environments
 app.set('port', process.env.PORT || 33322);
 app.set('views', path.join(__dirname, 'views'));
@@ -354,6 +363,19 @@ app.get('/rules', function(req,res){
 });
 app.get('/about', function(req,res){
     res.render("about");
+});
+app.get('/restartServer', function(req, res){
+    res.render('restartServer', {title:'Restart server'});
+});
+app.post('/restartServer', function(req, res){
+    console.log(req.body.name, req.body.password);
+    res.redirect('/restartServer');
+    // TODO, don't store passwords in code on github =)
+    if(req.body.name && req.body.password){
+        if (req.body.name=='jaric' && req.body.password=='1234'){
+            restartServer();
+        }
+    }
 });
 
 // API
