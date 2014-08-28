@@ -4,7 +4,7 @@
 html(ng-app='jApp')
     head
         title
-            | ang test
+            | NumbersGame on angularjs
         script(src='javascripts/angular.js')
         script(src='javascripts/angNumbers.js')
 
@@ -33,16 +33,29 @@ html(ng-app='jApp')
                             | [restart]
 
             div
+                span {{game.status}}: {{comment}}
+            div(class='namesView')
+                span(ng-repeat='name in game.names',
+                    ng-click='showPlayer($index)',
+                    style='font-weight: {{$index == game.playerIndex ? \'bold\' : \'normal\'}};'
+                ) &nbsp;{{name}}&nbsp;
+
+            div(ng-show='game.winner == null')
                 div(
                     ng-repeat='dice in currentRound.dices track by $index',
                     class='dice d{{dice}}',
                     ng-class='{selected: currentSelected[$index]}',
                     ng-click='toggleDice($index)'
                 )
-            div
+            div(ng-show='game.winner == null')
                 div(
                     ng-repeat='combo in currentRound.combinations track by $index',
                     class='combination',
                     ng-class='{used: usedCombinations[$index]}',
                     ng-click='accpetCombination($index)'
-                ) {{names[$index]}}: {{combo}}
+                ) {{combosNames[$index]}}: {{combo}}
+
+
+            div(ng-show='game.winner != null')
+                p Winner is
+                p {{game.winner.name}} ({{game.winner.result}} points)

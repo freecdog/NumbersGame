@@ -2,6 +2,8 @@
  * Created by yarvyk on 22.08.2014.
  */
 
+// TODO, in multiplayer game, playerIndex is incorrect, because you see other player state(wow!) (also you can click, but see no changes, if you press f5, you'll see your actions and other things will be fine)
+
 (function (angular){
 
     "use strict";
@@ -11,13 +13,15 @@
     var jApp = angular.module('jApp', []);
     console.log("jApp", jApp);
 
-    jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
+    var jc = jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
 
         // till http request doesn't processed there will be temp data
-        $scope.names = ["1er", "2er", "3er", "4er", "5er", "6er",
+        $scope.combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
             "Dreir Pasch", "Vierer Pasch", "Full House",
             "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
         clearPlayground();
+
+        var lastAction = function(){};
 
         $scope.connect = function(){
             $http.get('/api/connectPlayer').success(function(data){
@@ -36,8 +40,11 @@
                 if ($scope.game.playersOnline == null) {
                     clearPlayground();
                     $scope.getDice();
-                } else
+                } else {
                     console.warn("findGame failed");
+
+                    lastAction = $scope.findGame;
+                }
             });
         };
 
@@ -59,8 +66,11 @@
                 getUsedCombinations();
 
                 if ($scope.game.winner != null) {
-                    alert(JSON.stringify($scope.game.winner));
+                    //alert(JSON.stringify($scope.game.winner));
+                    console.log($scope.game.winner);
                 }
+
+                lastAction = $scope.getGameData;
             });
         };
 
@@ -119,6 +129,23 @@
             $scope.currentSelected[index] = !$scope.currentSelected[index];
         };
 
+        $scope.showPlayer = function(index){
+            ;
+        };
+
+        $scope.$watch('game.status', function(newValue){
+            console.log('status changed to', newValue);
+            if (newValue === undefined) {
+                $scope.comment = 'can\'t find game, try to restart';
+            } else if (newValue === 20) {
+                $scope.comment = 'game in progress';
+            } else if (newValue === 90) {
+                $scope.comment = 'game is finished, touch [restart] to play again';
+            } else {
+                $scope.comment = 'unknown state';
+            }
+        }, false);
+
         function updateCurrentRound(){
             var pId = $scope.game.playerIndex;
             var rounds = $scope.game.rounds[pId];
@@ -168,7 +195,7 @@
 
         // auto update
         function autoUpdater(){
-            $scope.getGameData();
+            lastAction();
             setTimeout(autoUpdater, 1000);
         }
         setTimeout(autoUpdater, 1000);

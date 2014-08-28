@@ -125,8 +125,8 @@ table {
   font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
   color: #ece9e9;
   background-color: #343434;
-  width: 90%;
-  max-width: 512px;
+  width: 89.5%;
+  max-width: 510px;
   text-align: center;
 }
 .inputPasswordView {
@@ -137,8 +137,8 @@ table {
   font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
   color: #ece9e9;
   background-color: #343434;
-  width: 90%;
-  max-width: 512px;
+  width: 89.5%;
+  max-width: 510px;
   text-align: center;
 }
 .inputSubmitView {

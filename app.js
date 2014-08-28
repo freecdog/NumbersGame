@@ -230,7 +230,8 @@ function findGameById(sessionId) {
         //    }
         //} else
         {
-            if (game.status != 90 && game.status != -1) {
+            //if (game.status != 90 && game.status != -1) {
+            if (game.status != -1) {
                 if (isThisGameMine(game)) {
                     //return game;
                     ans = game;
@@ -623,13 +624,8 @@ app.get("/api/findGame", function(req, res){
         console.log("game:", JSON.stringify(game));
         if (game == null) game = collectOnlineStatistics();
         else {
-            game.playerIndex = -1;
-            for (var i = 0; i < game.players.length; i++){
-                if (game.players[i] == req.sessionID) {
-                    game.playerIndex = i;
-                    break;
-                }
-            }
+            var playerIndex = getPlayerIndexInGame(game, req.sessionID);
+            game.playerIndex = playerIndex;
             console.log("game to send:", game);
         }
 
