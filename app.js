@@ -97,6 +97,8 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
+app.get('/t', function(req,res){res.send("t");});
+
 var NumbersBase = require('./public/javascripts/NumbersBase.js');
 
 var generateDice = NumbersBase.generateDice;
