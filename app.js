@@ -49,6 +49,7 @@ configure();
 // executed (now spawned, but is not tested yet) can't finish process
 // of restarting server.
 // http://nodejs.org/api/child_process.html
+// tags: ci, continious integration
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 //var execFile = require('child_process').execFile;
@@ -58,7 +59,14 @@ function restartServer(){
     //    if (error !== null) console.log('exec error: ' + error);
     //});
     //spawn("sudo service node29 restart");
-    spawn("sudo", ['service', 'node29', 'restart']);
+    //spawn("sudo", ['service', 'node29', 'restart']);
+
+    // update from github
+    exec("git --git-dir=" + __dirname + "/.git --work-tree=" + __dirname + " pull origin master", function (error, stdout, stderr) {
+        // spawn can ruin server so Forever should back it up.
+        spawn("sudo service node29 restart");
+        if (error !== null) console.log('exec error: ' + error);
+    });
 }
 
 // all environments
