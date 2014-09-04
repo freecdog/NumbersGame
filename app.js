@@ -2,6 +2,8 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 
+var _ = require('underscore')._;
+
 var app = express();
 
 // default config
@@ -190,7 +192,7 @@ function prepareGame() {
 
             connectedCookie.status = 3;
         }
-        console.log("names:", games[gameId].names, JSON.stringify(games[gameId]));
+        console.log("names:", games[gameId].names);//, JSON.stringify(games[gameId]));
     }
 }
 // TODO, now it returns last game of player while iterating through ALL amount of games
@@ -278,7 +280,7 @@ function endOfGame(game){
     game.winner = {index: "", name: "", result: 0};
     for (var i = 0; i < game.players.length; i++){
         var result = calculateResult(game.rounds[i]);
-        game.results[i] = result;
+        game.results[i] = {name: game.names[i], result: result};
         if (result > game.winner.result) {
             game.winner.index = game.players[i];
             game.winner.name = game.names[i];
@@ -334,7 +336,10 @@ app.get('/play', function(req,res){
     res.render("play");
 });
 app.get('/onlineStatistics', function(req, res){
+    var st=new Date();
+
     removeExpiredConnections();
+    var st1 = st - new Date();
 
     // 10 last games
     var len = 10;
@@ -343,12 +348,15 @@ app.get('/onlineStatistics', function(req, res){
         var gName = "g" + i.toString();
         gamesToSend[gName] = games[gName];
     }
+    var st2 = st - new Date();
 
     res.render("onlineStatistics", {
         serverTime: new Date(),
         connected: connectedCookies,
         games: gamesToSend
     });
+    var st3 = st - new Date();
+    console.log(st, st1, st2, st3);
 });
 app.get("/dropAll", function(req, res){
     connectedCookies = {};
@@ -411,7 +419,7 @@ app.get('/api/dices', function(req, res){
 
                     game.rounds[playerIndex].push(round);
 
-                    console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
+                    console.log(req.connection.remoteAddress, dices);//, JSON.stringify(game));
                     res.send({dices: dices, rerolled: round.rerolled});
                 } else {
                     var lastDices = game.rounds[playerIndex][game.rounds[playerIndex].length-1].dices;
@@ -478,7 +486,7 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                     game.rounds[playerIndex][rIndex].combinations = checkCombinations(game.rounds[playerIndex][rIndex].dices);
                     game.rounds[playerIndex][rIndex].rerolled = true;
 
-                    console.log(req.connection.remoteAddress, dices, JSON.stringify(game));
+                    console.log(req.connection.remoteAddress, dices);//, JSON.stringify(game));
                     //res.send(dices);
                     res.send({dices: game.rounds[playerIndex][rIndex].dices});
                 }
@@ -521,19 +529,12 @@ app.get('/api/combination/:comboIndex', function(req, res){
                     // end of game
                     var gameEnds = false;
                     if (game.rounds[playerIndex].length == 13){
-                        if (isEndOfGame(game)){
-                            endOfGame(game);
-                            gameEnds = true;
-                        }
+                        gameEnds = isEndOfGame(game);
+                        if (gameEnds) endOfGame(game);
                     }
 
-                    console.log(req.connection.remoteAddress, JSON.stringify(game));
-                    if (gameEnds) {
-                        res.send(game);
-                    } else {
-                        res.send(game);
-                        //res.send("1");
-                    }
+                    console.log(req.connection.remoteAddress);//, JSON.stringify(game));
+                    res.send(game);
                 } else {
                     console.log("error, such combination had been already used");
                     res.send(game);
@@ -611,6 +612,10 @@ app.get("/api/disconnectPlayer", function(req, res){
     res.send(Object.keys(connectedCookies).length.toString());
 });
 
+// connectedCookie status:
+// 1 — connected
+// 2 — searching for game
+// 3 — play a game
 app.get("/api/findGame", function(req, res){
     if (connectedCookies[req.sessionID] !== undefined){
         connectedCookies[req.sessionID].time = new Date();
@@ -621,17 +626,36 @@ app.get("/api/findGame", function(req, res){
 
         prepareGame();
         var game = findGameById(req.sessionID);
-        console.log("game:", JSON.stringify(game));
-        if (game == null) game = collectOnlineStatistics();
-        else {
+        console.log("game:", game ? game._id : null);//, JSON.stringify(game));
+        if (game == null) {
+            game = collectOnlineStatistics();
+
+            res.send(game);
+        } else {
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
-            game.playerIndex = playerIndex;
-            console.log("game to send:", game);
+            //game.playerIndex = playerIndex;
+            var gameWithPlayerIndex = {playerIndex: playerIndex};
+            _.extend(gameWithPlayerIndex, game);
+            console.log("game to send (findGame):", gameWithPlayerIndex);
+
+            res.send(gameWithPlayerIndex);
         }
 
-        res.send(game);
+        removeExpiredConnections();
+    } else {
+        res.send();
+    }
+});
+app.get("/api/stopFindGame", function(req, res){
+    if (connectedCookies[req.sessionID] !== undefined) {
+        connectedCookies[req.sessionID].time = new Date();
+        if (connectedCookies[req.sessionID].status == 2)
+            connectedCookies[req.sessionID].status = 1;
+        res.send("1");
 
         removeExpiredConnections();
+
+        console.log(req._remoteAddress + ", stop find game, onliners: " + Object.keys(connectedCookies).length.toString());
     } else {
         res.send();
     }
@@ -652,7 +676,7 @@ app.get("/api/rounds/:gid", function(req, res){
     }
     //console.log("game:", game._id);
     if (game) {
-        //console.log("game status", game.status);
+        //console.log("pIndex", req.session.id, game.playerIndex);
 
         res.send(game);
 

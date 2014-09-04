@@ -129,7 +129,7 @@
                 },
                 error: function( model, response) {
                     console.log("Could not create user:", response);
-                    alert("Try one more time please");
+                    alert("Try one more time please. Allowed characters are letters and numbers.");
                 }
             });
             event.currentTarget.checkValidity();

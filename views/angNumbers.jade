@@ -15,10 +15,11 @@ html(ng-app='jApp')
         meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
 
     body
-        p
-            div(class="menuElement menuPad")
-                a(href="/") Menu
+
         div(ng-controller='jController')
+            p
+                div(class="menuElement menuPad")
+                    a(href="/", ng-click='stopFindGame()') Menu
 
             //-input(class='inputSubmitView', ng-click='connect()', value='connect')
             //-input(class='inputSubmitView', ng-click='findGame()', value='find')
@@ -35,9 +36,9 @@ html(ng-app='jApp')
             div
                 span {{game.status}}: {{comment}}
             div(class='namesView')
-                span(ng-repeat='name in game.names',
+                span(ng-repeat='name in game.names track by $index',
                     ng-click='showPlayer($index)',
-                    style='font-weight: {{$index == game.playerIndex ? \'bold\' : \'normal\'}};'
+                    style='font-weight: {{$index == game.myPlayerIndex ? \'bold\' : \'normal\'}}; text-decoration: {{($index == game.playerIndex && game.playerIndex != game.myPlayerIndex) ? \'underline\' : \'none\'}};'
                 ) &nbsp;{{name}}&nbsp;
 
             div(ng-show='game.winner == null')
@@ -57,5 +58,6 @@ html(ng-app='jApp')
 
 
             div(ng-show='game.winner != null')
-                p Winner is
-                p {{game.winner.name}} ({{game.winner.result}} points)
+                p Winner is {{game.winner.name}}
+                p Results:
+                p(ng-repeat='result in game.results | orderBy:"-result" track by $index') {{$index+1}}. {{result.name}}: {{result.result}}

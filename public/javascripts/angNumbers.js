@@ -2,8 +2,6 @@
  * Created by yarvyk on 22.08.2014.
  */
 
-// TODO, in multiplayer game, playerIndex is incorrect, because you see other player state(wow!) (also you can click, but see no changes, if you press f5, you'll see your actions and other things will be fine)
-
 (function (angular){
 
     "use strict";
@@ -38,13 +36,23 @@
                 $scope.game = data;
 
                 if ($scope.game.playersOnline == null) {
+                    if ($scope.game.myPlayerIndex == undefined) $scope.game.myPlayerIndex = $scope.game.playerIndex;
+
                     clearPlayground();
                     $scope.getDice();
                 } else {
-                    console.warn("findGame failed");
+                    console.log("game wasn't found yet");
+
+                    $scope.comment = 'searching for a game, if nothing is happening for too long touch [restart], '
+                        + 'players searching: ' + $scope.game.playersSearching;
 
                     lastAction = $scope.findGame;
                 }
+            });
+        };
+        $scope.stopFindGame = function(){
+            $http.get('/api/stopFindGame').success(function(data){
+                console.log("stop find a game", data);
             });
         };
 
@@ -63,11 +71,12 @@
                 _.extend($scope.game, data);
 
                 updateCurrentRound();
-                getUsedCombinations();
+                //getUsedCombinations();
 
                 if ($scope.game.winner != null) {
                     //alert(JSON.stringify($scope.game.winner));
                     console.log($scope.game.winner);
+                    console.log($scope.game.results);
                 }
 
                 lastAction = $scope.getGameData;
@@ -76,11 +85,16 @@
 
         $scope.restart = function(){
             $http.get('/api/giveup').success(function(){
-                $scope.findGame();
+                $scope.connect();
             });
         };
 
         $scope.reroll = function(){
+            if ($scope.game.clickable === false) {
+                console.log('It is not your playground');
+                return;
+            }
+
             if ($scope.game.rerolled) {
                 console.log('already rerolled');
                 return;
@@ -106,6 +120,11 @@
         };
 
         $scope.accpetCombination = function(index){
+            if ($scope.game.clickable === false) {
+                console.log('It is not your playground');
+                return;
+            }
+
             var usedCombos = getUsedCombinations();
             for (var i = 0; i < usedCombos.length; i++) {
                 if (index == usedCombos[i]) {
@@ -126,17 +145,30 @@
         };
 
         $scope.toggleDice = function(index){
+            if ($scope.game.clickable === false) {
+                console.log('It is not your playground');
+                return;
+            }
+
             $scope.currentSelected[index] = !$scope.currentSelected[index];
         };
 
         $scope.showPlayer = function(index){
-            ;
+            if ($scope.game.myPlayerIndex == undefined) $scope.game.myPlayerIndex = $scope.game.playerIndex;
+
+            if ($scope.game.myPlayerIndex == index) {
+                // welcome back to home
+                $scope.game.clickable = true;
+            } else {
+                $scope.game.clickable = false;
+            }
+            $scope.game.playerIndex = index;
         };
 
         $scope.$watch('game.status', function(newValue){
             console.log('status changed to', newValue);
             if (newValue === undefined) {
-                $scope.comment = 'can\'t find game, try to restart';
+                $scope.comment = 'searching for a game, if nothing is happening for too long touch [restart]' + $scope.playersSearching;
             } else if (newValue === 20) {
                 $scope.comment = 'game in progress';
             } else if (newValue === 90) {
@@ -163,6 +195,8 @@
         function getUsedCombinations(){
             var pId = $scope.game.playerIndex;
             var rounds = $scope.game.rounds[pId];
+
+            $scope.usedCombinations = [];
 
             var usedCombos = [];
             for (var i = 0; i < rounds.length; i++){
