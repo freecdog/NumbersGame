@@ -52,10 +52,12 @@ configure();
 // http://nodejs.org/api/child_process.html
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
+var execFile = require('child_process').execFile;
 function restartServer(){
-    exec("sudo service node29 restart", function (error, stdout, stderr) {
-        if (error !== null) console.log('exec error: ' + error);
-    });
+    execFile('./restart.sh');
+    //exec("sudo service node29 restart", function (error, stdout, stderr) {
+    //    if (error !== null) console.log('exec error: ' + error);
+    //});
     //spawn("sudo service node29 restart");
 }
 
