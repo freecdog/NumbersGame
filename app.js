@@ -44,13 +44,19 @@ function configure(){
 // now default config should be loaded from config.txt file
 configure();
 
+// TODO when service restarting it terminate parent process
+// so chilren process terminate too. Thus child_process that had been
+// executed (now spawned, but is not tested yet) can't finish process
+// of restarting server.
+// try "execFile" if nothing helps
+// http://nodejs.org/api/child_process.html
 var exec = require('child_process').exec;
+var spawn = require('child_process').spawn;
 function restartServer(){
-    exec("sudo service node29 restart", function (error, stdout, stderr) {
-        if (error !== null) {
-            console.log('exec error: ' + error);
-        }
-    });
+    //exec("sudo service node29 restart", function (error, stdout, stderr) {
+    //    if (error !== null) console.log('exec error: ' + error);
+    //});
+    spawn("sudo service node29 restart");
 }
 
 // all environments
@@ -92,9 +98,7 @@ var value = 0;
 
 var connectedCookies = {};
 
-var purchases = {};
-
-var gamesIndex = 0;
+var gamesCounter = 0;
 var games = {};
 var gamesInProgress = {};
 
@@ -121,11 +125,8 @@ function removeExpiredConnections(){
                                 if (player == key) {
                                     //console.log("games[" + gInd + "] deleted");
                                     //delete games[gInd];
-                                    // if game wasn't ended it is marked as abandoned, else if purchases info still alive it will be deleted
-                                    if (games[gInd].status != 90){
-                                        games[gInd].status = -1;
-                                    } else {
-                                        if (purchases[gInd] != null) delete purchases[gInd];
+                                    if (game.status != 90){
+                                        game.status = -1;
                                     }
                                     break;
                                 }
@@ -155,44 +156,38 @@ function prepareGame() {
 
     var len = wannaPlayers.length;
     if (len >= config.minPlayers) {
-        var gameId = "g" + gamesIndex.toString();
-        games[gameId] = {};
-        games[gameId]._id = gameId;
-        gamesIndex++;
-        games[gameId].players = [];
-        games[gameId].status = 20;
+        var gameId = "g" + gamesCounter.toString();
+        gamesCounter++;
+
+        var game = {};
+        games[gameId] = game;
+        game._id = gameId;
+        game.players = [];
+        game.status = 20;
 
         for (var i = 0; i < len; i++) {
             if (i==0) {
-                //games[gameId].settings = connectedCookies[wannaPlayers[i]].settings;
-                //games[gameId].boxes = connectedCookies[wannaPlayers[i]].boxes;
+                //game.settings = connectedCookies[wannaPlayers[i]].settings;
+                //game.boxes = connectedCookies[wannaPlayers[i]].boxes;
             }
 
             var userSessionId = wannaPlayers[i];
-            games[gameId].players.push(userSessionId);
-            if (games[gameId].names == null) games[gameId].names = [];
+            game.players.push(userSessionId);
+            if (game.names == null) game.names = [];
 
-            // No settings, no name
-            //var playerName = connectedCookies[wannaPlayers[i]].settings.name;
-            //if (playerName == undefined || playerName == null || playerName == "")
-              //  games[gameId].names.push("player" + (10000 * Math.random()).toFixed(0) );
-            //else
-                //games[gameId].names.push(connectedCookies[wannaPlayers[i]].settings.name);
             var connectedCookie = connectedCookies[userSessionId];
             var playerName = "";
-            if (connectedCookie.name){
-                playerName = connectedCookie.name;
-            } else {
-                playerName = "player" + (10000 * Math.random()).toFixed(0);
+            if (connectedCookie.name == null){
+                connectedCookie.name = "player" + (10000 * Math.random()).toFixed(0);
             }
-            games[gameId].names.push(playerName);
+            game.names.push(connectedCookie.name);
 
-            if (games[gameId].rounds == null) games[gameId].rounds = [];
-            games[gameId].rounds.push([]);
+            if (game.rounds == null) game.rounds = [];
+            game.rounds.push([]);
 
             connectedCookie.status = 3;
         }
-        console.log("names:", games[gameId].names);//, JSON.stringify(games[gameId]));
+        console.log("names:", game.names, 'in game', game._id);//, JSON.stringify(game));
     }
 }
 // TODO, now it returns last game of player while iterating through ALL amount of games
@@ -216,8 +211,8 @@ function findGameById(sessionId) {
     }
 
     for (var gInd in games) {
-    //for (var i = gamesIndex-1; i >=0; i--){
-        //var gInd = "g" + gamesIndex.toString();
+    //for (var i = gamesCounter-1; i >=0; i--){
+        //var gInd = "g" + gamesCounter.toString();
         //if (games.hasOwnProperty(gInd) == false) {
         //    console.log("skipping game index:", i);
         //    continue;
@@ -291,7 +286,7 @@ function endOfGame(game){
         //    connectedCookies[game.players[i]].status = 1;
     }
 
-    console.log("game ends:", game);
+    console.log("game ends:", game._id);
 }
 function calculateResult(rounds){
     var ans = 0;
@@ -344,7 +339,7 @@ app.get('/onlineStatistics', function(req, res){
     // 10 last games
     var len = 10;
     var gamesToSend = {};
-    for (var i = gamesIndex -1; i >=0 && Object.keys(gamesToSend).length < len; i--){
+    for (var i = gamesCounter -1; i >=0 && Object.keys(gamesToSend).length < len; i--){
         var gName = "g" + i.toString();
         gamesToSend[gName] = games[gName];
     }
@@ -389,7 +384,8 @@ app.post('/restartServer', function(req, res){
 
 // API
 app.get('/api/dices', function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined){
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null) {
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
@@ -443,7 +439,8 @@ app.get('/api/dices', function(req, res){
     }
 });
 app.get('/api/dices/:dicesIndexes', function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined){
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null) {
             var dlen = Math.min(6, req.params.dicesIndexes.length);
@@ -503,7 +500,8 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
     }
 });
 app.get('/api/combination/:comboIndex', function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined){
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
         var game = findGameById(req.sessionID);
         if (game != null) {
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
@@ -554,8 +552,9 @@ app.get('/api/combination/:comboIndex', function(req, res){
     }
 });
 app.get('/api/giveup', function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined){
-        connectedCookies[req.sessionID].status = 1;
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
+        connectedCookie.status = 1;
 
         var game = findGameById(req.sessionID);
         if (game != null){
@@ -582,18 +581,20 @@ app.get('/api/giveup', function(req, res){
 });
 
 app.get("/api/connectPlayer", function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined){
-        connectedCookies[req.sessionID].time = new Date();
-        if (connectedCookies[req.sessionID].status === undefined) {
-            //connectedCookies[req.sessionID].status = 2;
-            connectedCookies[req.sessionID].status = 1;
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
+        connectedCookie.time = new Date();
+        if (connectedCookie.status === undefined) {
+            //connectedCookie.status = 2;
+            connectedCookie.status = 1;
         }
-        //if (connectedCookies[req.sessionID].status == 80) connectedCookies[req.sessionID].status = 2;
+        //if (connectedCookie.status == 80) connectedCookie.status = 2;
     } else {
-        connectedCookies[req.sessionID] = {};
-        connectedCookies[req.sessionID].time = new Date();
-        connectedCookies[req.sessionID].status = 1; // connected
-        //connectedCookies[req.sessionID].status = 2; // 2 because we are skipping POST find game request
+        connectedCookie = {};
+        connectedCookies[req.sessionID] = connectedCookie;
+        connectedCookie.time = new Date();
+        connectedCookie.status = 1; // connected
+        //connectedCookie.status = 2; // 2 because we are skipping POST find game request
     }
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
@@ -603,8 +604,9 @@ app.get("/api/connectPlayer", function(req, res){
     removeExpiredConnections();
 });
 app.get("/api/disconnectPlayer", function(req, res){
-    if (connectedCookies[req.sessionID]) {
-        connectedCookies[req.sessionID].time = 0;
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined) {
+        connectedCookie.time = 0;
     }
     removeExpiredConnections();
 
@@ -617,10 +619,11 @@ app.get("/api/disconnectPlayer", function(req, res){
 // 2 — searching for game
 // 3 — play a game
 app.get("/api/findGame", function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined){
-        connectedCookies[req.sessionID].time = new Date();
-        if (connectedCookies[req.sessionID].status == 1)
-            connectedCookies[req.sessionID].status = 2;
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
+        connectedCookie.time = new Date();
+        if (connectedCookie.status == 1)
+            connectedCookie.status = 2;
 
         console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
 
@@ -636,7 +639,7 @@ app.get("/api/findGame", function(req, res){
             //game.playerIndex = playerIndex;
             var gameWithPlayerIndex = {playerIndex: playerIndex};
             _.extend(gameWithPlayerIndex, game);
-            console.log("game to send (findGame):", gameWithPlayerIndex);
+            //console.log("game to send (findGame):", gameWithPlayerIndex);
 
             res.send(gameWithPlayerIndex);
         }
@@ -647,10 +650,11 @@ app.get("/api/findGame", function(req, res){
     }
 });
 app.get("/api/stopFindGame", function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined) {
-        connectedCookies[req.sessionID].time = new Date();
-        if (connectedCookies[req.sessionID].status == 2)
-            connectedCookies[req.sessionID].status = 1;
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined) {
+        connectedCookie.time = new Date();
+        if (connectedCookie.status == 2)
+            connectedCookie.status = 1;
         res.send("1");
 
         removeExpiredConnections();
@@ -663,8 +667,6 @@ app.get("/api/stopFindGame", function(req, res){
 
 app.get("/api/rounds/:gid", function(req, res){
     //console.log(req._remoteAddress + " GameProcess check" );
-
-    //console.log("purchases: " + JSON.stringify(purchases));
 
     var data = {};
     var game;
@@ -680,8 +682,9 @@ app.get("/api/rounds/:gid", function(req, res){
 
         res.send(game);
 
-        if (connectedCookies[req.sessionID] !== undefined) {
-            connectedCookies[req.sessionID].time = new Date();
+        var connectedCookie = connectedCookies[req.sessionID];
+        if (connectedCookie !== undefined) {
+            connectedCookie.time = new Date();
         }
         removeExpiredConnections();
     } else {
@@ -691,7 +694,8 @@ app.get("/api/rounds/:gid", function(req, res){
 
 });
 app.get("/api/rounds/:gid/:datastring", function(req, res){
-    if (connectedCookies[req.sessionID] !== undefined) {
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined) {
 
         var gameId = req.params.gid;
         if (gameId != null) {
@@ -699,10 +703,9 @@ app.get("/api/rounds/:gid/:datastring", function(req, res){
             var data = JSON.parse(req.params.datastring);
         }
 
-        //console.log(req._remoteAddress + " purchases " + req.body.purchase );
         res.send("1");
 
-        connectedCookies[req.sessionID].time = new Date();
+        connectedCookie.time = new Date();
         removeExpiredConnections();
     }
 });
@@ -719,16 +722,16 @@ app.get("/api/changeName/:name", function(req, res){
         var loginMatch = reLogin.test(name);
         if (loginMatch) {
 
-            if (connectedCookies[req.sessionID] !== undefined) {
-                connectedCookies[req.sessionID].name = name;
-                connectedCookies[req.sessionID].time = new Date();
+            var connectedCookie = connectedCookies[req.sessionID];
+            if (connectedCookie !== undefined) {
+                connectedCookie.name = name;
+                connectedCookie.time = new Date();
             } else {
                 var connectedCookie = {};
+                connectedCookies[req.sessionID] = connectedCookie;
                 connectedCookie.name = name;
                 connectedCookie.time = new Date();
                 //connectedCookie.status = 2; // 2 because we are skipping POST find game request
-
-                connectedCookies[req.sessionID] = connectedCookie;
             }
 
             ans = {login: name};

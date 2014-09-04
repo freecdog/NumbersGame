@@ -11,7 +11,7 @@
     var jApp = angular.module('jApp', []);
     console.log("jApp", jApp);
 
-    var jc = jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
+    jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
 
         // till http request doesn't processed there will be temp data
         $scope.combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
@@ -156,12 +156,9 @@
         $scope.showPlayer = function(index){
             if ($scope.game.myPlayerIndex == undefined) $scope.game.myPlayerIndex = $scope.game.playerIndex;
 
-            if ($scope.game.myPlayerIndex == index) {
-                // welcome back to home
-                $scope.game.clickable = true;
-            } else {
-                $scope.game.clickable = false;
-            }
+            // if (true) welcome back home
+            $scope.game.clickable = $scope.game.myPlayerIndex == index;
+
             $scope.game.playerIndex = index;
         };
 
@@ -235,4 +232,9 @@
         setTimeout(autoUpdater, 1000);
     }]);
 
+    jApp.filter('bracketMe', function(){
+        return function(input){
+            return ' [' + input + '] ';
+        };
+    });
 })(angular);
