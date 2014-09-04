@@ -44,7 +44,8 @@ function configure(){
 // now default config should be loaded from config.txt file
 configure();
 
-// TODO when service restarting it terminate parent process
+// TODO. Looks like I've done it, but tricky and odd solution
+// When service restarting it terminate parent process
 // so chilren process terminate too. Thus child_process that had been
 // executed (now spawned, but is not tested yet) can't finish process
 // of restarting server.
@@ -96,8 +97,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
-
-app.get('/t', function(req,res){res.send("t");});
 
 var NumbersBase = require('./public/javascripts/NumbersBase.js');
 
