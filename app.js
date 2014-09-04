@@ -754,6 +754,8 @@ app.get('/ang',function(req,res){
     res.render('angNumbers');
 });
 
+app.get('/t', function(req,res){res.sent('t');});
+
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
