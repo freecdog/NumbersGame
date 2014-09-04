@@ -48,17 +48,17 @@ configure();
 // so chilren process terminate too. Thus child_process that had been
 // executed (now spawned, but is not tested yet) can't finish process
 // of restarting server.
-// try "execFile" if nothing helps
 // http://nodejs.org/api/child_process.html
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
-var execFile = require('child_process').execFile;
+//var execFile = require('child_process').execFile;
 function restartServer(){
-    execFile('./restart.sh');
+    //execFile('./restart.sh');
     //exec("sudo service node29 restart", function (error, stdout, stderr) {
     //    if (error !== null) console.log('exec error: ' + error);
     //});
     //spawn("sudo service node29 restart");
+    spawn("sudo", ['service', 'node29', 'restart']);
 }
 
 // all environments
