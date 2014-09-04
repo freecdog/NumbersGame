@@ -53,10 +53,10 @@ configure();
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
 function restartServer(){
-    //exec("sudo service node29 restart", function (error, stdout, stderr) {
-    //    if (error !== null) console.log('exec error: ' + error);
-    //});
-    spawn("sudo service node29 restart");
+    exec("sudo service node29 restart", function (error, stdout, stderr) {
+        if (error !== null) console.log('exec error: ' + error);
+    });
+    //spawn("sudo service node29 restart");
 }
 
 // all environments
@@ -753,8 +753,6 @@ app.get("/api/changeName/:name", function(req, res){
 app.get('/ang',function(req,res){
     res.render('angNumbers');
 });
-
-app.get('/t', function(req,res){res.sent('t');});
 
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
