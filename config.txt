@@ -1,4 +1,1 @@
-﻿{
-	"minPlayers": 1,
-	"secret": "someSecret"
-}
+﻿{"minPlayers":2,"secret":"someSecret"}

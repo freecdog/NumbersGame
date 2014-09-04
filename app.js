@@ -1,6 +1,7 @@
 var express = require('express');
 var http = require('http');
 var path = require('path');
+var fs = require('fs');
 
 var _ = require('underscore')._;
 
@@ -11,18 +12,35 @@ var config = {
     "minPlayers" : 1,
     "secret": "someSecret"
 };
+
+function readJSONFile(filepath, callback){
+    fs.readFile(filepath, {encoding: "utf8"}, function(err, filedata){
+        if (err) {
+            console.log("read error:", err);
+            callback(e, null);
+        } else {
+            // some hack with first symbol =/
+            filedata = filedata.replace(/^\uFEFF/, '');
+            // parsing file to JSON object
+            var jsondata = JSON.parse(filedata);
+
+            callback(null, jsondata);
+        }
+    });
+}
+function writeJSONFile(filepath, jsondata, callback){
+    fs.writeFile(filepath, JSON.stringify(jsondata), {encoding: "utf8"}, function (err) {
+        if (err) {
+            console.log("write error:", err);
+            callback(e, null);
+        } else {
+            console.log('File has been successfully written');
+            callback();
+        }
+    });
+}
 function configure(){
-    var fs = require('fs');
-
-    var configPath = __dirname + '/config.txt';
-
-    try {
-        var filedata = fs.readFileSync(configPath, {encoding: "utf8"});
-        // some hack with first symbol =/
-        filedata = filedata.replace(/^\uFEFF/, '');
-        // parsing file to JSON object
-        var jsondata = JSON.parse(filedata);
-
+    readJSONFile(path.join(__dirname, 'config.txt'), function(err, jsondata){
         if (jsondata){
             var objectFieldsCounter = 0;
             for (var property in jsondata) {
@@ -37,9 +55,7 @@ function configure(){
         } else {
             console.log('No json data in file');
         }
-    } catch (e) {
-        console.log("error:", e);
-    }
+    });
 }
 // now default config should be loaded from config.txt file
 configure();
@@ -47,9 +63,9 @@ configure();
 // TODO. Looks like I've done it, but tricky and odd solution
 // When service restarting it terminate parent process
 // so chilren process terminate too. Thus child_process that had been
-// executed (now spawned, but is not tested yet) can't finish process
-// of restarting server.
+// executed can't finish process of restarting server.
 // http://nodejs.org/api/child_process.html
+// Advanced ci: http://www.carbonsilk.com/node/deploying-nodejs-apps/
 // tags: ci, continious integration
 var exec = require('child_process').exec;
 var spawn = require('child_process').spawn;
@@ -63,8 +79,8 @@ function restartServer(){
     //spawn("sudo", ['service', 'node29', 'restart']);
 
     // update from github
-    exec("git --git-dir=" + __dirname + "/.git --work-tree=" + __dirname + " pull origin master", function (error, stdout, stderr) {
-        // spawn can ruin server so Forever should back it up.
+    exec("git --git-dir=" + path.join(__dirname, '.git') + " --work-tree=" + __dirname + " pull origin master", function (error, stdout, stderr) {
+        // spawn will ruin server so Forever should back it up.
         spawn("sudo service node29 restart");
         if (error !== null) console.log('exec error: ' + error);
     });
@@ -371,6 +387,26 @@ app.get("/dropAll", function(req, res){
 });
 app.get("/reconfigure", function(req, res){
     configure();
+    res.redirect("/");
+});
+app.get("/reconfigure/:num", function(req, res){
+    var num = req.params.num[0];
+    if ('0' < num && num < '5') {
+        console.log('rc1');
+        num = parseInt(num);
+        var filepath = path.join(__dirname, 'config.txt');
+        readJSONFile(filepath, function(err, jsondata){
+            console.log('rc2');
+            jsondata.minPlayers = num;
+            writeJSONFile(filepath, jsondata, function(){
+                console.log('rc3');
+
+                configure();
+            });
+        });
+    } else {
+        console.log('reconfigure failed');
+    }
     res.redirect("/");
 });
 app.get('/rules', function(req,res){
