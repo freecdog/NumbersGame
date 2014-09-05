@@ -1,5 +1,5 @@
 /**
- * Created by yarvyk on 22.08.2014.
+ * Created by jaric on 22.08.2014.
  */
 
 (function (angular){
@@ -160,6 +160,9 @@
             $scope.game.clickable = $scope.game.myPlayerIndex == index;
 
             $scope.game.playerIndex = index;
+
+            // should update faster other state
+            lastAction();
         };
 
         $scope.$watch('game.status', function(newValue){

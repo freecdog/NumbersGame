@@ -358,10 +358,49 @@ app.get('/play', function(req,res){
     res.render("play");
 });
 app.get('/onlineStatistics', function(req, res){
-    var st=new Date();
+    var st = new Date();
+    removeExpiredConnections();
+
+    // 10 last games
+    var len = 10;
+    var gamesToSend = {};
+    for (var i = gamesCounter -1; i >=0 && Object.keys(gamesToSend).length < len; i--){
+        var gName = "g" + i.toString();
+        var game = {};
+        gamesToSend[gName] = game;
+        game.players = [];
+        for (var j = 0; j < games[gName].names.length; j++) {
+            if (games[gName].results !== undefined){
+                game.players.push(games[gName].results[j]);
+            } else {
+                game.players.push({name: games[gName].names[j]});
+            }
+        }
+    }
+    var cookiesToSend = [];
+    for (var key in connectedCookies) {
+        var connectedCookie = connectedCookies[key];
+        if (connectedCookie !== undefined) {
+            if (connectedCookie.name !== undefined)
+                cookiesToSend.push(connectedCookie.name);
+            else
+                cookiesToSend.push(' ');
+        }
+    }
+
+    res.render("onlineStatisticsSmall", {
+        serverTime: new Date(),
+        connected: cookiesToSend,
+        games: gamesToSend
+    });
+    var st3 = new Date() - st;
+    console.log('new onlineStatistics: ', st3);
+});
+app.get('/onlineStatisticsFull', function(req, res){
+    var st = new Date();
 
     removeExpiredConnections();
-    var st1 = st - new Date();
+    var st1 = new Date() - st;
 
     // 10 last games
     var len = 10;
@@ -370,15 +409,17 @@ app.get('/onlineStatistics', function(req, res){
         var gName = "g" + i.toString();
         gamesToSend[gName] = games[gName];
     }
-    var st2 = st - new Date();
+    var st2 = new Date() - st;
 
     res.render("onlineStatistics", {
         serverTime: new Date(),
         connected: connectedCookies,
         games: gamesToSend
     });
-    var st3 = st - new Date();
-    console.log(st, st1, st2, st3);
+    var st3 = new Date() - st;
+    console.log('expired cleared: ', st1,
+        ', ten last games found: ', st2,
+        ', template rendered: ', st3);
 });
 app.get("/dropAll", function(req, res){
     connectedCookies = {};
@@ -392,14 +433,11 @@ app.get("/reconfigure", function(req, res){
 app.get("/reconfigure/:num", function(req, res){
     var num = req.params.num[0];
     if ('0' < num && num < '5') {
-        console.log('rc1');
         num = parseInt(num);
         var filepath = path.join(__dirname, 'config.txt');
         readJSONFile(filepath, function(err, jsondata){
-            console.log('rc2');
             jsondata.minPlayers = num;
             writeJSONFile(filepath, jsondata, function(){
-                console.log('rc3');
 
                 configure();
             });

@@ -1,0 +1,28 @@
+//
+   Created by jaric on 05.09.2014.
+
+extends layout
+block content
+    p
+        div(class="menuElement menuPad")
+            a(href="/") Menu
+    p Server time: #{serverTime}
+    //-
+        br
+        a(href="/dropAll") Drop all
+
+    p Connections[#{Object.keys(connected).length}]:
+    -for(var connectionIt in connected)
+        -var connection = connected[connectionIt];
+        #pad1 #{JSON.stringify(connection)}
+
+    p Games, #{Math.min(10,Object.keys(games).length)} last is showed:
+    -for(var gameIt in games)
+        -var game = games[gameIt];
+        #pad1 #{gameIt}:
+        //- #{JSON.stringify(game)}
+        -for(var playerIt in game.players)
+            -var player = game.players[playerIt];
+            #pad2 #{player.name}: #{player.result != null ? player.result : '?'};&nbsp;
+
+    p
