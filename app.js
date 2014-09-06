@@ -467,6 +467,7 @@ app.post('/restartServer', function(req, res){
     }
 });
 
+// Strange bug was detected, while accepting combo and requesting new dices (WinPhone), last combination was rewrited, I've done some changes but not sure if bug fixed
 // API
 app.get('/api/dices', function(req, res){
     var connectedCookie = connectedCookies[req.sessionID];
@@ -476,10 +477,11 @@ app.get('/api/dices', function(req, res){
             var playerIndex = getPlayerIndexInGame(game, req.sessionID);
             if (playerIndex == -1) console.log("error while generating dices, no player with such sessionID in this game", req.sessionID, game);
 
+            var playerRounds = game.rounds[playerIndex];
             var generateNewDices = true, notFinishedRoundIndex = -1;
-            for (var i = 0; i < game.rounds[playerIndex].length; i++) {
+            for (var i = 0; i < playerRounds.length; i++) {
                 // if round not finished
-                if (game.rounds[playerIndex][i].combinationIndex == null) {
+                if (playerRounds[i].combinationIndex == null) {
                     notFinishedRoundIndex = i;
                     generateNewDices = false;
                     break;
@@ -487,9 +489,9 @@ app.get('/api/dices', function(req, res){
             }
 
             if (generateNewDices){
-                if (game.rounds[playerIndex].length < 13) {
-                    var dices = [generateDice(), generateDice(), generateDice(),
-                        generateDice(), generateDice(), generateDice()];
+                if (playerRounds.length < 13) {
+                    var dices = [];
+                    for (var j = 0; j < 6; j++) dices.push(generateDice());
                     //var combinationString = ""; for (var i =0; i<6; i++)
                     // combinationString += combo[i].toString();
 
@@ -498,21 +500,21 @@ app.get('/api/dices', function(req, res){
                     round.combinations = checkCombinations(dices);
                     round.rerolled = false;
 
-                    game.rounds[playerIndex].push(round);
+                    playerRounds.push(round);
 
-                    console.log(req.connection.remoteAddress, dices);//, JSON.stringify(game));
+                    console.log('sending new dices to ',req.connection.remoteAddress, dices);//, JSON.stringify(game));
                     res.send({dices: dices, rerolled: round.rerolled});
                 } else {
-                    var lastDices = game.rounds[playerIndex][game.rounds[playerIndex].length-1].dices;
+                    var lastDices = playerRounds[playerRounds.length-1].dices;
                     console.log("asking extra dices while game was over", lastDices);
                     res.send({dices: lastDices});
                 }
             } else {
                 console.log("updating not finished dices");
-                var notFinishedDices = game.rounds[playerIndex][notFinishedRoundIndex].dices;
+                var notFinishedDices = playerRounds[notFinishedRoundIndex].dices;
                 res.send({
                     dices: notFinishedDices,
-                    rerolled: game.rounds[playerIndex][notFinishedRoundIndex].rerolled
+                    rerolled: playerRounds[notFinishedRoundIndex].rerolled
                 });
             }
 
@@ -595,9 +597,10 @@ app.get('/api/combination/:comboIndex', function(req, res){
             var comboIndex = parseInt(req.params.comboIndex);
             if (req.params.comboIndex.length <= 2 && comboIndex != "NaN" && comboIndex >= 0 && comboIndex <= 12) {
 
+                var playerRounds = game.rounds[playerIndex];
                 var validComboIndex = true;
-                for (var i = 0; i < game.rounds[playerIndex].length; i++) {
-                    if (game.rounds[playerIndex][i].combinationIndex == comboIndex) {
+                for (var i = 0; i < playerRounds.length; i++) {
+                    if (playerRounds[i].combinationIndex == comboIndex) {
 
                         validComboIndex = false;
                         break;
@@ -605,18 +608,18 @@ app.get('/api/combination/:comboIndex', function(req, res){
                 }
 
                 if (validComboIndex){
-                    var rIndex = game.rounds[playerIndex].length - 1;
-                    game.rounds[playerIndex][rIndex].combinationIndex = comboIndex;
-                    game.rounds[playerIndex][rIndex].points = game.rounds[playerIndex][rIndex].combinations[game.rounds[playerIndex][rIndex].combinationIndex];
+                    var rIndex = playerRounds.length - 1;
+                    playerRounds[rIndex].combinationIndex = comboIndex;
+                    playerRounds[rIndex].points = playerRounds[rIndex].combinations[playerRounds[rIndex].combinationIndex];
 
                     // end of game
                     var gameEnds = false;
-                    if (game.rounds[playerIndex].length == 13){
+                    if (playerRounds.length == 13){
                         gameEnds = isEndOfGame(game);
                         if (gameEnds) endOfGame(game);
                     }
 
-                    console.log(req.connection.remoteAddress);//, JSON.stringify(game));
+                    console.log('accepted combo', comboIndex, 'from', req.connection.remoteAddress);//, JSON.stringify(game));
                     res.send(game);
                 } else {
                     console.log("error, such combination had been already used");
