@@ -79,11 +79,15 @@ function restartServer(){
     //spawn("sudo", ['service', 'node29', 'restart']);
 
     // update from github
-    exec("git --git-dir=" + path.join(__dirname, '.git') + " --work-tree=" + __dirname + " pull origin master", function (error, stdout, stderr) {
+    updateServer(function (error, stdout, stderr) {
         // spawn will ruin server so Forever should back it up.
         spawn("sudo service node29 restart");
         if (error !== null) console.log('exec error: ' + error);
     });
+}
+function updateServer(callback){
+    // update from github
+    exec("git --git-dir=" + path.join(__dirname, '.git') + " --work-tree=" + __dirname + " pull origin master", callback);
 }
 
 // all environments
@@ -94,7 +98,7 @@ app.set('view engine', 'jade');
 var staticFont = require('./staticFont');
 app.use(staticFont());
 
-app.use(express.favicon());
+app.use(express.favicon(path.join(__dirname, 'public','favicon.ico')));
 app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
@@ -457,12 +461,32 @@ app.get('/restartServer', function(req, res){
     res.render('restartServer', {title:'Restart server'});
 });
 app.post('/restartServer', function(req, res){
-    console.log(req.body.name, req.body.password);
-    res.redirect('/restartServer');
+    console.log(req.body.name, req.body.password, req.body.updateOnly);
     // TODO, don't store passwords in code on github =)
     if(req.body.name && req.body.password){
         if (req.body.name=='jaric' && req.body.password=='1234'){
-            restartServer();
+            if (req.body.updateOnly !== undefined && req.body.updateOnly == 'on') {
+                updateServer(function(error, stdout, stderr){
+                    if (!error){
+                        res.render('restartServer', {
+                            title: 'Restart server',
+                            message: 'successfully updated',
+                            serverTime: new Date(),
+                            error: null
+                        });
+                    } else {
+                        res.render('restartServer', {
+                            title:'Restart server',
+                            message:'something goes wrong',
+                            serverTime: new Date(),
+                            error: JSON.stringify(error)
+                        });
+                    }
+                });
+            } else {
+                res.redirect('/restartServer');
+                restartServer();
+            }
         }
     }
 });

@@ -21,4 +21,14 @@ block content
             pattern='.{3,16}',
             title='min3max16'
         )
+        label
+            input(type="checkbox" name="updateOnly")
+            | update only
         input(type='submit', class='inputSubmitView', value='[submit]')
+
+        -if (serverTime)
+            p #{serverTime}
+        -if (message)
+            p #{message}
+        -if (error)
+            p #{error}
