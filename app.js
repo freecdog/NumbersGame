@@ -78,12 +78,8 @@ function restartServer(){
     //spawn("sudo service node29 restart");
     //spawn("sudo", ['service', 'node29', 'restart']);
 
-    // update from github
-    updateServer(function (error, stdout, stderr) {
-        // spawn will ruin server so Forever should back it up.
-        spawn("sudo service node29 restart");
-        if (error !== null) console.log('exec error: ' + error);
-    });
+    // spawn will ruin server so Forever should back it up.
+    spawn("sudo service node29 restart");
 }
 function updateServer(callback){
     // update from github
@@ -118,7 +114,7 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-var NumbersBase = require('./public/javascripts/NumbersBase.js');
+var NumbersBase = require(path.join(__dirname, 'public', 'javascripts', 'NumbersBase.js'));
 
 var generateDice = NumbersBase.generateDice;
 var checkCombinations = NumbersBase.checkCombinations;
@@ -472,20 +468,44 @@ app.post('/restartServer', function(req, res){
                             title: 'Restart server',
                             message: 'successfully updated',
                             serverTime: new Date(),
-                            error: null
+                            error: JSON.stringify(error),
+                            stdout: JSON.stringify(stdout),
+                            stderr: JSON.stringify(stderr)
                         });
                     } else {
                         res.render('restartServer', {
                             title:'Restart server',
                             message:'something goes wrong',
                             serverTime: new Date(),
-                            error: JSON.stringify(error)
+                            error: JSON.stringify(error),
+                            stdout: JSON.stringify(stdout),
+                            stderr: JSON.stringify(stderr)
                         });
                     }
                 });
             } else {
-                res.redirect('/restartServer');
-                restartServer();
+                updateServer(function(error, stdout, stderr){
+                    if (!error){
+                        res.render('restartServer', {
+                            title: 'Restart server',
+                            message: 'successfully updated and going to reboot',
+                            serverTime: new Date(),
+                            error: JSON.stringify(error),
+                            stdout: JSON.stringify(stdout),
+                            stderr: JSON.stringify(stderr)
+                        });
+                    } else {
+                        res.render('restartServer', {
+                            title:'Restart server',
+                            message:'something goes wrong with update and going to reboot',
+                            serverTime: new Date(),
+                            error: JSON.stringify(error),
+                            stdout: JSON.stringify(stdout),
+                            stderr: JSON.stringify(stderr)
+                        });
+                    }
+                    restartServer();
+                });
             }
         }
     }
