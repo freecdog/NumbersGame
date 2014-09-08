@@ -2,6 +2,8 @@
  * Created by jaric on 22.08.2014.
  */
 
+// TODO, leftPlayers isn't presented
+
 (function (angular){
 
     "use strict";

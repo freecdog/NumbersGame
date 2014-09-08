@@ -129,6 +129,9 @@ var gamesCounter = 0;
 var games = {};
 var gamesInProgress = {};
 
+function prepareIpToConsole(req){
+    return 'ip:'+req.connection.remoteAddress;
+}
 function removeExpiredConnections(){
     var curTime = new Date();
 
@@ -351,6 +354,8 @@ function collectOnlineStatistics(){
 }
 
 app.get('/', function(req, res){
+    removeExpiredConnections();
+
     var stats = collectOnlineStatistics();
     res.render('index', { title: 'NumbersGame', onlineStatistics: stats });
 });
@@ -546,7 +551,7 @@ app.get('/api/dices', function(req, res){
 
                     playerRounds.push(round);
 
-                    console.log('sending new dices to ',req.connection.remoteAddress, dices);//, JSON.stringify(game));
+                    console.log('sending new dices to ',prepareIpToConsole(req), dices);//, JSON.stringify(game));
                     res.send({dices: dices, rerolled: round.rerolled});
                 } else {
                     var lastDices = playerRounds[playerRounds.length-1].dices;
@@ -614,7 +619,7 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                     game.rounds[playerIndex][rIndex].combinations = checkCombinations(game.rounds[playerIndex][rIndex].dices);
                     game.rounds[playerIndex][rIndex].rerolled = true;
 
-                    console.log(req.connection.remoteAddress, dices);//, JSON.stringify(game));
+                    console.log(prepareIpToConsole(req), dices);//, JSON.stringify(game));
                     //res.send(dices);
                     res.send({dices: game.rounds[playerIndex][rIndex].dices});
                 }
@@ -663,7 +668,7 @@ app.get('/api/combination/:comboIndex', function(req, res){
                         if (gameEnds) endOfGame(game);
                     }
 
-                    console.log('accepted combo', comboIndex, 'from', req.connection.remoteAddress);//, JSON.stringify(game));
+                    console.log('accepted combo', comboIndex, 'from', prepareIpToConsole(req));//, JSON.stringify(game));
                     res.send(game);
                 } else {
                     console.log("error, such combination had been already used");
@@ -791,14 +796,14 @@ app.get("/api/stopFindGame", function(req, res){
 
         removeExpiredConnections();
 
-        console.log(req._remoteAddress + ", stop find game, onliners: " + Object.keys(connectedCookies).length.toString());
+        console.log(prepareIpToConsole(req) + ", stop find game, onliners: " + Object.keys(connectedCookies).length.toString());
     } else {
         res.send();
     }
 });
 
 app.get("/api/rounds/:gid", function(req, res){
-    //console.log(req._remoteAddress + " GameProcess check" );
+    //console.log(prepareIpToConsole(req) + " GameProcess check" );
 
     var data = {};
     var game;
@@ -844,26 +849,36 @@ app.get("/api/rounds/:gid/:datastring", function(req, res){
 
 app.get("/api/changeName/:name", function(req, res){
 
-    console.log(req._remoteAddress + ", changing name");
+    console.log(prepareIpToConsole(req) + ", changing name");
 
     var ans = null;
 
     var name = req.params.name;
     if (name != null) {
-        var reLogin = new RegExp("^[A-z0-9_-]{3,16}$");
-        var loginMatch = reLogin.test(name);
+        //var reLogin = new RegExp("^[A-z0-9_-]{3,16}$");
+        //var loginMatch = reLogin.test(name);
+        var loginMatch = 0 < name.length && name.length < 17;
         if (loginMatch) {
+            console.log("changing name to", name);
 
             var connectedCookie = connectedCookies[req.sessionID];
-            if (connectedCookie !== undefined) {
-                connectedCookie.name = name;
-                connectedCookie.time = new Date();
-            } else {
-                var connectedCookie = {};
+            if (connectedCookie === undefined) {
+                connectedCookie = {};
                 connectedCookies[req.sessionID] = connectedCookie;
-                connectedCookie.name = name;
-                connectedCookie.time = new Date();
                 //connectedCookie.status = 2; // 2 because we are skipping POST find game request
+            }
+            connectedCookie.name = name;
+            connectedCookie.time = new Date();
+
+            var game = findGameById(req.sessionID);
+            if (game != null){
+                var ind = 0;
+                for (; ind < game.players.length; ind++)
+                    if (game.players[ind] == req.sessionID)
+                        break;
+                if (ind != game.players.length) {
+                    game.names[ind] = connectedCookie.name;
+                }
             }
 
             ans = {login: name};
@@ -879,6 +894,25 @@ app.get("/api/changeName/:name", function(req, res){
     } else {
         console.log("no name");
         res.send(ans);
+    }
+});
+
+app.get("/api/getName", function(req, res){
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined) {
+        console.log(prepareIpToConsole(req) + ", getting name");
+
+        var ans = {login: null};
+
+        console.log('connectedCookie:', JSON.stringify(connectedCookie));
+        if (connectedCookie.name !== undefined){
+            ans.login = connectedCookie.name;
+        }
+
+        res.send(ans);
+        removeExpiredConnections();
+    } else {
+        res.send(null);
     }
 });
 

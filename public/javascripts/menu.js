@@ -24,6 +24,16 @@
                 .done(callback.success)
                 .fail(callback.error);
             this.urlRoot = oldRoot;
+        },
+        getName: function(attributes, callback){
+            var recentUrl = this.urlRoot;
+            this.urlRoot = '/api/getName';
+
+            this.fetch(attributes)
+                .done(callback.success)
+                .fail(callback.error);
+
+            this.urlRoot = recentUrl;
         }
     });
 
@@ -39,13 +49,15 @@
             this.$el.attr('name', 'name');
             this.$el.attr('placeholder', "nickname");
 
-            this.$el.attr('pattern','.{3,16}');
+            this.$el.attr('pattern','.{1,16}');
             this.$el.attr('required', true);
-            this.$el.attr('title', 'min 3, max 16');
+            this.$el.attr('title', 'min 1, max 16');
             //this.listenTo(this.options.parent.model, "change:names", this.listener);
             this.el.addEventListener('input', function(){
                 self.changeVisibility();
             }, false);
+
+            this.listenTo(this.model, 'change:name', this.setNameValue);
         },
         // events won't work, so I use "addEventListener", so sad =/
         //events: function(){console.log("anything");},
@@ -56,6 +68,9 @@
         },*/
         changeVisibility: function(){
             this.options.parent.inputSubmitView.changeVisibility(this);
+        },
+        setNameValue: function(){
+            this.el.value = this.model.attributes.name;
         },
         render: function(){
             this.$el.empty();
@@ -73,6 +88,8 @@
             this.lastChanger = this.options.parent.inputLoginView;
             // impossible for mobile devices =/
             //this.$el.css('display','none');
+
+            this.listenTo(this.model, 'change:name', function(){});
         },
         changeVisibility: function(changer){
             if (this.lastChanger != changer) {
@@ -95,13 +112,15 @@
         initialize: function () {
             this.initViews();
 
+            this.tryGetName();
+
             this.render();
         },
         initViews: function(){
             this.inputLoginView = new $.menu.InputLoginView({model: this.model, parent: this});
             this.inputLoginView.render();
 
-            this.inputSubmitView = new $.menu.InputSubmitView({parent: this});
+            this.inputSubmitView = new $.menu.InputSubmitView({model: this.model, parent: this});
             this.inputSubmitView.render();
         },
 
@@ -110,16 +129,40 @@
             //"change" : "change",
             "submit" : "tryChangeName"
         },
+        tryGetName: function(){
+            var self = this;
+
+            console.log('trying to get name');
+
+            this.model.getName(null, {
+                success: function(model, values){
+                    if (model.login != null) {
+                        self.model.set({
+                            name: model.login
+                        });
+                        self.inputSubmitView.changeVisibility(self);
+                        console.log('name is:', self.model.attributes.name);
+                    } else {
+                        console.log('name is undefined', model, values);
+                    }
+                },
+                error: function(model, response){
+                    console.log("Could not get user name:", response);
+                }
+            });
+        },
         tryChangeName : function(event) {
             var self = this;
 
             console.log('trying to change name');
             event.preventDefault();
 
+            // set name to model before send name
             this.model.set({
                 name: this.el.elements["name"].value
             });
 
+            // send name to server
             this.model.changeName(null, {
                 success: function(model,values) {
                     console.log("User name changed", model, values);
@@ -128,8 +171,8 @@
                     self.render();
                 },
                 error: function( model, response) {
-                    console.log("Could not create user:", response);
-                    alert("Try one more time please. Allowed characters are letters and numbers.");
+                    console.log("Could not change name:", response);
+                    alert("Try another login please.");
                 }
             });
             event.currentTarget.checkValidity();
@@ -149,7 +192,31 @@
         }
     });
 
-    // Router
+    $.menu.PlayButtonView = Backbone.View.extend({
+        initialize: function(){
+        },
+        events: {
+            'click': 'tryChangeName'
+        },
+        tryChangeName: function(){
+            // set name to model before send name
+            this.model.set({
+                name: this.options.parent.el.elements["name"].value
+            });
+
+            // send name to server
+            this.model.changeName(null, {
+                success: function(model,values) {
+                    console.log("User name changed", model, values);
+                },
+                error: function( model, response) {
+                    console.log("Could not change name:", response);
+                }
+            });
+        }
+    });
+
+        // Router
 
     // looks like main application class
     $.menu.Router = Backbone.Router.extend({
@@ -168,6 +235,8 @@
             this.userModel = new $.menu.User();
             var inputFormView = new $.menu.InputFormView({model: this.userModel});
             $('#nameForm').prepend(inputFormView.render().el);
+
+            var playButtonView = new $.menu.PlayButtonView({el: $('#menuPlayButton'), model: this.userModel, parent: inputFormView});
         }
     });
 
