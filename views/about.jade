@@ -3,6 +3,9 @@
 
 extends layout
 block headData
+    title About authors of Numbers game
+
+block headData
     meta(name="Description" content="about page is here")
 
 block content
@@ -23,7 +26,7 @@ block content
     //- It looks like social buttons work only from real hosts (not localhost)
     script(
         type='text/javascript',
-        src='//yandex.st/share/share.js',
+        src='http://yandex.st/share/share.js',
         charset='utf-8')
     div(
         class='yashare-auto-init',

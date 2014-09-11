@@ -357,7 +357,7 @@ app.get('/', function(req, res){
     removeExpiredConnections();
 
     var stats = collectOnlineStatistics();
-    res.render('index', { title: 'NumbersGame', onlineStatistics: stats });
+    res.render('index', { onlineStatistics: stats });
 });
 app.get('/play', function(req,res){
     res.render("play");
@@ -459,7 +459,7 @@ app.get('/about', function(req,res){
     res.render("about");
 });
 app.get('/restartServer', function(req, res){
-    res.render('restartServer', {title:'Restart server'});
+    res.render('restartServer');
 });
 app.post('/restartServer', function(req, res){
     console.log(req.body.name, req.body.password, req.body.updateOnly);
@@ -470,7 +470,6 @@ app.post('/restartServer', function(req, res){
                 updateServer(function(error, stdout, stderr){
                     if (!error){
                         res.render('restartServer', {
-                            title: 'Restart server',
                             message: 'successfully updated',
                             serverTime: new Date(),
                             error: JSON.stringify(error),
@@ -479,7 +478,6 @@ app.post('/restartServer', function(req, res){
                         });
                     } else {
                         res.render('restartServer', {
-                            title:'Restart server',
                             message:'something goes wrong',
                             serverTime: new Date(),
                             error: JSON.stringify(error),
@@ -492,7 +490,6 @@ app.post('/restartServer', function(req, res){
                 updateServer(function(error, stdout, stderr){
                     if (!error){
                         res.render('restartServer', {
-                            title: 'Restart server',
                             message: 'successfully updated and going to reboot',
                             serverTime: new Date(),
                             error: JSON.stringify(error),
@@ -501,7 +498,6 @@ app.post('/restartServer', function(req, res){
                         });
                     } else {
                         res.render('restartServer', {
-                            title:'Restart server',
                             message:'something goes wrong with update and going to reboot',
                             serverTime: new Date(),
                             error: JSON.stringify(error),
