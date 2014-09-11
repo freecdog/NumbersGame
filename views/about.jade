@@ -2,6 +2,9 @@
    Created by jaric on 10.08.2014.
 
 extends layout
+block headData
+    meta(name="Description" content="about page is here")
+
 block content
 
     p
@@ -16,3 +19,16 @@ block content
     p
         | &nbsp;
     p Inspired by Pavel and Ann and Elena.
+
+    //- It looks like social buttons work only from real hosts (not localhost)
+    script(
+        type='text/javascript',
+        src='//yandex.st/share/share.js',
+        charset='utf-8')
+    div(
+        class='yashare-auto-init',
+        data-yashareL10n='ru',
+        data-yashareType='none',
+        data-yashareQuickServices='vkontakte,facebook,twitter,gplus,pinterest',
+        data-yashareImage='http://jaric.ru:33322/dice_Visual_Pharm.png'
+    )

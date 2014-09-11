@@ -2,6 +2,9 @@
    Created by jaric on 27.08.2014.
 
 extends layout
+block headData
+    meta(name="Description" content="restart page is here")
+
 block content
     form(action='/restartServer', method='post')
         input(
@@ -28,13 +31,13 @@ block content
 
         input(type='submit', class='inputSubmitView', value='[submit]')
 
-        -if (serverTime)
-            p #{serverTime}
-        -if (message)
-            p #{message}
-        -if (error)
-            p #{error}
-        -if (stdout)
-            p #{stdout}
-        -if (stderr)
-            p #{stderr}
+    -if (serverTime)
+        p #{serverTime}
+    -if (message)
+        p #{message}
+    -if (error)
+        p #{error}
+    -if (stdout)
+        p #{stdout}
+    -if (stderr)
+        p #{stderr}

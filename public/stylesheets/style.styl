@@ -15,6 +15,11 @@ $colorBackground = #343434;
 $colorInput = #999999;
 $transparency = 0.618;
 
+$elemWidth = 90%;
+$elemWidthFixed = 89.5%;
+$elemMaxWidth = 512px;
+$elemMaxWidthFixed = 510px;
+
 /*mixins*/
 colorUsed() {
   background-color: #999999;
@@ -86,8 +91,8 @@ a
   display: block;
   margin: 0 auto;
   text-align: center;
-  width: 90%;
-  max-width: 512px;
+  width: $elemWidth;
+  max-width: $elemMaxWidth;
   text-decoration: none !important;
 table
   border: 0;
@@ -132,8 +137,8 @@ table
   display: block;
   margin: 0 auto;
   text-align: center;
-  width: 90%;
-  max-width: 512px;
+  width: $elemWidth;
+  max-width: $elemMaxWidth;
   text-decoration: none !important;
 .menuPad
   /* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
@@ -151,8 +156,8 @@ table
   font: $fonts;
   color: $colorFont;
   background-color: $colorBackground;
-  width: 89.5%;
-  max-width: 510px;
+  width: $elemWidthFixed;
+  max-width: $elemMaxWidthFixed;
   text-align: center;
 .inputPasswordView
   display: block;
@@ -162,8 +167,8 @@ table
   font: $fonts;
   color: $colorFont;
   background-color: $colorBackground;
-  width: 89.5%;
-  max-width: 510px;
+  width: $elemWidthFixed;
+  max-width: $elemMaxWidthFixed;
   text-align: center;
 .inputSubmitView
   display: block;
@@ -173,8 +178,8 @@ table
   font: $fonts;
   color: $colorInput;
   background-color: $colorBackground;
-  width: 90%;
-  max-width: 512px;
+  width: $elemWidth;
+  max-width: $elemMaxWidth;
   text-align: center;
 .dicesHolder
   height: auto;
