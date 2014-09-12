@@ -12,11 +12,11 @@ block content
             a(href="/play") Play
     div(id='menuPlayButton', class="menuElement menuPad")
         a(href="/ang") Play
-    //-
-        div(class="menuElement", onclick="f1()") CLEAR STORAGE
+
+    //-div(class="menuElement", onclick="f1()") CLEAR STORAGE
     p
         div(class="menuElement")
-            | (searching: #{onlineStatistics.playersSearching})
+            | (searching: #{onlineStatistics ? onlineStatistics.playersSearching : ''})
     div(class="menuElement menuPad")
         a(href="/onlineStatistics") Online statistics
     div(class="menuElement menuPad")
@@ -27,6 +27,22 @@ block content
     //-
         div(class="menuElement")
             a(href="/reconfigure") Reconfigure
+
+    //- It looks like social buttons work only from real hosts (not localhost)
+    script(
+        type='text/javascript',
+        src='//yandex.st/share/share.js',
+        charset='utf-8'
+    )
+    div(
+        class='yashare-auto-init menuElement',
+        data-yashareL10n='ru',
+        data-yashareType='none',
+        data-yashareTheme='counter',
+        data-yashareQuickServices='vkontakte,facebook,twitter,gplus,pinterest,odnoklassniki,moimir',
+        data-yashareLink='http://jaric.ru',
+        data-yashareImage='http://jaric.ru/dice_Visual_Pharm.png'
+    )
 
     p
         | &nbsp;
