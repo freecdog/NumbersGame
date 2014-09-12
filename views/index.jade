@@ -17,7 +17,7 @@ block content
     //-div(class="menuElement", onclick="f1()") CLEAR STORAGE
     p
         div(class="menuElement")
-            | (searching: #{onlineStatistics ? onlineStatistics.playersSearching : ''})
+            | (searching: #{onlineStatistics ? onlineStatistics.playersSearching : '0'})
     div(class="menuElement menuPad")
         a(href="/onlineStatistics") Online statistics
     div(class="menuElement menuPad")
@@ -42,7 +42,7 @@ block content
         data-yashareType='none',
         data-yashareTheme='counter',
         data-yashareQuickServices='vkontakte,facebook,twitter,gplus,pinterest,odnoklassniki,moimir',
-        data-yashareLink='http://jaric.ru',
+        data-yashareLink='http://jaric.ru:33322',
         data-yashareImage='http://jaric.ru:33322/dice_Visual_Pharm.png'
     )
 
