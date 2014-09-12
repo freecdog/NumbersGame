@@ -2,6 +2,7 @@ extends layout
 
 block headData
     title Numbers game (variation of Kniffel or Yahtzee)
+    link(rel='image_src', href='//jaric.ru/dice_Visual_Pharm.png')
 
 block content
     p
@@ -29,6 +30,7 @@ block content
             a(href="/reconfigure") Reconfigure
 
     //- It looks like social buttons work only from real hosts (not localhost)
+    p
     script(
         type='text/javascript',
         src='//yandex.st/share/share.js',
@@ -40,8 +42,8 @@ block content
         data-yashareType='none',
         data-yashareTheme='counter',
         data-yashareQuickServices='vkontakte,facebook,twitter,gplus,pinterest,odnoklassniki,moimir',
-        data-yashareLink='http://jaric.ru',
-        data-yashareImage='http://jaric.ru/dice_Visual_Pharm.png'
+        data-yashareLink='//jaric.ru',
+        data-yashareImage='//jaric.ru/dice_Visual_Pharm.png'
     )
 
     p
