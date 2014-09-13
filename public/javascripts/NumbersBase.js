@@ -246,8 +246,8 @@
         stats.game = {};
         stats.players = [];
 
-        for (var i = 1; i <= 6; i++) stats.game['d'+ i.toString()] = 0;
         stats.game.dicesCount = 0;
+        for (var i = 1; i <= 6; i++) stats.game['d'+ i.toString()] = 0;
 
         function getDicesOfRound(round){
             var dices = [];
