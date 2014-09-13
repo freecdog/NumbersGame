@@ -52,13 +52,20 @@ block content
                 #pad2(onclick="toggle_visibility(this)") #{gameState}:
                 -for(var winnerParam in games[game][gameState])
                     #pad3(onclick="toggle_visibility(this)") #{winnerParam}: #{games[game][gameState][winnerParam]}
+            else if (gameState == "statistics")
+                #pad2 #{gameState}: #{JSON.stringify(games[game][gameState])}
             else
-                #pad2 #{gameState} — #{games[game][gameState]}
+                #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
 
     p
 
     script(src="/javascripts/jquery-1.9.1.js")
+    script(src="/javascripts/NumbersBase.js")
     script.
+        //var gs = !{JSON.stringify(games)};
+        //console.log('gs:',gs);
+        //console.log('stats:', window.NumbersBase.collectStatisticsOfGame(gs.g0));
+
         function toggle_visibility(obj) {
 
             function toggleId(level){

@@ -27,6 +27,6 @@ block content
         -for(var playerIt in game.players)
             -var player = game.players[playerIt];
             #pad2 #{player.name}: #{player.result != null ? player.result : '?'};&nbsp;
-        #pad2 Duration: #{game.duration / 1000 / 60} min
+        #pad2 Duration: #{(game.duration / 1000 / 60).toFixed(3)} min
 
     p

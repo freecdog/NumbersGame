@@ -240,9 +240,49 @@
             return false;
         }
     };
+    exports.collectStatisticsOfGame = function(game) {
+        var stats = {};
 
-    exports.test = function(){
-        return 'hello world'
+        stats.game = {};
+        stats.players = [];
+
+        for (var i = 1; i <= 6; i++) stats.game['d'+ i.toString()] = 0;
+        stats.game.dicesCount = 0;
+
+        function getDicesOfRound(round){
+            var dices = [];
+            for (var j = 0; j < round.dices.length; j++) dices.push(round.dices[j]);
+            if (round.olddices && round.changedDicesIndexes)
+                for (var k = 0; k < round.changedDicesIndexes.length; k++) dices.push(round.olddices[k]);
+            return dices;
+        }
+        function collectPlayerStatistic(playerRounds){
+            var playerStats = {};
+
+            playerStats.dicesCount = 0;
+            for (var i = 1; i <= 6; i++) playerStats['d'+ i.toString()] = 0;
+
+            for (var j = 0; j < playerRounds.length; j++){
+                var round = playerRounds[j];
+                var roundDices = getDicesOfRound(round);
+                for (var k = 0; k < roundDices.length; k++) {
+                    var dice = roundDices[k];
+                    playerStats['d'+ dice.toString()]++;
+                    playerStats.dicesCount++;
+
+                    stats.game['d'+ dice.toString()]++;
+                    stats.game.dicesCount++;
+                }
+            }
+            return playerStats;
+        }
+
+        for (var pid = 0; pid < game.players.length; pid++){
+            var playerRounds = game.rounds[pid];
+            stats.players.push(collectPlayerStatistic(playerRounds));
+        }
+
+        return stats;
     };
 
 })(typeof exports === 'undefined'? this['NumbersBase']={} : exports);

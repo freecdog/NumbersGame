@@ -14,7 +14,9 @@ var config = {
     "secret": "someSecret"
 };
 
+var noop = function(){};
 function readJSONFile(filepath, callback){
+    callback = callback || noop;
     fs.readFile(filepath, {encoding: "utf8"}, function(err, filedata){
         if (err) {
             console.log("read error:", err);
@@ -30,6 +32,7 @@ function readJSONFile(filepath, callback){
     });
 }
 function writeJSONFile(filepath, jsondata, callback){
+    callback = callback || noop;
     fs.writeFile(filepath, JSON.stringify(jsondata), {encoding: "utf8"}, function (err) {
         if (err) {
             console.log("write error:", err);
@@ -126,6 +129,28 @@ var NumbersBase = require(path.join(__dirname, 'public', 'javascripts', 'Numbers
 
 var generateDice = NumbersBase.generateDice;
 var checkCombinations = NumbersBase.checkCombinations;
+
+function generateStandard(){
+    var mass = [];
+    for (var c1 = 1; c1 < 7; c1++){
+        for (var c2 = 1; c2 < 7; c2++){
+            for (var c3 = 1; c3 < 7; c3++){
+                for (var c4 = 1; c4 < 7; c4++){
+                    for (var c5 = 1; c5 < 7; c5++){
+                        for (var c6 = 1; c6 < 7; c6++){
+                            var standardEl = {};
+                            standardEl.dices = [c1, c2, c3, c4, c5, c6];
+                            standardEl.combos = checkCombinations(standardEl.dices);
+                            mass.push(standardEl);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    writeJSONFile(path.join(__dirname, 'tests', 'standardDicesCombos.json'), mass, null);
+}
+//generateStandard();
 
 //console.log("small test", generateDice(), checkCombinations("134256"));
 
@@ -329,6 +354,8 @@ function endOfGame(game){
     game.endTime = new Date();
     game.duration = game.endTime - game.startTime;  // ms
 
+    game.statistics = NumbersBase.collectStatisticsOfGame(game);
+
     console.log("game ends:", game._id);
 }
 function calculateResult(rounds){
@@ -485,7 +512,7 @@ app.get('/restartServer', function(req, res){
     res.render('restartServer');
 });
 app.post('/restartServer', function(req, res){
-    console.log('going to restart server', prepareIpToConsole(req));
+    console.log('going to restart server', prepareIpToConsole(req), new Date());
     if(req.body.name && req.body.password){
         console.log(req.body.name, req.body.updateOnly);
         var passHash = req.app.getHash(req.body.password);
@@ -615,11 +642,12 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                 if (playerIndex == -1) console.log("error while rerolling dices, no player with such sessionID in this game", req.sessionID, game);
 
                 var rIndex = game.rounds[playerIndex].length - 1;
-                if (game.rounds[playerIndex][rIndex].rerolled) {
+                var playerRound = game.rounds[playerIndex][rIndex];
+                if (playerRound.rerolled) {
                     // sending last set of dices
                     res.send({
-                        dices: game.rounds[playerIndex][rIndex].dices,
-                        rerolled: game.rounds[playerIndex][rIndex].rerolled
+                        dices: playerRound.dices,
+                        rerolled: playerRound.rerolled
                     });
                 } else {
                     var dices = [];
@@ -627,21 +655,24 @@ app.get('/api/dices/:dicesIndexes', function(req, res){
                         dices.push(generateDice());
                     }
 
-                    game.rounds[playerIndex][rIndex].olddices = [];
-                    for (var m = 0; m < game.rounds[playerIndex][rIndex].dices.length; m++){
-                        game.rounds[playerIndex][rIndex].olddices[m] = game.rounds[playerIndex][rIndex].dices[m];
+                    playerRound.olddices = [];
+                    for (var m = 0; m < playerRound.dices.length; m++){
+                        playerRound.olddices[m] = playerRound.dices[m];
                     }
 
+                    playerRound.changedDicesIndexes = [];
                     for (var j = 0; j < dlen; j++){
-                        game.rounds[playerIndex][rIndex].dices[ parseInt(req.params.dicesIndexes[j]) ] = dices[j];
+                        var changedDiceIndex = parseInt(req.params.dicesIndexes[j]);
+                        playerRound.changedDicesIndexes.push(changedDiceIndex);
+                        playerRound.dices[ changedDiceIndex ] = dices[j];
                     }
 
-                    game.rounds[playerIndex][rIndex].combinations = checkCombinations(game.rounds[playerIndex][rIndex].dices);
-                    game.rounds[playerIndex][rIndex].rerolled = true;
+                    playerRound.combinations = checkCombinations(playerRound.dices);
+                    playerRound.rerolled = true;
 
                     console.log(prepareIpToConsole(req), dices);//, JSON.stringify(game));
                     //res.send(dices);
-                    res.send({dices: game.rounds[playerIndex][rIndex].dices});
+                    res.send({dices: playerRound.dices});
                 }
             } else {
                 console.log("error, not valid dices indexes to reroll");
