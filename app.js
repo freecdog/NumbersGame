@@ -487,7 +487,7 @@ app.get('/restartServer', function(req, res){
 app.post('/restartServer', function(req, res){
     console.log('going to restart server', prepareIpToConsole(req));
     if(req.body.name && req.body.password){
-        console.log(req.body.name, req.body.password, req.body.updateOnly);
+        console.log(req.body.name, req.body.updateOnly);
         var passHash = req.app.getHash(req.body.password);
         if (req.body.name=='jaric' && passHash=='bXSdeiUOrFs6OEO6jzlsXMVatr0V3ih4t8EpDLbh7b6y5mbV5uk1f5XD2na5oSWRYyY9mSg9rGauTr7rI01plA=='){
             if (req.body.updateOnly !== undefined && req.body.updateOnly == 'on') {
