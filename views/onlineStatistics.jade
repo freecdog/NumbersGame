@@ -1,84 +1,32 @@
 //
-   Created by jaric on 04.07.14.
+   Created by jaric on 05.09.2014.
 
 extends layout
-block content
+block headData
+    title Online statistics of Numbers game
 
+block content
     p
         div(class="menuElement menuPad")
             a(href="/") Menu
-
     p Server time: #{serverTime}
-
     //-
         br
         a(href="/dropAll") Drop all
 
-    p Connections[#{Object.keys(connected).length}]:
-    -for(var connection in connected)
-        #pad1(onclick="toggle_visibility(this)") #{connection}:
-        -for(var conState in connected[connection])
-            if (conState == "time")
-                -var diff = (serverTime - connected[connection][conState]) / 1000.0;
-                #pad2(onclick="toggle_visibility(this)") #{conState} — (#{diff}) #{connected[connection][conState]}
-            else
-                #pad2(onclick="toggle_visibility(this)") #{conState} — #{connected[connection][conState]}
-    p Games, #{Math.min(10,Object.keys(games).length)} last is showed:
-    -for(var game in games)
-        #pad1(onclick="toggle_visibility(this)") #{game}:
-        -for(var gameState in games[game])
-            if (gameState == "rounds")
-                #pad2(onclick="toggle_visibility(this)") #{gameState}:
-                -for(var player in games[game][gameState])
-                    #pad3(onclick="toggle_visibility(this)") Player index: #{player}
+    p Connections[#{connected ? Object.keys(connected).length : ''}]:
+    -for(var connectionIt in connected)
+        -var connection = connected[connectionIt];
+        #pad1 #{JSON.stringify(connection)}
 
-                    -for(var round in games[game][gameState][player])
-                        #pad4(onclick="toggle_visibility(this)") Round number: #{round}
-                        -for(var roundParams in games[game][gameState][player][round])
-                            if (roundParams == "rerolled" || roundParams == "combinationIndex" || roundParams == "points")
-                                #pad5 #{roundParams}: #{games[game][gameState][player][round][roundParams]}
-                            else
-                                #pad5 #{roundParams}: #{JSON.stringify(games[game][gameState][player][round][roundParams])}
-                                //-
-                                    -for(var paramDetails in games[game][gameState][player][round][roundParams])
-                                        #pad6 #{paramDetails}: #{games[game][gameState][player][round][roundParams][paramDetails]}
-
-            else if (gameState == "leftPlayers")
-                //-
-                    #pad2 #{gameState} — #{JSON.stringify(games[game][gameState])}
-                #pad2(onclick="toggle_visibility(this)") #{gameState}:
-                -for(var leaverParam in games[game][gameState])
-                    #pad3(onclick="toggle_visibility(this)") #{leaverParam}: #{games[game][gameState][leaverParam]}
-            else if (gameState == "winner")
-                #pad2(onclick="toggle_visibility(this)") #{gameState}:
-                -for(var winnerParam in games[game][gameState])
-                    #pad3(onclick="toggle_visibility(this)") #{winnerParam}: #{games[game][gameState][winnerParam]}
-            else
-                #pad2 #{gameState} — #{games[game][gameState]}
+    p Games, #{Math.min(10,games ? Object.keys(games).length : 0)} last is showed:
+    -for(var gameIt in games)
+        -var game = games[gameIt];
+        #pad1 #{gameIt}:
+        //- #{JSON.stringify(game)}
+        -for(var playerIt in game.players)
+            -var player = game.players[playerIt];
+            #pad2 #{player.name}: #{player.result != null ? player.result : '?'};&nbsp;
+        #pad2 Duration: #{game.duration / 1000 / 60} min
 
     p
-
-    script(src="/javascripts/jquery-1.9.1.js")
-    script.
-        function toggle_visibility(obj) {
-
-            function toggleId(level){
-                $("*[id=pad"+ level.toString()+"]").each(function(){
-                    if ($(this).is(':visible')) {
-                        $(this).slideUp("fast");
-                    } else {
-                        $(this).slideDown("fast");
-                    }
-                });
-            }
-
-            var d = new Date();
-            var nid = parseInt(obj.id.substr(3)) + 1;
-            for (var i = nid; i <= 6; i++) {
-                toggleId(i);
-            }
-            //$('html, body').animate({
-            //    scrollTop: $(obj).offset().top
-            //}, 2000);
-            console.log((new Date() - d) + " ms");
-        }

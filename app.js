@@ -2,6 +2,7 @@ var express = require('express');
 var http = require('http');
 var path = require('path');
 var fs = require('fs');
+var crypto = require('crypto');
 
 var _ = require('underscore')._;
 
@@ -86,6 +87,13 @@ function updateServer(callback){
     exec("git --git-dir=" + path.join(__dirname, '.git') + " --work-tree=" + __dirname + " pull origin master", callback);
 }
 
+app.getHash = function(password){
+    var hash = crypto.createHash('sha512');
+    hash.update(password, 'utf8');
+
+    return hash.digest('base64');
+};
+
 // all environments
 app.set('port', process.env.PORT || 33322);
 app.set('views', path.join(__dirname, 'views'));
@@ -142,7 +150,7 @@ function removeExpiredConnections(){
         //if (connectedCookies.hasOwnProperty(key)) {
         if (connectedCookies[key] !== undefined) {
             //console.log ( (curTime - connectedCookies[key]).toString() );
-            if (Math.abs(curTime - connectedCookies[key].time) > 600000) {   // 1 hour
+            if (Math.abs(curTime - connectedCookies[key].time) > 600000) {   // 10 min
 
                 for (var gInd in games) {
                     //if (games.hasOwnProperty(gInd)){
@@ -157,6 +165,8 @@ function removeExpiredConnections(){
                                     //delete games[gInd];
                                     if (game.status != 90){
                                         game.status = -1;
+                                        game.endTime = new Date();
+                                        game.duration = game.endTime - game.startTime;  // ms
                                     }
                                     break;
                                 }
@@ -194,6 +204,7 @@ function prepareGame() {
         game._id = gameId;
         game.players = [];
         game.status = 20;
+        game.startTime = new Date();
 
         for (var i = 0; i < len; i++) {
             if (i==0) {
@@ -315,6 +326,8 @@ function endOfGame(game){
         //if (leftPlayers[game.players[i]] === undefined)
         //    connectedCookies[game.players[i]].status = 1;
     }
+    game.endTime = new Date();
+    game.duration = game.endTime - game.startTime;  // ms
 
     console.log("game ends:", game._id);
 }
@@ -368,19 +381,24 @@ app.get('/onlineStatistics', function(req, res){
 
     // 10 last games
     var len = 10;
+    var addedGamesCounter = 0;
     var gamesToSend = {};
-    for (var i = gamesCounter -1; i >=0 && Object.keys(gamesToSend).length < len; i--){
+    for (var i = gamesCounter -1; i >=0 && addedGamesCounter < len; i--){
         var gName = "g" + i.toString();
+        var originalGame = games[gName];
         var game = {};
         gamesToSend[gName] = game;
         game.players = [];
-        for (var j = 0; j < games[gName].names.length; j++) {
-            if (games[gName].results !== undefined){
-                game.players.push(games[gName].results[j]);
+        for (var j = 0; j < originalGame.names.length; j++) {
+            if (originalGame.results !== undefined){
+                game.players.push(originalGame.results[j]);
             } else {
-                game.players.push({name: games[gName].names[j]});
+                game.players.push({name: originalGame.names[j]});
             }
         }
+        game.duration = originalGame.duration;
+
+        addedGamesCounter++;
     }
     var cookiesToSend = [];
     for (var key in connectedCookies) {
@@ -393,7 +411,7 @@ app.get('/onlineStatistics', function(req, res){
         }
     }
 
-    res.render("onlineStatisticsSmall", {
+    res.render("onlineStatistics", {
         serverTime: new Date(),
         connected: cookiesToSend,
         games: gamesToSend
@@ -409,14 +427,17 @@ app.get('/onlineStatisticsFull', function(req, res){
 
     // 10 last games
     var len = 10;
+    var addedGamesCounter = 0;
     var gamesToSend = {};
-    for (var i = gamesCounter -1; i >=0 && Object.keys(gamesToSend).length < len; i--){
+    for (var i = gamesCounter -1; i >=0 && addedGamesCounter < len; i--){
         var gName = "g" + i.toString();
         gamesToSend[gName] = games[gName];
+
+        addedGamesCounter++;
     }
     var st2 = new Date() - st;
 
-    res.render("onlineStatistics", {
+    res.render("onlineStatisticsFull", {
         serverTime: new Date(),
         connected: connectedCookies,
         games: gamesToSend
@@ -426,11 +447,13 @@ app.get('/onlineStatisticsFull', function(req, res){
         ', ten last games found: ', st2,
         ', template rendered: ', st3);
 });
+/*
 app.get("/dropAll", function(req, res){
     connectedCookies = {};
     games = {};
-    res.redirect("/onlineStatistics");
+    res.redirect("/onlineStatisticsFull");
 });
+*/
 app.get("/reconfigure", function(req, res){
     configure();
     res.redirect("/");
@@ -462,10 +485,11 @@ app.get('/restartServer', function(req, res){
     res.render('restartServer');
 });
 app.post('/restartServer', function(req, res){
-    console.log(req.body.name, req.body.password, req.body.updateOnly);
-    // TODO, don't store passwords in code on github =)
+    console.log('going to restart server', prepareIpToConsole(req));
     if(req.body.name && req.body.password){
-        if (req.body.name=='jaric' && req.body.password=='1234'){
+        console.log(req.body.name, req.body.password, req.body.updateOnly);
+        var passHash = req.app.getHash(req.body.password);
+        if (req.body.name=='jaric' && passHash=='bXSdeiUOrFs6OEO6jzlsXMVatr0V3ih4t8EpDLbh7b6y5mbV5uk1f5XD2na5oSWRYyY9mSg9rGauTr7rI01plA=='){
             if (req.body.updateOnly !== undefined && req.body.updateOnly == 'on') {
                 updateServer(function(error, stdout, stderr){
                     if (!error){
@@ -508,8 +532,8 @@ app.post('/restartServer', function(req, res){
                     restartServer();
                 });
             }
-        }
-    }
+        } else res.send('No, inc');
+    } else res.send('No');
 });
 
 // Strange bug was detected, while accepting combo and requesting new dices (WinPhone), last combination was rewrited, I've done some changes but not sure if bug fixed
