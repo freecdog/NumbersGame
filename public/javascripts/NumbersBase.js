@@ -284,5 +284,35 @@
 
         return stats;
     };
+    exports.getPreferCombo = function(criteria, dices, combos){
+        if (dices == null || combos == null) {
+            console.log('dices or combos is null, can not get most valuable combo');
+            return;
+        }
+
+        // most valuable
+        if (criteria == 0) {
+            var ind = 0;
+            for (var i = 1; i < combos.length; i++)
+                if(combos[ind] < combos[i])
+                    ind = i;
+            return ind;
+        }
+        // most rare combo
+        if (criteria == 1) {
+            function calculateRarity(dices, combos){
+                var rarity = [];
+                var base = 6;
+
+                for (var i = 0 ; i < combos.length; i++){
+
+                }
+
+                return rarity;
+            }
+            var rarity = calculateRarity(dices, combos);
+
+        }
+    };
 
 })(typeof exports === 'undefined'? this['NumbersBase']={} : exports);
