@@ -35,13 +35,15 @@ colorRestartButton(){
   background-color: $c1;
   background-color: rgba(255, 54, 43, $transparency);
 }
-colorAcceptButton(){
-  background-color: #68ffa3;
-  background-color: rgba(104, 255, 163, $transparency);
-}
+$c2 = #3eff89;
 colorRerollButton(){
-  background-color: #3eff89;
+  background-color: $c2;
   background-color: rgba(62, 255, 137, $transparency);
+}
+$c3 = #68ffa3;
+colorAcceptButton(){
+  background-color: $c3;
+  background-color: rgba(104, 255, 163, $transparency);
 }
 colorRerollButtonUsed(){
   colorUsed();
@@ -60,9 +62,9 @@ colorMenuPad(){
 }
 
 ::selection
-  background: lighten($c1, 50%); /* Safari */
+  background: lighten($c2, 50%); /* Safari */
 ::-moz-selection
-  background: lighten($c1, 50%); /* Firefox */
+  background: lighten($c2, 50%); /* Firefox */
 body
   margin: 0 auto;
   padding: 0px;
@@ -137,6 +139,26 @@ table
   /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
   cursor: default;
   colorCombinationUsed();
+//.combination.ng-enter,
+//.combination.ng-leave,
+.combination.ng-move {
+  -webkit-transition:0.5s linear all;
+  -moz-transition:0.5s linear all;
+  -ms-transition:0.5s linear all;
+  -o-transition:0.5s linear all;
+  transition:0.5s linear all;
+}
+
+.combination.ng-enter,
+.combination.ng-move { opacity: $transparency; }
+
+.combination.ng-enter.ng-enter-active,
+.combination.ng-move.ng-move-active { opacity:1; }
+
+.combination.ng-leave { opacity:1; }
+
+.combination.ng-leave.ng-leave-active { opacity: $transparency; }
+
 .playerName
   cursor: pointer;
 .playerName.selected

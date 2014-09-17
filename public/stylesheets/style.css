@@ -11,11 +11,11 @@
 /*vars*/
 /*mixins*/
 ::selection {
-  background: #ff9b95;
+  background: #9fffc4;
 /* Safari */
 }
 ::-moz-selection {
-  background: #ff9b95;
+  background: #9fffc4;
 /* Firefox */
 }
 body {
@@ -112,6 +112,27 @@ table {
   cursor: default;
   background-color: #999;
   background-color: rgba(153,153,153,0.618);
+}
+.combination.ng-move {
+  -webkit-transition: 0.5s linear all;
+  -moz-transition: 0.5s linear all;
+  -ms-transition: 0.5s linear all;
+  -o-transition: 0.5s linear all;
+  transition: 0.5s linear all;
+}
+.combination.ng-enter,
+.combination.ng-move {
+  opacity: 0.618;
+}
+.combination.ng-enter.ng-enter-active,
+.combination.ng-move.ng-move-active {
+  opacity: 1;
+}
+.combination.ng-leave {
+  opacity: 1;
+}
+.combination.ng-leave.ng-leave-active {
+  opacity: 0.618;
 }
 .playerName {
   cursor: pointer;

@@ -10,7 +10,7 @@
 
     console.log("angTest", angular);
 
-    var jApp = angular.module('jApp', []);
+    var jApp = angular.module('jApp', ['ngAnimate']);
     console.log("jApp", jApp);
 
     jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
@@ -46,14 +46,14 @@
                     console.log("game wasn't found yet");
 
                     var message = 'searching for a game';
+                    message += ', if nothing is happening for too long touch [restart], ';
+                    message += 'players searching now: ';
+                    if ($scope.game.playersSearching) message += $scope.game.playersSearching;
 
                     for (var i = 0; i < findTick; i++) message += '.';
                     findTick++;
                     if (findTick > 3) findTick = 0;
 
-                    message += ', if nothing is happening for too long touch [restart], ';
-                    message += 'players searching now: ';
-                    if ($scope.game.playersSearching) message += $scope.game.playersSearching;
                     $scope.comment = message;
 
                     lastAction = $scope.findGame;
@@ -101,7 +101,6 @@
             }
 
             var status = $scope.game.status;
-            console.warn(status, status == undefined);
             var needConfirmation = status != undefined && status != 90 && status != -1;
             if (needConfirmation) {
                 var confirmed = confirm("Leave this game and start new one?");
@@ -159,6 +158,7 @@
                 }
             }
 
+            combo.used = true;
             $http.get('/api/combination/'+index.toString()).success(function(data){
                 $scope.game.rerolled = false;
                 $scope.currentSelected = [false, false, false, false, false, false];
@@ -207,7 +207,9 @@
         $scope.perfectCombosSort = function(combo){
             var ans = combo.points;
 
-            if (combo.used == true) ans -= 100;
+            //if (combo.used == true) ans -= 100;
+            // it depends on order of elements (and blinking while reordering)
+            if (combo.used == true) ans = (ans+100) * (-1);
             return ans;
         };
 
@@ -240,6 +242,24 @@
 
             $scope.currentRound = lastRound;
 
+            if ($scope.preparedCombos == null){
+                $scope.preparedCombos = preparedCombos;
+            } else {
+                for (var pi = 0; pi < preparedCombos.length; pi++){
+                    if (preparedCombos[pi].index == $scope.preparedCombos[pi].index) {
+                        // this method (obj = obj) is blinking
+                        //if (preparedCombos[pi].used != $scope.preparedCombos[pi].used
+                        //    || preparedCombos[pi].points != $scope.preparedCombos[pi].points)
+                        //    $scope.preparedCombos[pi] = preparedCombos[pi];
+                        if (preparedCombos[pi].used != $scope.preparedCombos[pi].used){
+                            $scope.preparedCombos[pi].used = preparedCombos[pi].used;
+                        }
+                        if (preparedCombos[pi].points != $scope.preparedCombos[pi].points){
+                            $scope.preparedCombos[pi].points = preparedCombos[pi].points;
+                        }
+                    }
+                }
+            }
         }
 
         function getUsedCombinations(){

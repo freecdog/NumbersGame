@@ -162,6 +162,9 @@ var gamesCounter = 0;
 var games = {};
 var gamesInProgress = {};
 
+function generatePlayerName(){
+    return "player" + (10000 * Math.random()).toFixed(0);
+}
 function prepareIpToConsole(req){
     return 'ip:'+req.connection.remoteAddress;
 }
@@ -244,7 +247,7 @@ function prepareGame() {
             var connectedCookie = connectedCookies[userSessionId];
             var playerName = "";
             if (connectedCookie.name == null){
-                connectedCookie.name = "player" + (10000 * Math.random()).toFixed(0);
+                connectedCookie.name = generatePlayerName();
             }
             game.names.push(connectedCookie.name);
 
@@ -949,15 +952,24 @@ app.get("/api/changeName/:name", function(req, res){
 });
 
 app.get("/api/getName", function(req, res){
-    var connectedCookie = connectedCookies[req.sessionID];
-    if (connectedCookie !== undefined) {
-        console.log(prepareIpToConsole(req) + ", getting name");
+    console.log(prepareIpToConsole(req) + ", getting name");
 
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie === undefined) {
+        connectedCookie = {};
+        connectedCookies[req.sessionID] = connectedCookie;
+    }
+
+    if (connectedCookie !== undefined) {
         var ans = {login: null};
 
         console.log('connectedCookie:', JSON.stringify(connectedCookie));
         if (connectedCookie.name !== undefined){
             ans.login = connectedCookie.name;
+        } else {
+            var name = generatePlayerName();
+            connectedCookie.name = name;
+            ans.login = name;
         }
 
         res.send(ans);

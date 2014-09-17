@@ -6,6 +6,7 @@ html(ng-app='jApp')
         title
             | NumbersGame on angularjs
         script(src='javascripts/angular.js')
+        script(src='javascripts/angular-animate.js')
         script(src='javascripts/angNumbers.js')
 
         script(src="/javascripts/underscore.js")
@@ -52,7 +53,7 @@ html(ng-app='jApp')
                 )
             div(ng-show='game.winner == null')
                 div(
-                    ng-repeat='combo in currentRound.preparedCombos | orderBy:perfectCombosSort:true',
+                    ng-repeat='combo in preparedCombos | orderBy:perfectCombosSort:true',
                     class='combination',
                     ng-class='{used: combo.used}',
                     ng-click='acceptCombination(combo)'
