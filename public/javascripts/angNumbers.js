@@ -15,8 +15,7 @@
 
     jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
 
-        // till http request doesn't processed there will be temp data
-        $scope.combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
+        var combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
             "Dreir Pasch", "Vierer Pasch", "Full House",
             "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
         clearPlayground();
@@ -32,6 +31,7 @@
             });
         };
 
+        var findTick = 0;
         $scope.findGame = function(){
             $http.get('/api/findGame').success(function(data){
                 console.log("data fetched, from find:", data);
@@ -45,8 +45,16 @@
                 } else {
                     console.log("game wasn't found yet");
 
-                    $scope.comment = 'searching for a game, if nothing is happening for too long touch [restart], '
-                        + 'players searching: ' + $scope.game.playersSearching;
+                    var message = 'searching for a game';
+
+                    for (var i = 0; i < findTick; i++) message += '.';
+                    findTick++;
+                    if (findTick > 3) findTick = 0;
+
+                    message += ', if nothing is happening for too long touch [restart], ';
+                    message += 'players searching now: ';
+                    if ($scope.game.playersSearching) message += $scope.game.playersSearching;
+                    $scope.comment = message;
 
                     lastAction = $scope.findGame;
                 }
@@ -86,9 +94,23 @@
         };
 
         $scope.restart = function(){
-            $http.get('/api/giveup').success(function(){
-                $scope.connect();
-            });
+            function doRestart(){
+                $http.get('/api/giveup').success(function(){
+                    $scope.connect();
+                });
+            }
+
+            var status = $scope.game.status;
+            console.warn(status, status == undefined);
+            var needConfirmation = status != undefined && status != 90 && status != -1;
+            if (needConfirmation) {
+                var confirmed = confirm("Leave this game and start new one?");
+                if (confirmed) {
+                    doRestart();
+                }
+            } else {
+                doRestart();
+            }
         };
 
         $scope.reroll = function(){
@@ -121,7 +143,9 @@
             });
         };
 
-        $scope.accpetCombination = function(index){
+        $scope.acceptCombination = function(combo){
+            var index = combo.index;
+
             if ($scope.game.clickable === false) {
                 console.log('It is not your playground');
                 return;
@@ -170,7 +194,7 @@
         $scope.$watch('game.status', function(newValue){
             console.log('status changed to', newValue);
             if (newValue === undefined) {
-                $scope.comment = 'searching for a game, if nothing is happening for too long touch [restart]' + $scope.playersSearching;
+                $scope.comment = 'searching for a game, if nothing is happening for too long touch [restart]';
             } else if (newValue === 20) {
                 $scope.comment = 'game in progress';
             } else if (newValue === 90) {
@@ -179,6 +203,13 @@
                 $scope.comment = 'unknown state';
             }
         }, false);
+
+        $scope.perfectCombosSort = function(combo){
+            var ans = combo.points;
+
+            if (combo.used == true) ans -= 100;
+            return ans;
+        };
 
         function updateCurrentRound(){
             var pId = $scope.game.playerIndex;
@@ -191,7 +222,24 @@
                 lastRound.combinations[rId] = getRound(rId).points;
             }
 
+            var preparedCombos = [];
+            for (var j = 0; j < lastRound.combinations.length; j++){
+                preparedCombos.push({
+                    index: j,
+                    name: combosNames[j],
+                    points: lastRound.combinations[j],
+                    used: false
+                });
+            }
+            for (var k = 0; k < usedCombos.length; k++) {
+                preparedCombos[usedCombos[k]].used = true;
+            }
+            //console.warn(preparedCombos);
+
+            lastRound.preparedCombos = preparedCombos;
+
             $scope.currentRound = lastRound;
+
         }
 
         function getUsedCombinations(){

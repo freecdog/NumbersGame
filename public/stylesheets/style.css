@@ -77,24 +77,31 @@ table {
 .restartGameButton {
   text-align: right;
   font-size: 2em;
+  cursor: pointer;
   background-color: #ff362b;
   background-color: rgba(255,54,43,0.618);
 }
 .rerollButton {
   text-align: left;
   font-size: 2em;
+  cursor: pointer;
   background-color: #3eff89;
   background-color: rgba(62,255,137,0.618);
 }
 .rerollButton.used {
+  cursor: default;
   background-color: #999;
   background-color: rgba(153,153,153,0.618);
 }
 .acceptCombinationButton {
   text-align: center;
   font-size: 2em;
+  cursor: pointer;
   background-color: #68ffa3;
   background-color: rgba(104,255,163,0.618);
+}
+.combination {
+  cursor: pointer;
 }
 .combination.selected {
   background-color: #b27571;
@@ -102,8 +109,15 @@ table {
 }
 .combination.used {
 /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+  cursor: default;
   background-color: #999;
   background-color: rgba(153,153,153,0.618);
+}
+.playerName {
+  cursor: pointer;
+}
+.playerName.selected {
+  cursor: default;
 }
 .menuElement {
   display: block;
@@ -171,6 +185,7 @@ table {
   width: 100px;
   -moz-border-radius: 20px;
   border-radius: 20px;
+  cursor: pointer;
 }
 .dice.d1 {
   background: url("../images/dices/white/1.png");

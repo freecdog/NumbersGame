@@ -37,8 +37,10 @@ html(ng-app='jApp')
                 span {{game.status}}: {{comment}}
             div(class='namesView')
                 span(ng-repeat='name in game.names track by $index',
+                    class='playerName',
                     ng-click='showPlayer($index)',
-                    style='font-weight: {{$index == game.myPlayerIndex ? \'bold\' : \'normal\'}}; text-decoration: {{($index == game.playerIndex && game.playerIndex != game.myPlayerIndex) ? \'underline\' : \'none\'}};'
+                    style='font-weight: {{$index == game.myPlayerIndex ? "bold" : "normal"}}; text-decoration: {{($index == game.playerIndex && game.playerIndex != game.myPlayerIndex) ? "underline" : "none"}};',
+                    ng-class='{selected: $index == game.playerIndex}'
                 ) &nbsp;{{name | bracketMe}}&nbsp;
 
             div(ng-show='game.winner == null')
@@ -50,11 +52,11 @@ html(ng-app='jApp')
                 )
             div(ng-show='game.winner == null')
                 div(
-                    ng-repeat='combo in currentRound.combinations track by $index',
+                    ng-repeat='combo in currentRound.preparedCombos | orderBy:perfectCombosSort:true',
                     class='combination',
-                    ng-class='{used: usedCombinations[$index]}',
-                    ng-click='accpetCombination($index)'
-                ) {{combosNames[$index]}}: {{combo}}
+                    ng-class='{used: combo.used}',
+                    ng-click='acceptCombination(combo)'
+                ) {{combo.name}}: {{combo.points}}
 
 
             div(ng-show='game.winner != null')

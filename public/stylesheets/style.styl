@@ -114,22 +114,33 @@ table
 .restartGameButton
   text-align: right;
   font-size: 2em;
+  cursor: pointer;
   colorRestartButton();
 .rerollButton
   text-align: left;
   font-size: 2em;
+  cursor: pointer;
   colorRerollButton();
 .rerollButton.used
+  cursor: default;
   colorRerollButtonUsed();
 .acceptCombinationButton
   text-align: center;
   font-size: 2em;
+  cursor: pointer;
   colorAcceptButton();
+.combination
+  cursor: pointer;
 .combination.selected
   colorCombinationSelected();
 .combination.used
   /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+  cursor: default;
   colorCombinationUsed();
+.playerName
+  cursor: pointer;
+.playerName.selected
+  cursor: default;
 
 .menuElement
   display: block;
@@ -191,6 +202,7 @@ table
   width: 100px;
   -moz-border-radius: 20px;
   border-radius: 20px;
+  cursor: pointer;
 .dice.d1
   background: url("../images/dices/white/1.png");
 .dice.d1.selected
