@@ -61,7 +61,8 @@ html(ng-app='jApp')
                     ng-click='acceptCombination(combo)'
                 ) {{combo.name}}: {{combo.points}}
             div(ng-show='game.winner == null')
-                div total: {{sums.total}}
+                div(ng-show='preparedCombos != null')
+                    div total: {{sums.total}}
 
 
             div(ng-show='game.winner != null')
