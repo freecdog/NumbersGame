@@ -202,6 +202,7 @@ table {
 }
 .dice {
   display: inline-block;
+  background-size: 100% auto;
   height: 100px;
   width: 100px;
   -moz-border-radius: 20px;
@@ -210,6 +211,7 @@ table {
 }
 .dice.d1 {
   background: url("../images/dices/white/1.png");
+  background-size: 100% auto;
 }
 .dice.d1.selected {
   background-color: #b27571;
@@ -217,6 +219,7 @@ table {
 }
 .dice.d2 {
   background: url("../images/dices/white/2.png");
+  background-size: 100% auto;
 }
 .dice.d2.selected {
   background-color: #b27571;
@@ -224,6 +227,7 @@ table {
 }
 .dice.d3 {
   background: url("../images/dices/white/3.png");
+  background-size: 100% auto;
 }
 .dice.d3.selected {
   background-color: #b27571;
@@ -231,6 +235,7 @@ table {
 }
 .dice.d4 {
   background: url("../images/dices/white/4.png");
+  background-size: 100% auto;
 }
 .dice.d4.selected {
   background-color: #b27571;
@@ -238,6 +243,7 @@ table {
 }
 .dice.d5 {
   background: url("../images/dices/white/5.png");
+  background-size: 100% auto;
 }
 .dice.d5.selected {
   background-color: #b27571;
@@ -245,6 +251,7 @@ table {
 }
 .dice.d6 {
   background: url("../images/dices/white/6.png");
+  background-size: 100% auto;
 }
 .dice.d6.selected {
   background-color: #b27571;
@@ -252,13 +259,17 @@ table {
 }
 .dice.d0 {
   background: url("../images/dices/white/0.png");
+  background-size: 100% auto;
 }
 .dice.d7 {
   background: url("../images/dices/white/7.png");
+  background-size: 100% auto;
 }
 .dice.d8 {
   background: url("../images/dices/white/8.png");
+  background-size: 100% auto;
 }
 .dice.d9 {
   background: url("../images/dices/white/9.png");
+  background-size: 100% auto;
 }

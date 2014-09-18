@@ -141,23 +141,22 @@ table
   colorCombinationUsed();
 //.combination.ng-enter,
 //.combination.ng-leave,
-.combination.ng-move {
+.combination.ng-move
   -webkit-transition:0.5s linear all;
   -moz-transition:0.5s linear all;
   -ms-transition:0.5s linear all;
   -o-transition:0.5s linear all;
   transition:0.5s linear all;
-}
-
 .combination.ng-enter,
-.combination.ng-move { opacity: $transparency; }
-
+.combination.ng-move
+  opacity: $transparency;
 .combination.ng-enter.ng-enter-active,
-.combination.ng-move.ng-move-active { opacity:1; }
-
-.combination.ng-leave { opacity:1; }
-
-.combination.ng-leave.ng-leave-active { opacity: $transparency; }
+.combination.ng-move.ng-move-active
+  opacity:1;
+.combination.ng-leave
+  opacity:1;
+.combination.ng-leave.ng-leave-active
+  opacity: $transparency;
 
 .playerName
   cursor: pointer;
@@ -220,6 +219,7 @@ table
   text-align: center;
 .dice
   display: inline-block;
+  background-size: 100% auto;
   height: 100px;
   width: 100px;
   -moz-border-radius: 20px;
@@ -227,35 +227,45 @@ table
   cursor: pointer;
 .dice.d1
   background: url("../images/dices/white/1.png");
+  background-size: 100% auto;
 .dice.d1.selected
   colorDiceSelected();
 .dice.d2
   background: url("../images/dices/white/2.png");
+  background-size: 100% auto;
 .dice.d2.selected
   colorDiceSelected();
 .dice.d3
   background: url("../images/dices/white/3.png");
+  background-size: 100% auto;
 .dice.d3.selected
   colorDiceSelected();
 .dice.d4
   background: url("../images/dices/white/4.png");
+  background-size: 100% auto;
 .dice.d4.selected
   colorDiceSelected();
 .dice.d5
   background: url("../images/dices/white/5.png");
+  background-size: 100% auto;
 .dice.d5.selected
   colorDiceSelected();
 .dice.d6
   background: url("../images/dices/white/6.png");
+  background-size: 100% auto;
 .dice.d6.selected
   colorDiceSelected();
 
 .dice.d0
   background: url("../images/dices/white/0.png");
+  background-size: 100% auto;
 .dice.d7
   background: url("../images/dices/white/7.png");
+  background-size: 100% auto;
 .dice.d8
   background: url("../images/dices/white/8.png");
+  background-size: 100% auto;
 .dice.d9
   background: url("../images/dices/white/9.png");
+  background-size: 100% auto;
 

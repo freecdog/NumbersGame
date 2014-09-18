@@ -13,7 +13,35 @@
     var jApp = angular.module('jApp', ['ngAnimate']);
     console.log("jApp", jApp);
 
-    jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
+    function getScreenSize(){
+        var winW = 600, winH = 333;
+        if (document.body && document.body.offsetWidth) {
+            winW = document.body.offsetWidth;
+            winH = document.body.offsetHeight;
+        }
+        if (document.compatMode=='CSS1Compat' && document.documentElement && document.documentElement.offsetWidth ) {
+            winW = document.documentElement.offsetWidth;
+            winH = document.documentElement.offsetHeight;
+        }
+        var lastW = winW, lastH = winH;
+        if (window.innerWidth && window.innerHeight) {
+            winW = window.innerWidth;
+            winH = window.innerHeight;
+        }
+        // to detect scroll width
+        if (Math.abs(lastW - winW) < 30) winW = Math.min(lastW, winW);
+        if (Math.abs(lastH - winH) < 30) winH = Math.min(lastH, winH);
+        return {width: winW, height: winH};
+    }
+    function calculateDiceSize(){
+        var screenSize = getScreenSize();
+        var diceWidth = Math.floor((screenSize.width) / 6) - 1;
+        if (diceWidth > 100) diceWidth = 100;
+        var diceBorderRadius = Math.floor(diceWidth / 5);
+        return {diceWidth: diceWidth, diceBorderRadius: diceBorderRadius};
+    }
+
+    jApp.controller('jController', ['$scope', '$http', '$window', function($scope, $http, $window) {
 
         var combosNames;
         $scope.language = 'en';
@@ -273,6 +301,21 @@
                     }
                 }
             }
+
+            // sums
+            var sums = {total: 0, sumNumbers: 0, sumBonus: 0, sumNames: 0};
+            for (var si = 0; si < usedCombos.length; si++) {
+                var roundPoints = lastRound.combinations[usedCombos[si]];
+                // if index of used combination is below 6 (Ones, Twos, ..., Sixes) sum to sumNumbers
+                if (usedCombos[si] < 6)
+                    sums.sumNumbers += roundPoints;
+                else
+                    sums.sumNames += roundPoints;
+            }
+            if (sums.sumNumbers >= 63) sums.sumBonus += 35;
+            sums.total = sums.sumNumbers + sums.sumBonus + sums.sumNames;
+            //console.log('sums', sums.total, sums.sumNumbers, sums.sumBonus, sums.sumNames);
+            $scope.sums = sums;
         }
 
         function getUsedCombinations(){
@@ -306,6 +349,20 @@
             // combos
             $scope.usedCombinations = [];
         }
+
+        function changeDiceSize(){
+            var ds = calculateDiceSize();
+            $scope.diceSize = ds.diceWidth;
+            $scope.diceBorderRadius = ds.diceBorderRadius.toString() + 'px';
+            //console.warn($scope.diceSize);
+        }
+        changeDiceSize();
+
+        var w = angular.element($window);
+        w.bind('resize', function () {
+            changeDiceSize();
+        });
+
 
         // Start!!!
         $scope.connect();

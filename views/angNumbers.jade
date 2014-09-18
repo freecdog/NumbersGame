@@ -49,6 +49,7 @@ html(ng-app='jApp')
                     div(
                         ng-repeat='dice in currentRound.dices track by $index',
                         class='dice d{{dice}}',
+                        ng-style='{width: diceSize, height: diceSize, "-moz-border-radius": diceBorderRadius, "border-radius": diceBorderRadius}',
                         ng-class='{selected: currentSelected[$index]}',
                         ng-click='toggleDice($index)'
                     )
@@ -59,6 +60,8 @@ html(ng-app='jApp')
                     ng-class='{used: combo.used}',
                     ng-click='acceptCombination(combo)'
                 ) {{combo.name}}: {{combo.points}}
+            div(ng-show='game.winner == null')
+                div total: {{sums.total}}
 
 
             div(ng-show='game.winner != null')
