@@ -15,9 +15,22 @@
 
     jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
 
-        var combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
-            "Dreir Pasch", "Vierer Pasch", "Full House",
-            "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
+        var combosNames;
+        $scope.language = 'en';
+        if ($scope.language == 'ru') {
+            combosNames = ["Единицы", "Двойки", "Тройки", "Четверки", "Пятерки", "Шестерки",
+                "Сет", "Каре", "Фул-хаус",
+                "Маленькая улица", "Большая улица", "Язь", "Шанс"];
+        } else if ($scope.language == 'de') {
+            combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
+                "Dreir Pasch", "Vierer Pasch", "Full House",
+                "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
+        } else {
+            combosNames = ["Ones", "Twos", "Threes", "Fours", "Fives", "Sixes",
+                "3 of a kind", "4 of a kind", "Full house",
+                "Small straight", "Large straight", "Yatzy", "Chance"];
+        }
+
         clearPlayground();
 
         var lastAction = function(){};
