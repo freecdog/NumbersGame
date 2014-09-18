@@ -45,12 +45,13 @@ html(ng-app='jApp')
                 ) &nbsp;{{name | bracketMe}}&nbsp;
 
             div(ng-show='game.winner == null')
-                div(
-                    ng-repeat='dice in currentRound.dices track by $index',
-                    class='dice d{{dice}}',
-                    ng-class='{selected: currentSelected[$index]}',
-                    ng-click='toggleDice($index)'
-                )
+                div(class='dicesHolder')
+                    div(
+                        ng-repeat='dice in currentRound.dices track by $index',
+                        class='dice d{{dice}}',
+                        ng-class='{selected: currentSelected[$index]}',
+                        ng-click='toggleDice($index)'
+                    )
             div(ng-show='game.winner == null')
                 div(
                     ng-repeat='combo in preparedCombos | orderBy:perfectCombosSort:true',
