@@ -5,11 +5,13 @@ html(ng-app='jApp')
     head
         title
             | NumbersGame on angularjs
+
+        script(src="/javascripts/underscore.js")
+        script(src="/javascripts/Localization.js")
+
         script(src='javascripts/angular.js')
         script(src='javascripts/angular-animate.js')
         script(src='javascripts/angNumbers.js')
-
-        script(src="/javascripts/underscore.js")
 
         link(rel='stylesheet', href='stylesheets/style.css')
 
@@ -20,7 +22,7 @@ html(ng-app='jApp')
         div(ng-controller='jController')
             p
                 div(class="menuElement menuPad")
-                    a(href="/", ng-click='stopFindGame()') Menu
+                    a(href="/", ng-click='stopFindGame()') {{localization.Menu.menu}}
 
             //-input(class='inputSubmitView', ng-click='connect()', value='connect')
             //-input(class='inputSubmitView', ng-click='findGame()', value='find')
@@ -29,13 +31,13 @@ html(ng-app='jApp')
                 tr
                     td(style='width: 50%; padding: 0;')
                         div(class='rerollButton', ng-class='{used: game.rerolled}', ng-click='reroll()', value='reroll')
-                            | [reroll]
+                            | [{{localization.Play.Buttons.reroll}}]
                     td(style='width: 50%; padding: 0;')
                         div(class='restartGameButton', ng-click='restart()', value='restart')
-                            | [restart]
+                            | [{{localization.Play.Buttons.restart}}]
 
             div
-                span {{game.status}}: {{comment}}
+                span(ng-click='language = language=="ru" ? "en" : "ru"') {{game.status}}: {{localization.Play.Statuses[game.status.toString()]}}{{comment}}
             div(class='namesView')
                 span(ng-repeat='name in game.names track by $index',
                     class='playerName',
@@ -62,10 +64,10 @@ html(ng-app='jApp')
                 ) {{combo.name}}: {{combo.points}}
             div(ng-show='game.winner == null')
                 div(ng-show='preparedCombos != null')
-                    div total: {{sums.total}}
+                    div(ng-click='language = language=="ru" ? "en" : "ru"') {{localization.Play.Other.total}} {{sums.total}}
 
 
             div(ng-show='game.winner != null')
-                p Winner is {{game.winner.name}}
-                p Results:
+                p {{localization.Play.Winners.winner}} {{game.winner.name}}
+                p {{localization.Play.Winners.results}}
                 p(ng-repeat='result in game.results | orderBy:"-result" track by $index') {{$index+1}}. {{result.name}}: {{result.result}}

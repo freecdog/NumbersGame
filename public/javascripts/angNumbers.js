@@ -43,21 +43,27 @@
 
     jApp.controller('jController', ['$scope', '$http', '$window', function($scope, $http, $window) {
 
-        var combosNames;
+        $scope.combosNames = [];
+
+        //TODO, when searching game after previous finished language doesn't change
         $scope.language = 'en';
-        if ($scope.language == 'ru') {
-            combosNames = ["Единицы", "Двойки", "Тройки", "Четверки", "Пятерки", "Шестерки",
-                "Сет", "Каре", "Фул-хаус",
-                "Маленькая улица", "Большая улица", "Язь", "Шанс"];
-        } else if ($scope.language == 'de') {
-            combosNames = ["1er", "2er", "3er", "4er", "5er", "6er",
-                "Dreir Pasch", "Vierer Pasch", "Full House",
-                "Kleine Straße", "Große Straße", "Yazzee", "Chance"];
-        } else {
-            combosNames = ["Ones", "Twos", "Threes", "Fours", "Fives", "Sixes",
-                "3 of a kind", "4 of a kind", "Full house",
-                "Small straight", "Large straight", "Yatzy", "Chance"];
-        }
+
+        $scope.$watch('language', function(newValue){
+            $scope.localization = Localization[$scope.language];
+
+            console.log('language changed to', newValue);
+            var lang = Localization[$scope.language];
+            var langCombos = lang.Play.Combinations;
+            $scope.combosNames = [];
+            for (var langCombo in langCombos){
+                if (langCombos.hasOwnProperty(langCombo)){
+                    $scope.combosNames.push(langCombos[langCombo]);
+                }
+            }
+            // to force change text
+            lastAction();
+            updateCurrentRound();
+        }, false);
 
         clearPlayground();
 
@@ -81,15 +87,19 @@
                 if ($scope.game.playersOnline == null) {
                     if ($scope.game.myPlayerIndex == undefined) $scope.game.myPlayerIndex = $scope.game.playerIndex;
 
+                    $scope.comment = '';
                     clearPlayground();
                     $scope.getDice();
                 } else {
                     console.log("game wasn't found yet");
 
-                    var message = 'searching for a game';
-                    message += ', if nothing is happening for too long touch [restart], ';
-                    message += 'players searching now: ';
-                    if ($scope.game.playersSearching) message += $scope.game.playersSearching;
+                    var message = '';
+                    //message += 'searching for a game, if nothing is happening for too long touch [restart], players searching now: ';
+                    if ($scope.game.playersSearching) {
+                        //message += ', players searching now: ';
+                        message += $scope.localization.Play.Other.playersSearching;
+                        message += $scope.game.playersSearching;
+                    }
 
                     for (var i = 0; i < findTick; i++) message += '.';
                     findTick++;
@@ -234,7 +244,7 @@
 
         $scope.$watch('game.status', function(newValue){
             console.log('status changed to', newValue);
-            if (newValue === undefined) {
+            /*if (newValue === undefined) {
                 $scope.comment = 'searching for a game, if nothing is happening for too long touch [restart]';
             } else if (newValue === 20) {
                 $scope.comment = 'game in progress';
@@ -242,7 +252,7 @@
                 $scope.comment = 'game is finished, touch [restart] to play again';
             } else {
                 $scope.comment = 'unknown state';
-            }
+            }*/
         }, false);
 
         $scope.perfectCombosSort = function(combo){
@@ -255,6 +265,10 @@
         };
 
         function updateCurrentRound(){
+            if (!$scope.game) {
+                console.log("game isn't initialized yet");
+                return;
+            }
             var pId = $scope.game.playerIndex;
             var rounds = $scope.game.rounds[pId];
 
@@ -269,7 +283,7 @@
             for (var j = 0; j < lastRound.combinations.length; j++){
                 preparedCombos.push({
                     index: j,
-                    name: combosNames[j],
+                    name: $scope.combosNames[j],
                     points: lastRound.combinations[j],
                     used: false
                 });
@@ -297,6 +311,9 @@
                         }
                         if (preparedCombos[pi].points != $scope.preparedCombos[pi].points){
                             $scope.preparedCombos[pi].points = preparedCombos[pi].points;
+                        }
+                        if (preparedCombos[pi].name != $scope.preparedCombos[pi].name){
+                            $scope.preparedCombos[pi].name = preparedCombos[pi].name;
                         }
                     }
                 }
