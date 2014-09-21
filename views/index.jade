@@ -6,7 +6,6 @@ block headData
 
 block content
     p
-    div(id="nameForm")
 
     div(id='menuPlayButton', class="menuElement menuPad")
         a(href="/ang", onclick='setSearchPlayersCount(1);') Singleplayer
@@ -19,7 +18,7 @@ block content
     div(class="menuElement menuPad")
         a(href="/onlineStatistics") Online statistics
     div(class="menuElement menuPad")
-        a(href="/configuration") Configuration
+        a(href="/configuration") Settings
     div(class="menuElement menuPad")
         a(href="/rules") Rules
     div(class="menuElement menuPad")
@@ -45,36 +44,3 @@ block content
 
     p
         | &nbsp;
-
-    script.
-        function setSearchPlayersCount(count){
-            localStorage.setItem("searchPlayersCount", count.toString());
-        }
-        function isNumber(n) {
-            return !isNaN(parseFloat(n)) && isFinite(n);
-        }
-        function getSearchPlayersCount(){
-            var defaultCount = '2';
-            var localStorage = window.localStorage;
-            if (!localStorage) return defaultCount;
-            var searchPlayersCount = localStorage.getItem("searchPlayersCount");
-            if (isNumber(searchPlayersCount)) {
-                //searchPlayersCount = Math.floor(parseFloat(searchPlayersCount));
-                return searchPlayersCount;
-            } else return defaultCount;
-        }
-        function getMultiplayerPlayersCount(){
-            var defaultCount = '2';
-            console.warn(localStorage);
-            if (!localStorage) return defaultCount;
-            var searchPlayersCount = localStorage.getItem("multiplayerPlayersCount");
-            console.warn(searchPlayersCount);
-            if (isNumber(searchPlayersCount)) {
-                //searchPlayersCount = Math.floor(parseFloat(searchPlayersCount));
-                return searchPlayersCount;
-            } else return defaultCount;
-        }
-        function setSearchPlayersForMultiplayer(){
-            var multiplayerPlayersCount = getMultiplayerPlayersCount();
-            setSearchPlayersCount(multiplayerPlayersCount);
-        }

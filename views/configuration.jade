@@ -14,14 +14,16 @@ block content
                 a(href="/") Menu
 
         p(class='menuElement', style='text-align: left;') Name:
-        div(id="nameForm")
+        form(id="nameForm")
             input(
                 class='inputView',
+                name='nickname',
                 placeholder='nickname',
                 pattern='.{1,16}',
                 required='true',
                 title='min 1, max 16',
-                ng-model='name'
+                ng-model='name',
+                ng-submit='setName(name)'
             )
             input(
                 class='inputSubmitView',
@@ -32,7 +34,8 @@ block content
             )
 
         p
-        p(id='currentMultiplayerPlayersCount', class='menuElement', style='text-align: left;') Multiplayer players:
+        p(id='currentMultiplayerPlayersCount', class='menuElement', style='text-align: left;') Multiplayer
+        p(id='currentMultiplayerPlayersCount', class='menuElement', style='text-align: left;') Number of players:
         table
             tr
                 td(ng-repeat='playersCount in [2,3,4]')

@@ -28,6 +28,7 @@
         } else return defaultCount;
     }
 
+    // TODO, need correct ng validate
     jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
         $scope.multiplayerPlayersCount = getMultiplayerPlayersCount();
         $scope.$watch(getMultiplayerPlayersCount,function(newValue){
@@ -37,21 +38,26 @@
         $scope.setMultiplayerPlayersCount = function(count){
             setMultiplayerPlayersCount(count);
         };
-        $scope.$watch('name',function(newValue){
-            $scope.nameChanged = true;
+        $scope.$watch('name',function(newValue, oldValue){
+            console.log('nw', newValue, oldValue);
+            if (oldValue === undefined) $scope.nameChanged = false;
+            else $scope.nameChanged = true;
         },false);
 
         $scope.getName = function(){
             $http.get('/api/getName').success(function(data){
                 $scope.name = data.login;
-                $scope.nameChanged = false;
+
             });
         };
         $scope.setName = function(name){
-            console.log('sending name', name);
-            $http.get('/api/changeName/' + name).success(function(data){
-                $scope.name = data.login;
-            });
+            if (name){
+                console.log('sending name', name);
+                $http.get('/api/changeName/' + name).success(function(data){
+                    $scope.name = data.login;
+                    $scope.nameChanged = false;
+                });
+            }
         };
 
         // get name on load
