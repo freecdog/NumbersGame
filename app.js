@@ -231,7 +231,7 @@ function apiFindGame(req, res, connectedCookie, searchPlayersCount){
     var game = findGameById(req.sessionID);
     console.log("game:", game ? game._id : null);//, JSON.stringify(game));
     if (game == null) {
-        game = collectOnlineStatistics();
+        game = collectOnlineStatistics(searchPlayersCount);
 
         res.send(game);
     } else {
@@ -414,15 +414,17 @@ function calculateResult(rounds){
     return ans;
 }
 
-function collectOnlineStatistics(){
+function collectOnlineStatistics(searchPlayersCount){
     var data = {};
     data.playersOnline = Object.keys(connectedCookies).length;
     data.playersSearching = 0;
     data.activeGames = 0;
     for(var player in connectedCookies) {
         if (connectedCookies[player] !== undefined){
-            if (connectedCookies[player].status == 2) {
-                data.playersSearching++;
+            var connectedCookie = connectedCookies[player];
+            if (connectedCookie.status == 2) {
+                if (searchPlayersCount == null) data.playersSearching++;
+                else if (connectedCookie.searchPlayersCount == searchPlayersCount) data.playersSearching++;
             }
         }
     }
@@ -446,6 +448,9 @@ app.get('/ang',function(req,res){
 //app.get('/play', function(req,res){
 //    res.render("play");
 //});
+app.get('/configuration',function(req,res){
+    res.render('configuration');
+});
 app.get('/onlineStatistics', function(req, res){
     var st = new Date();
     removeExpiredConnections();

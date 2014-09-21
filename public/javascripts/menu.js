@@ -221,7 +221,7 @@
     // looks like main application class
     $.menu.Router = Backbone.Router.extend({
         routes: {
-            "": "menu"
+            "configuration": "menu"
         },
         initialize: function(){
             console.log("1. app init");
