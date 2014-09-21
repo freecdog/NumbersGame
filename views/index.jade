@@ -12,7 +12,13 @@ block content
         div(class="menuElement menuPad")
             a(href="/play") Play
     div(id='menuPlayButton', class="menuElement menuPad")
-        a(href="/ang") Play
+        a(href="/ang", onclick='setSearchPlayersCount(1);') Single Player
+    div(id='menuPlayButton', class="menuElement menuPad")
+        a(href="/ang", onclick='setSearchPlayersCount(2);') 2 players
+    div(id='menuPlayButton', class="menuElement menuPad")
+        a(href="/ang", onclick='setSearchPlayersCount(3);') 3 players
+    div(id='menuPlayButton', class="menuElement menuPad")
+        a(href="/ang", onclick='setSearchPlayersCount(4);') 4 players
 
     //-div(class="menuElement", onclick="f1()") CLEAR STORAGE
     p
@@ -49,10 +55,6 @@ block content
 
     p
         | &nbsp;
-    p
-        | &nbsp;
-    p
-        | &nbsp;
 
     script(src="/javascripts/jquery-1.9.1.js")
     script(src="/javascripts/underscore.js")
@@ -64,4 +66,7 @@ block content
         })(jQuery);
         function f1(){
             localStorage.clear();
+        }
+        function setSearchPlayersCount(count){
+            localStorage.setItem("searchPlayersCount", count.toString());
         }

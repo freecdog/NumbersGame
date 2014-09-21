@@ -208,7 +208,45 @@ function removeExpiredConnections(){
         }
     }
 }
-function prepareGame() {
+function createPlayer(){
+    var connectedCookie = {};
+    connectedCookie.time = new Date();
+    //connectedCookie.status = 1; // connected
+    connectedCookie.searchPlayersCount = 2; // default value
+    return connectedCookie;
+}
+// connectedCookie status:
+// 1 — connected
+// 2 — searching for game
+// 3 — play a game
+function apiFindGame(req, res, connectedCookie, searchPlayersCount){
+    connectedCookie.time = new Date();
+    if (connectedCookie.status == 1)
+        connectedCookie.status = 2;
+    connectedCookie.searchPlayersCount = searchPlayersCount;
+
+    console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
+
+    prepareGame(searchPlayersCount);
+    var game = findGameById(req.sessionID);
+    console.log("game:", game ? game._id : null);//, JSON.stringify(game));
+    if (game == null) {
+        game = collectOnlineStatistics();
+
+        res.send(game);
+    } else {
+        var playerIndex = getPlayerIndexInGame(game, req.sessionID);
+        //game.playerIndex = playerIndex;
+        var gameWithPlayerIndex = {playerIndex: playerIndex};
+        _.extend(gameWithPlayerIndex, game);
+        //console.log("game to send (findGame):", gameWithPlayerIndex);
+
+        res.send(gameWithPlayerIndex);
+    }
+
+    removeExpiredConnections();
+}
+function prepareGame(numberOfPlayers) {
     var wannaPlayers = [];
 
     for (var key in connectedCookies) {
@@ -216,14 +254,15 @@ function prepareGame() {
             // if status "searching"
             var player = connectedCookies[key];
             player.id = key;
-            if (player.status == 2) {
+            if (player.status == 2 && player.searchPlayersCount == numberOfPlayers) {
                 wannaPlayers.push(key);
             }
         }
     }
 
     var len = wannaPlayers.length;
-    if (len >= config.minPlayers) {
+    //if (len >= config.minPlayers) {
+    if (len >= numberOfPlayers) {
         var gameId = "g" + gamesCounter.toString();
         gamesCounter++;
 
@@ -245,7 +284,6 @@ function prepareGame() {
             if (game.names == null) game.names = [];
 
             var connectedCookie = connectedCookies[userSessionId];
-            var playerName = "";
             if (connectedCookie.name == null){
                 connectedCookie.name = generatePlayerName();
             }
@@ -402,9 +440,12 @@ app.get('/', function(req, res){
     var stats = collectOnlineStatistics();
     res.render('index', { onlineStatistics: stats });
 });
-app.get('/play', function(req,res){
-    res.render("play");
+app.get('/ang',function(req,res){
+    res.render('angNumbers');
 });
+//app.get('/play', function(req,res){
+//    res.render("play");
+//});
 app.get('/onlineStatistics', function(req, res){
     var st = new Date();
     removeExpiredConnections();
@@ -781,11 +822,9 @@ app.get("/api/connectPlayer", function(req, res){
         }
         //if (connectedCookie.status == 80) connectedCookie.status = 2;
     } else {
-        connectedCookie = {};
+        connectedCookie = createPlayer();
         connectedCookies[req.sessionID] = connectedCookie;
-        connectedCookie.time = new Date();
         connectedCookie.status = 1; // connected
-        //connectedCookie.status = 2; // 2 because we are skipping POST find game request
     }
     console.log(req._remoteAddress + ", players connected, onliners: " + Object.keys(connectedCookies).length.toString());
     var data = collectOnlineStatistics();
@@ -805,37 +844,26 @@ app.get("/api/disconnectPlayer", function(req, res){
     res.send(Object.keys(connectedCookies).length.toString());
 });
 
-// connectedCookie status:
-// 1 — connected
-// 2 — searching for game
-// 3 — play a game
+// for backward compatibility
 app.get("/api/findGame", function(req, res){
     var connectedCookie = connectedCookies[req.sessionID];
     if (connectedCookie !== undefined){
-        connectedCookie.time = new Date();
-        if (connectedCookie.status == 1)
-            connectedCookie.status = 2;
-
-        console.log(req._remoteAddress + ", searching for game, onliners: " + Object.keys(connectedCookies).length.toString());
-
-        prepareGame();
-        var game = findGameById(req.sessionID);
-        console.log("game:", game ? game._id : null);//, JSON.stringify(game));
-        if (game == null) {
-            game = collectOnlineStatistics();
-
-            res.send(game);
+        var searchPlayersCount = 2;
+        apiFindGame(req, res, connectedCookie, searchPlayersCount);
+    } else {
+        res.send();
+    }
+});
+app.get("/api/findGame/:searchPlayersCount", function(req, res){
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie !== undefined){
+        var searchPlayersCount = req.params.searchPlayersCount[0];
+        if (searchPlayersCount == '1' || searchPlayersCount == '2' || searchPlayersCount == '3' || searchPlayersCount == '4') {
+            searchPlayersCount = parseInt(searchPlayersCount);
+            apiFindGame(req, res, connectedCookie, searchPlayersCount);
         } else {
-            var playerIndex = getPlayerIndexInGame(game, req.sessionID);
-            //game.playerIndex = playerIndex;
-            var gameWithPlayerIndex = {playerIndex: playerIndex};
-            _.extend(gameWithPlayerIndex, game);
-            //console.log("game to send (findGame):", gameWithPlayerIndex);
-
-            res.send(gameWithPlayerIndex);
+            res.send();
         }
-
-        removeExpiredConnections();
     } else {
         res.send();
     }
@@ -917,9 +945,8 @@ app.get("/api/changeName/:name", function(req, res){
 
             var connectedCookie = connectedCookies[req.sessionID];
             if (connectedCookie === undefined) {
-                connectedCookie = {};
+                connectedCookie = createPlayer();
                 connectedCookies[req.sessionID] = connectedCookie;
-                //connectedCookie.status = 2; // 2 because we are skipping POST find game request
             }
             connectedCookie.name = name;
             connectedCookie.time = new Date();
@@ -956,7 +983,7 @@ app.get("/api/getName", function(req, res){
 
     var connectedCookie = connectedCookies[req.sessionID];
     if (connectedCookie === undefined) {
-        connectedCookie = {};
+        connectedCookie = createPlayer();
         connectedCookies[req.sessionID] = connectedCookie;
     }
 
@@ -977,10 +1004,6 @@ app.get("/api/getName", function(req, res){
     } else {
         res.send(null);
     }
-});
-
-app.get('/ang',function(req,res){
-    res.render('angNumbers');
 });
 
 http.createServer(app).listen(app.get('port'), function(){

@@ -4,7 +4,7 @@
 
 // TODO, leftPlayers isn't presented
 
-(function (angular){
+(function (angular, window){
 
     "use strict";
 
@@ -40,8 +40,31 @@
         var diceBorderRadius = Math.floor(diceWidth / 5);
         return {diceWidth: diceWidth, diceBorderRadius: diceBorderRadius};
     }
+    function isNumber(n) {
+        return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+    function getSearchPlayersCount(){
+        var defaultCount = '2';
+        var localStorage = window.localStorage;
+        if (!localStorage) return defaultCount;
+        var searchPlayersCount = localStorage.getItem("searchPlayersCount");
+        if (isNumber(searchPlayersCount)) {
+            //searchPlayersCount = Math.floor(parseFloat(searchPlayersCount));
+            return searchPlayersCount;
+        } else return defaultCount;
+    }
 
     jApp.controller('jController', ['$scope', '$http', '$window', function($scope, $http, $window) {
+
+        // TODO, very abusive code
+        window.onbeforeunload = function() {
+            $scope.stopFindGame();
+            // without abusive loop, stopFind can't finish request
+            for (var i = 0, j = 0; i < 100000000; i++) { j++;}
+
+            // if return is defined you will see confirmation dialog while code above would be done
+            //return "yo, don't leave now";
+        };
 
         $scope.combosNames = [];
 
@@ -80,7 +103,8 @@
 
         var findTick = 0;
         $scope.findGame = function(){
-            $http.get('/api/findGame').success(function(data){
+            var searchPlayersCount = getSearchPlayersCount();
+            $http.get('/api/findGame' + '/' + searchPlayersCount).success(function(data){
                 console.log("data fetched, from find:", data);
                 $scope.game = data;
 
@@ -397,4 +421,8 @@
             return ' [' + input + '] ';
         };
     });
-})(angular);
+})(angular, window);
+
+//window.onbeforeunload = function() {
+//    return '123123';
+//};
