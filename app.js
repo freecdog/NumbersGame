@@ -448,8 +448,8 @@ app.get('/ang',function(req,res){
 //app.get('/play', function(req,res){
 //    res.render("play");
 //});
-app.get('/configuration',function(req,res){
-    res.render('configuration');
+app.get('/settings',function(req,res){
+    res.render('settings');
 });
 app.get('/onlineStatistics', function(req, res){
     var st = new Date();

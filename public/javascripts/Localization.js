@@ -2,10 +2,7 @@
  * Created by jaric on 19.09.2014.
  */
 
-// for client side underscore should be loaded before this script in other case this script will fail
-_ = typeof exports === 'undefined'? _ : require('underscore')._;
-
-(function(_, exports){
+(function(exports){
 
     var listOfLanguages = [];
 
@@ -63,6 +60,11 @@ _ = typeof exports === 'undefined'? _ : require('underscore')._;
         },
         "Rules": {
             "bonus": "If in the end of game sum of 1er, 2er, 3er, 4er, 5er, 6er is more or equal 63, you will get additional 35 points."
+        },
+        "Settings": {
+            "name": "Name:",
+            "multiplayer": "Multiplayer",
+            "playerNumbers": "Number of players:"
         }
     };
     var russianLanguage = {
@@ -119,6 +121,11 @@ _ = typeof exports === 'undefined'? _ : require('underscore')._;
         },
         "Rules": {
             "bonus": "Если к концу игры сумма единичек, двоек, троек, четверок, пятерок и шестерок больше либо равна 64, вы получите дополнительные 35 очков."
+        },
+        "Settings": {
+            "name": "Имя:",
+            "multiplayer": "Мультиплеер",
+            "playerNumbers": "Количество игроков:"
         }
     };
     var deutchLanguage = {
@@ -142,26 +149,168 @@ _ = typeof exports === 'undefined'? _ : require('underscore')._;
         }
     };
 
+    var deepCloneStopper = 100000, deepCloneIterator = 0;  // to prevent infinite
+    function deepClone(obj1, obj2, elem){
+        if (deepCloneStopper-- < 0) return;
+        deepCloneIterator++;
+
+        var objType = typeof(obj1);
+        if (objType == 'string' || objType == 'number' || objType == 'boolean'){
+            obj2[elem] = obj1;
+        } else if(objType == 'object') {
+            var toStr = Object.prototype.toString.call( obj1 );
+            var nextObj;
+            if( toStr === '[object Array]' ) {
+                if (obj2 == null) {
+                    obj2 = [];
+                    nextObj = obj2;
+                } else {
+                    obj2[elem] = [];
+                    nextObj = obj2[elem];
+                }
+            }
+            if( toStr === '[object Object]' ) {
+                if (obj2 == null) {
+                    obj2 = {};
+                    nextObj = obj2;
+                } else {
+                    obj2[elem] = {};
+                    nextObj = obj2[elem];
+                }
+            }
+            for (var element in obj1){
+                if (obj1.hasOwnProperty(element)){
+                    deepClone(obj1[element], nextObj, element);
+                }
+            }
+        }
+        deepCloneIterator--;
+        if (deepCloneIterator == 0) {
+            return obj2;
+        }
+    }
+    var cloneElementsStopper = 100000, cloneTemplateIterator = 0;  // to prevent infinite recursion
+    // clone element by template, obj1 is template, obj2 object with new values
+    function cloneElementsByTemplate(level, obj1, obj2, parent1, parent2, parentElement, elementName){
+        if (cloneElementsStopper-- < 0) return;
+        cloneTemplateIterator++;
+
+        if (parent1 == null) parent1 = obj1;
+        if (parent2 == null) parent2 = obj2;
+
+        var objType = typeof(obj1);
+        if (objType == 'string' || objType == 'number' || objType == 'boolean'){
+            parentElement[elementName] = obj2;
+        } else if (objType == 'object'){
+            for (var element in obj1) {
+                if (obj1.hasOwnProperty(element)){
+                    if (obj2.hasOwnProperty(element)){
+                        cloneElementsByTemplate(level+1, obj1[element], obj2[element], parent1, parent2, obj1, element);
+                    }
+                }
+            }
+            if (Object.keys(obj2).length > Object.keys(obj1).length) {
+                for (var extraElement in obj2) {
+                    if (obj2.hasOwnProperty(extraElement) && obj1.hasOwnProperty(extraElement) == false) {
+                        console.warn(parent2.name, 'has extra param:', extraElement);
+                    }
+                }
+            }
+        } else {
+            console.error('different type ', obj1, obj2, level, 'type:', objType);
+        }
+
+        cloneTemplateIterator--;
+        if (cloneTemplateIterator == 0) {
+            //action on exit
+        }
+    }
     function jsonToLanguagePack(language){
-        // load base(english) values, to fill all objects (if language isn't full)
-        var lp = _.extend({}, englishLanguage);
-        // load language values
-        _.extend(lp, language);
+        // load base(english) values, to fill all objects (if language isn't full), underscore sucks here because clone(expand) doesn't clone arrays in array only links
+        var lp = deepClone(englishLanguage);
+        cloneElementsByTemplate(0, lp, language);
+        //console.warn('new', lp);
 
         return lp;
     }
-    function exportLanguage(language){
+    var loadedPacks = [];
+    function importLanguage(language){
         var languageName = language.name;
         listOfLanguages.push(languageName);
         exports[languageName] = jsonToLanguagePack(language);
-    }
-    exportLanguage(englishLanguage);
-    exportLanguage(russianLanguage);
-    exportLanguage(deutchLanguage);
 
-    var language = 'en';
-    exports.defaultLanguage = function(){return 'en';};
-    exports.currentLanguage = function(){return language;};
+        loadedPacks.push(language);
+    }
+    importLanguage(englishLanguage);
+    importLanguage(russianLanguage);
+    importLanguage(deutchLanguage);
+
+    exports.importLanguage = importLanguage;
+    exports.loadedPacks = loadedPacks;
+
+    var defaultLanguage = function(){return 'en';};
+    exports.defaultLanguage = defaultLanguage;
     exports.listOfLanguages = listOfLanguages;
 
-})(_, typeof exports === 'undefined'? this['Localization']={} : exports);
+    // Test section
+    var compareElementsStopper = 100000;  // to prevent infinite recursion
+    // compare recursively ethalon object with other
+    function compareElements(level, obj1, obj2, parent1, parent2){
+        if (compareElementsStopper-- < 0) return;
+
+        if (parent1 == null) parent1 = obj1;
+        if (parent2 == null) parent2 = obj2;
+
+        var objType = typeof(obj1);
+        if (objType == 'object'){
+            for (var element in obj1) {
+                if (obj1.hasOwnProperty(element)){
+                    //var str = ''; for (var i = 0; i < level; i++) str += '  ';
+                    //console.log(str, element, obj2[element], obj1[element]);
+                    if (obj2.hasOwnProperty(element)){
+                        // don't need to compare strings, obviously they are different
+                        if (typeof(obj1[element]) == 'object') {
+                            //console.log('going to compare:', element);
+                            //console.log(JSON.stringify(obj1[element]));
+                            //console.log(JSON.stringify(obj2[element]));
+                            compareElements(level+1, obj1[element], obj2[element], parent1, parent2);
+                        }
+                    } else {
+                        console.warn(parent2.name, 'does not have param:', element, ', priority:', level+1);
+                    }
+                }
+            }
+            if (Object.keys(obj2).length > Object.keys(obj1).length) {
+                for (var extraElement in obj2) {
+                    if (obj2.hasOwnProperty(extraElement) && obj1.hasOwnProperty(extraElement) == false) {
+                        console.warn(parent2.name, 'has extra param:', extraElement);
+                    }
+                }
+            }
+        } else {
+            console.error('different type ', obj1, obj2, level);
+        }
+    }
+
+    exports.runTestOfCoverage = function(){
+        var ethalon;
+        for (var ei = 0; ei < loadedPacks.length; ei++) {
+            if (loadedPacks[ei].name == defaultLanguage()) {
+                ethalon = loadedPacks[ei];
+                break;
+            }
+        }
+
+        console.log('Ethalon language is', ethalon.name);
+        for (var i = 0; i < loadedPacks.length; i++){
+            var name = loadedPacks[i].name;
+            if (ethalon.name == name) continue;
+
+            console.log('going to compare with', name);
+            //console.log(JSON.stringify(ethalon));
+            //console.log(JSON.stringify(Localization[name]));
+            compareElements(0, ethalon, loadedPacks[i]);
+        }
+    }
+
+})(typeof exports === 'undefined'? this['Localization']={} : exports);

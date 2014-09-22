@@ -33,13 +33,13 @@
         $scope.multiplayerPlayersCount = getMultiplayerPlayersCount();
         $scope.$watch(getMultiplayerPlayersCount,function(newValue){
             $scope.multiplayerPlayersCount = newValue;
-            console.log('plCount', newValue);
+            console.log('playersCount', newValue);
         },false);
         $scope.setMultiplayerPlayersCount = function(count){
             setMultiplayerPlayersCount(count);
         };
         $scope.$watch('name',function(newValue, oldValue){
-            console.log('nw', newValue, oldValue);
+            console.log('name changed to', newValue, 'from', oldValue);
             if (oldValue === undefined) $scope.nameChanged = false;
             else $scope.nameChanged = true;
         },false);
@@ -62,6 +62,33 @@
 
         // get name on load
         $scope.getName();
+
+        // Language section
+        var language = Localization.defaultLanguage();
+        if (localStorage!=null) {
+            var storageLanguage = localStorage.getItem('language');
+            if (storageLanguage != null){
+                if (Localization[storageLanguage] != null){
+                    if (Localization.listOfLanguages.indexOf(language) != -1) language = storageLanguage;
+                }
+            }
+        }
+        $scope.language = language;
+        console.log('language is', Localization[$scope.language]);
+
+        $scope.$watch('language', function(newValue){
+            $scope.localization = Localization[$scope.language];
+
+            console.log('language changed to', newValue);
+            var lang = Localization[$scope.language];
+            var langCombos = lang.Play.Combinations;
+            $scope.combosNames = [];
+            for (var langCombo in langCombos){
+                if (langCombos.hasOwnProperty(langCombo)){
+                    $scope.combosNames.push(langCombos[langCombo]);
+                }
+            }
+        }, false);
     }]);
 
 })(angular);

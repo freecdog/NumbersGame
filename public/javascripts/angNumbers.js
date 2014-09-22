@@ -56,7 +56,8 @@
 
     jApp.controller('jController', ['$scope', '$http', '$window', function($scope, $http, $window) {
 
-        // TODO, very abusive code
+        // Environment section
+        // TODO, very abusive code, but we need it to send stopFindGame request
         window.onbeforeunload = function() {
             $scope.stopFindGame();
             // without abusive loop, stopFind can't finish request
@@ -68,8 +69,19 @@
 
         $scope.combosNames = [];
 
+        // Language section
         //TODO, when searching game after previous finished language doesn't change
-        $scope.language = 'en';
+        var language = Localization.defaultLanguage();
+        if (localStorage!=null) {
+            var storageLanguage = localStorage.getItem('language');
+            if (storageLanguage != null){
+                if (Localization[storageLanguage] != null){
+                    if (Localization.listOfLanguages.indexOf(language) != -1) language = storageLanguage;
+                }
+            }
+        }
+        $scope.language = language;
+        console.log('language is', Localization[$scope.language]);
 
         $scope.$watch('language', function(newValue){
             $scope.localization = Localization[$scope.language];
@@ -88,6 +100,7 @@
             updateCurrentRound();
         }, false);
 
+        // Game section
         clearPlayground();
 
         var lastAction = function(){};
@@ -422,7 +435,3 @@
         };
     });
 })(angular, window);
-
-//window.onbeforeunload = function() {
-//    return '123123';
-//};
