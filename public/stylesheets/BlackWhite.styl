@@ -10,10 +10,11 @@
 
 /*vars*/
 $fonts = 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
-$colorFont = #ECE9E9;
-$colorBackground = #343434;
-$colorInput = #999999;
-$transparency = 0.618;
+$colorFont = #000;
+$colorFontInverted = #fff;
+$colorBackground = #fff;
+$colorInput = #000;
+$transparency = 1;
 
 $elemWidth = 100%;
 $elemWidthFixed = 89.5%;
@@ -22,12 +23,14 @@ $elemMaxWidthFixed = 510px;
 
 /*mixins*/
 colorUsed() {
-  background-color: #999999;
-  background-color: rgba(153, 153, 153, $transparency);
+  background-color: #000;
+  background-color: rgba(0, 0, 0, $transparency);
+  color: $colorFontInverted;
 }
 colorSelected() {
-  background-color: #b27571;
-  background-color: rgba(178, 117, 113, $transparency);
+  background-color: #000;
+  background-color: rgba(0, 0, 0, $transparency);
+  color: $colorFontInverted;
 }
 
 $c1 = #ff362b;
@@ -35,15 +38,15 @@ colorRestartButton(){
   background-color: $c1;
   background-color: rgba(255, 54, 43, $transparency);
 }
-$c2 = #3eff89;
+$c2 = #fff;
 colorRerollButton(){
   background-color: $c2;
-  background-color: rgba(62, 255, 137, $transparency);
+  background-color: rgba(255, 255, 255, $transparency);
 }
-$c3 = #68ffa3;
+$c3 = #000;
 colorAcceptButton(){
   background-color: $c3;
-  background-color: rgba(104, 255, 163, $transparency);
+  background-color: rgba(0, 0, 0, $transparency);
 }
 colorRerollButtonUsed(){
   colorUsed();
@@ -62,9 +65,9 @@ colorMenuPad(){
 }
 
 ::selection
-  background: lighten($c2, 50%); /* Safari */
+  background: lighten($c3, 50%); /* Safari */
 ::-moz-selection
-  background: lighten($c2, 50%); /* Firefox */
+  background: lighten($c3, 50%); /* Firefox */
 body
   margin: 0 auto;
   padding: 0px;
@@ -72,7 +75,6 @@ body
   color: $colorFont;
   background-color: $colorBackground;
   max-width: 600px;
-  background: url('../images/flickr.com_photos_40422902@N00_2580014287.jpg') no-repeat center center fixed;
   -webkit-background-size: cover !important;
   -moz-background-size: cover !important;
   -o-background-size: cover !important;
@@ -235,46 +237,46 @@ table
   border-radius: 20px;
   cursor: pointer;
 .dice.d1
-  background: url("../images/dices/white/1.png");
+  background: url("../images/dices/black/1-128.png");
   background-size: 100% auto;
 .dice.d1.selected
   colorDiceSelected();
 .dice.d2
-  background: url("../images/dices/white/2.png");
+  background: url("../images/dices/black/2-128.png");
   background-size: 100% auto;
 .dice.d2.selected
   colorDiceSelected();
 .dice.d3
-  background: url("../images/dices/white/3.png");
+  background: url("../images/dices/black/3-128.png");
   background-size: 100% auto;
 .dice.d3.selected
   colorDiceSelected();
 .dice.d4
-  background: url("../images/dices/white/4.png");
+  background: url("../images/dices/black/4-128.png");
   background-size: 100% auto;
 .dice.d4.selected
   colorDiceSelected();
 .dice.d5
-  background: url("../images/dices/white/5.png");
+  background: url("../images/dices/black/5-128.png");
   background-size: 100% auto;
 .dice.d5.selected
   colorDiceSelected();
 .dice.d6
-  background: url("../images/dices/white/6.png");
+  background: url("../images/dices/black/6-128.png");
   background-size: 100% auto;
 .dice.d6.selected
   colorDiceSelected();
 
 .dice.d0
-  background: url("../images/dices/white/0.png");
+  background: url("../images/dices/black/0-128.png");
   background-size: 100% auto;
 .dice.d7
-  background: url("../images/dices/white/7.png");
+  background: url("../images/dices/black/7-128.png");
   background-size: 100% auto;
 .dice.d8
-  background: url("../images/dices/white/8.png");
+  background: url("../images/dices/black/8-128.png");
   background-size: 100% auto;
 .dice.d9
-  background: url("../images/dices/white/9.png");
+  background: url("../images/dices/black/9-128.png");
   background-size: 100% auto;
 

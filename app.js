@@ -449,7 +449,7 @@ app.get('/ang',function(req,res){
 //    res.render("play");
 //});
 app.get('/settings',function(req,res){
-    res.render('settings');
+    res.render('angSettings');
 });
 app.get('/onlineStatistics', function(req, res){
     var st = new Date();

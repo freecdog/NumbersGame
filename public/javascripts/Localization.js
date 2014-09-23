@@ -64,7 +64,8 @@
         "Settings": {
             "name": "Name:",
             "multiplayer": "Multiplayer",
-            "playerNumbers": "Number of players:"
+            "playerNumbers": "Number of players:",
+            "style": "Style:"
         }
     };
     var russianLanguage = {
@@ -125,7 +126,8 @@
         "Settings": {
             "name": "Имя:",
             "multiplayer": "Мультиплеер",
-            "playerNumbers": "Количество игроков:"
+            "playerNumbers": "Количество игроков:",
+            "style": "Стиль:"
         }
     };
     var deutchLanguage = {

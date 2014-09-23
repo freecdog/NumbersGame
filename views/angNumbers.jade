@@ -1,7 +1,7 @@
 //
    Created by jaric on 22.08.2014.
 
-html(ng-app='jApp')
+html(ng-app='jApp', ng-controller='jController')
     head
         title
             | NumbersGame on angularjs
@@ -13,58 +13,56 @@ html(ng-app='jApp')
         script(src='/javascripts/angular-animate.js')
         script(src='/javascripts/angNumbers.js')
 
-        link(rel='stylesheet', href='/stylesheets/style.css')
+        //-link(rel='stylesheet', href='/stylesheets/style.css')
+        link(rel='stylesheet', ng-href="{{css}}")
 
         meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
 
     body
+        p
+            a(href="/", class='menuElement menuPad', ng-click='stopFindGame()') {{localization.Menu.menu}}
 
-        div(ng-controller='jController')
-            p
-                div(class="menuElement menuPad")
-                    a(href="/", ng-click='stopFindGame()') {{localization.Menu.menu}}
+        table
+            tr
+                td(style='width: 50%; padding: 0;')
+                    div(class='rerollButton', ng-class='{used: game.rerolled}', ng-click='reroll()', value='reroll')
+                        | [{{localization.Play.Buttons.reroll}}]
+                td(style='width: 50%; padding: 0;')
+                    div(class='restartGameButton', ng-click='restart()', value='restart')
+                        | [{{localization.Play.Buttons.restart}}]
 
-            table
-                tr
-                    td(style='width: 50%; padding: 0;')
-                        div(class='rerollButton', ng-class='{used: game.rerolled}', ng-click='reroll()', value='reroll')
-                            | [{{localization.Play.Buttons.reroll}}]
-                    td(style='width: 50%; padding: 0;')
-                        div(class='restartGameButton', ng-click='restart()', value='restart')
-                            | [{{localization.Play.Buttons.restart}}]
+        div
+            span(ng-click='language = language=="ru" ? "en" : "ru"') {{game.status}}: {{localization.Play.Statuses[game.status.toString()]}}{{comment}}
+        div(class='namesView')
+            span(ng-repeat='name in game.names track by $index',
+                class='playerName',
+                ng-click='showPlayer($index)',
+                style='font-weight: {{$index == game.myPlayerIndex ? "bold" : "normal"}}; text-decoration: {{($index == game.playerIndex && game.playerIndex != game.myPlayerIndex) ? "underline" : "none"}};',
+                ng-class='{selected: $index == game.playerIndex}'
+            ) &nbsp;{{name | bracketMe}}&nbsp;
 
-            div
-                span(ng-click='language = language=="ru" ? "en" : "ru"') {{game.status}}: {{localization.Play.Statuses[game.status.toString()]}}{{comment}}
-            div(class='namesView')
-                span(ng-repeat='name in game.names track by $index',
-                    class='playerName',
-                    ng-click='showPlayer($index)',
-                    style='font-weight: {{$index == game.myPlayerIndex ? "bold" : "normal"}}; text-decoration: {{($index == game.playerIndex && game.playerIndex != game.myPlayerIndex) ? "underline" : "none"}};',
-                    ng-class='{selected: $index == game.playerIndex}'
-                ) &nbsp;{{name | bracketMe}}&nbsp;
-
-            div(ng-show='game.winner == null')
-                div(class='dicesHolder')
-                    div(
-                        ng-repeat='dice in currentRound.dices track by $index',
-                        class='dice d{{dice}}',
-                        ng-style='{width: diceSize, height: diceSize, "-moz-border-radius": diceBorderRadius, "border-radius": diceBorderRadius}',
-                        ng-class='{selected: currentSelected[$index]}',
-                        ng-click='toggleDice($index)'
-                    )
-            div(ng-show='game.winner == null')
+        div(ng-show='game.winner == null')
+            div(class='dicesHolder')
                 div(
-                    ng-repeat='combo in preparedCombos | orderBy:perfectCombosSort:true',
-                    class='combination',
-                    ng-class='{used: combo.used}',
-                    ng-click='acceptCombination(combo)'
-                ) {{combo.name}}: {{combo.points}}
-            div(ng-show='game.winner == null')
-                div(ng-show='preparedCombos != null')
-                    div(ng-click='language = language=="ru" ? "en" : "ru"') {{localization.Play.Other.total}} {{sums.total}}
+                    ng-repeat='dice in currentRound.dices track by $index',
+                    class='dice d{{dice}}',
+                    ng-style='{width: diceSize, height: diceSize, "-moz-border-radius": diceBorderRadius, "border-radius": diceBorderRadius}',
+                    ng-class='{selected: currentSelected[$index]}',
+                    ng-click='toggleDice($index)'
+                )
+        div(ng-show='game.winner == null')
+            div(
+                ng-repeat='combo in preparedCombos | orderBy:perfectCombosSort:true',
+                class='combination',
+                ng-class='{used: combo.used}',
+                ng-click='acceptCombination(combo)'
+            ) {{combo.name}}: {{combo.points}}
+        div(ng-show='game.winner == null')
+            div(ng-show='preparedCombos != null')
+                div(ng-click='language = language=="ru" ? "en" : "ru"') {{localization.Play.Other.total}} {{sums.total}}
 
 
-            div(ng-show='game.winner != null')
-                p {{localization.Play.Winners.winner}} {{game.winner.name}}
-                p {{localization.Play.Winners.results}}
-                p(ng-repeat='result in game.results | orderBy:"-result" track by $index') {{$index+1}}. {{result.name}}: {{result.result}}
+        div(ng-show='game.winner != null')
+            p {{localization.Play.Winners.winner}} {{game.winner.name}}
+            p {{localization.Play.Winners.results}}
+            p(ng-repeat='result in game.results | orderBy:"-result" track by $index') {{$index+1}}. {{result.name}}: {{result.result}}

@@ -7,22 +7,15 @@ block headData
 block content
     p
 
-    div(id='menuPlayButton', class="menuElement menuPad")
-        a(href="/ang", onclick='setSearchPlayersCount(1);') Singleplayer
-    div(id='menuPlayButton', class="menuElement menuPad")
-        a(href="/ang", onclick='setSearchPlayersForMultiplayer();') Multiplayer
+    a(href="/ang", class="menuElement menuPad", onclick='setSearchPlayersCount(1);') Singleplayer
+    a(href="/ang", class="menuElement menuPad", onclick='setSearchPlayersForMultiplayer();') Multiplayer
 
     p
-        div(class="menuElement")
-            | (searching: #{onlineStatistics ? onlineStatistics.playersSearching : '0'})
-    div(class="menuElement menuPad")
-        a(href="/onlineStatistics") Online statistics
-    div(class="menuElement menuPad")
-        a(href="/settings") Settings
-    div(class="menuElement menuPad")
-        a(href="/rules") Rules
-    div(class="menuElement menuPad")
-        a(href="/about") About
+        div(class="menuElement") (searching: #{onlineStatistics ? onlineStatistics.playersSearching : '0'})
+    a(href="/onlineStatistics", class="menuElement menuPad") Online statistics
+    a(href="/settings", class="menuElement menuPad") Settings
+    a(href="/rules", class="menuElement menuPad") Rules
+    a(href="/about", class="menuElement menuPad") About
 
     //- It looks like social buttons work only from real hosts (not localhost), and some of them got problems with port (address:port)
     p

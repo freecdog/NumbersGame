@@ -2,7 +2,7 @@
  * Created by jaric on 21.09.2014.
  */
 
-(function (angular){
+(function (angular, window){
 
     "use strict";
 
@@ -18,18 +18,20 @@
         localStorage.setItem("multiplayerPlayersCount", count.toString());
     }
     function getMultiplayerPlayersCount(){
-        var defaultCount = '2';
-        var localStorage = window.localStorage;
-        if (!localStorage) return defaultCount;
-        var searchPlayersCount = localStorage.getItem("multiplayerPlayersCount");
-        if (isNumber(searchPlayersCount)) {
-            //searchPlayersCount = Math.floor(parseFloat(searchPlayersCount));
-            return searchPlayersCount;
-        } else return defaultCount;
+        // defaultCount = 2;
+        var searchPlayersCount = '2';
+        if (localStorage){
+            var playersCount = localStorage.getItem("multiplayerPlayersCount");
+            if (isNumber(playersCount)) {
+                //searchPlayersCount = Math.floor(parseFloat(searchPlayersCount));
+                searchPlayersCount = playersCount;
+            }
+        }
+        return searchPlayersCount;
     }
 
     // TODO, need correct ng validate
-    jApp.controller('jController', ['$scope', '$http', function($scope, $http) {
+    jApp.controller('jController', ['$scope', '$http', '$window', function($scope, $http, $window) {
         $scope.multiplayerPlayersCount = getMultiplayerPlayersCount();
         $scope.$watch(getMultiplayerPlayersCount,function(newValue){
             $scope.multiplayerPlayersCount = newValue;
@@ -38,16 +40,15 @@
         $scope.setMultiplayerPlayersCount = function(count){
             setMultiplayerPlayersCount(count);
         };
+
         $scope.$watch('name',function(newValue, oldValue){
             console.log('name changed to', newValue, 'from', oldValue);
             if (oldValue === undefined) $scope.nameChanged = false;
             else $scope.nameChanged = true;
         },false);
-
         $scope.getName = function(){
             $http.get('/api/getName').success(function(data){
                 $scope.name = data.login;
-
             });
         };
         $scope.setName = function(name){
@@ -59,7 +60,6 @@
                 });
             }
         };
-
         // get name on load
         $scope.getName();
 
@@ -75,7 +75,7 @@
         }
         $scope.language = language;
         console.log('language is', Localization[$scope.language]);
-
+        $scope.Localization = Localization;
         $scope.$watch('language', function(newValue){
             $scope.localization = Localization[$scope.language];
 
@@ -89,6 +89,56 @@
                 }
             }
         }, false);
+
+        // Style section
+        $scope.validStyles = ['style', 'BlackWhite']; // 0 index is default
+        function getStorageStyleValue(){
+            var style = 'style';
+            //var localStorage = window.localStorage;
+            if (localStorage){
+                var alterStyle = localStorage.getItem("style");
+                if (alterStyle) {
+                    style = alterStyle;
+                    console.log('we have value in localStorage:', style, ', it will be set');
+                }
+            } else {
+                console.error('no local storage');
+            }
+            return style;
+        }
+        function setStorageStyleValue(style){
+            console.log('setting storage value to', style);
+            //var localStorage = window.localStorage;
+            if (localStorage) {
+                localStorage.setItem('style', style);
+            } else {
+                console.error('no local storage');
+            }
+        }
+        $scope.setStorageStyle = function(style){
+            if ($scope.validStyles.indexOf(style) == -1) {
+                console.warn('invalid style:', style, 'changing style to default value');
+                style = $scope.validStyles[0];
+            }
+            console.log('changing css string to', style);
+            $scope.css = '/stylesheets/' + style + '.css';
+            setStorageStyleValue(style);
+            // safe apply, but everywhere were written tis is bad practice
+            if ($scope.$root.$$phase != '$apply' && $scope.$root.$$phase != '$digest') {
+                $scope.$apply();
+            }
+        };
+        $scope.getStorageStyle = function(){
+            var style = getStorageStyleValue();
+            $scope.storageStyle = style;
+            return style;
+        };
+        // default value sets by $watch
+        $scope.$watch($scope.getStorageStyle, function(newValue, oldValue){
+            console.log('style changed to', newValue, 'from', oldValue);
+            $scope.setStorageStyle(newValue);
+        },false);
     }]);
 
-})(angular);
+
+})(angular, window);
