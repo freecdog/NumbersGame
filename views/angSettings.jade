@@ -5,16 +5,19 @@ html(ng-app='jApp', ng-controller='jController')
     head
         meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
         title Settings of Numbers game
+        meta(name="Description" content="Settings page is here")
 
+        script(src='/javascripts/Localization.js')
         script(src='/javascripts/angular.js')
         script(src='/javascripts/angSettings.js')
-        script(src='/javascripts/Localization.js')
+        script(src='/javascripts/jAngLanguages.js')
+        script(src='/javascripts/jAngStyles.js')
 
         link(rel='stylesheet', ng-href="{{css}}")
 
     body
-        p
-            a(href="/", class="menuElement menuPad") {{localization.Menu.menu}}
+
+        a(href="/", class="menuElement menuPad") {{localization.Menu.menu}}
 
         p(class='menuElement', style='text-align: left;') {{localization.Settings.name}}
         form(id="nameForm")
@@ -55,8 +58,14 @@ html(ng-app='jApp', ng-controller='jController')
                         ng-click='setStorageStyle(userStyle)',
                         ng-class='{menuPad: userStyle == storageStyle}'
                     ) {{userStyle}}
+        p(class='menuElement', style='text-align: left;') {{localization.Settings.language}}
+        table
+            tr
+                td(ng-repeat="lang in validLanguages")
+                    a(
+                        ng-click='setStorageLanguage(lang)',
+                        ng-class='{menuPad: lang == storageLanguage}'
+                    ) {{lang}}
 
         p
             | &nbsp;
-
-        //-p(class='beFixed beBottom beLeft', ng-repeat='lang in Localization.listOfLanguages') &nbsp;{{lang}}&nbsp;

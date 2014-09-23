@@ -1,0 +1,38 @@
+//
+   Created by jaric on 05.09.2014.
+
+html(ng-app='jApp', ng-controller='jController')
+    head
+        meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
+        title Online statistics of Numbers game
+        meta(name="Description" content="Online statistics page is here")
+
+        script(src='/javascripts/Localization.js')
+        script(src='/javascripts/angular.js')
+        script(src='/javascripts/angDefaultPack.js')
+        script(src='/javascripts/jAngLanguages.js')
+        script(src='/javascripts/jAngStyles.js')
+
+        link(rel='stylesheet', ng-href="{{css}}")
+
+    body
+
+        a(href="/", class="menuElement menuPad") Menu
+        p Server time: #{serverTime}
+
+        p Connections[#{connected ? Object.keys(connected).length : ''}]:
+        -for(var connectionIt in connected)
+            -var connection = connected[connectionIt];
+            #pad1 #{JSON.stringify(connection)}
+
+        p Games, #{Math.min(10,games ? Object.keys(games).length : 0)} last is showed:
+        -for(var gameIt in games)
+            -var game = games[gameIt];
+            #pad1 #{gameIt}:
+            //- #{JSON.stringify(game)}
+            -for(var playerIt in game.players)
+                -var player = game.players[playerIt];
+                #pad2 #{player.name}: #{player.result != null ? player.result : '?'};&nbsp;
+            #pad2 Duration: #{(game.duration / 1000 / 60).toFixed(3)} min
+
+        p

@@ -1,0 +1,90 @@
+//
+   Created by jaric on 10.08.2014.
+
+html(ng-app='jApp', ng-controller='jController')
+    head
+        meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
+        title Rules of Numbers game
+        meta(name="Description" content="Rules page is here")
+
+        script(src='/javascripts/Localization.js')
+        script(src='/javascripts/angular.js')
+        script(src='/javascripts/angDefaultPack.js')
+        script(src='/javascripts/jAngLanguages.js')
+        script(src='/javascripts/jAngStyles.js')
+
+        link(rel='stylesheet', ng-href="{{css}}")
+
+    body
+
+        a(href="/", class="menuElement menuPad") {{localization.Menu.menu}}
+
+        p Rules:
+        table
+            tr
+                td
+                    | {{localization.Play.Combinations.ones}}
+                td
+                    | Σ&nbsp;1
+            tr
+                td
+                    | {{localization.Play.Combinations.twos}}
+                td
+                    | Σ&nbsp;2
+            tr
+                td
+                    | {{localization.Play.Combinations.threes}}
+                td
+                    | Σ&nbsp;3
+            tr
+                td
+                    | {{localization.Play.Combinations.fours}}
+                td
+                    | Σ&nbsp;4
+            tr
+                td
+                    | {{localization.Play.Combinations.fives}}
+                td
+                    | Σ&nbsp;5
+            tr
+                td
+                    | {{localization.Play.Combinations.sixes}}
+                td
+                    | Σ&nbsp;6
+            tr
+                td
+                    | {{localization.Play.Combinations.3ofaKind}}
+                td
+                    | Σ
+            tr
+                td
+                    | {{localization.Play.Combinations.4ofaKind}}
+                td
+                    | Σ
+            tr
+                td
+                    | {{localization.Play.Combinations.fullHouse}}
+                td
+                    | 25
+            tr
+                td
+                    | {{localization.Play.Combinations.smallStraight}}
+                td
+                    | 30
+            tr
+                td
+                    | {{localization.Play.Combinations.largeStraight}}
+                td
+                    | 40
+            tr
+                td
+                    | {{localization.Play.Combinations.yatzy}}
+                td
+                    | 50
+            tr
+                td
+                    | {{localization.Play.Combinations.chance}}
+                td
+                    | Σ
+
+        p {{localization.Rules.bonus}}

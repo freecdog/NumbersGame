@@ -48,9 +48,13 @@
         "Menu": {
             "menu": "Menu",
             "play": "Play",
+            "singleplayer": "Singleplayer",
+            "multiplayer": "Multiplayer",
             "onlineStatistics": "Online Statistics",
             "rules": "Rules",
-            "about": "About"
+            "settings": "Settings",
+            "about": "About",
+            "searching": "searching:"
         },
         "About": {
             "text1": "Hi, I'm Jaric, the author of this app, nice to meet you! Thank you so much for being here. I hope you enjoy it!",
@@ -65,7 +69,8 @@
             "name": "Name:",
             "multiplayer": "Multiplayer",
             "playerNumbers": "Number of players:",
-            "style": "Style:"
+            "style": "Style:",
+            "language": "Language:"
         }
     };
     var russianLanguage = {
@@ -110,15 +115,19 @@
         "Menu": {
             "menu": "Меню",
             "play": "Играть",
+            "singleplayer": "Одиночная игра",
+            "multiplayer": "Мультиплеер",
             "onlineStatistics": "Статистика игр",
-            "rules": "Правило",
-            "about": "О проекте"
+            "rules": "Правила",
+            "settings": "Настройки",
+            "about": "О проекте",
+            "searching": "ищут игру:"
         },
         "About": {
             "text1": "Привет, меня зовут Ярик, я автор этого приложения, рад вас видеть! Спасибо, что вы здесь. Надеюсь, вам здесь нравится!",
             "text2": "Андрей готовит версию для Windows Phone",
-            "text3": "По всем вопросам вы можете обращаться по адресу at mm1000@list.ru",
-            "text4": "Под влиянием от Паши, Ани и Лены."
+            "text3": "По всем вопросам вы можете обращаться по адресу mm1000@list.ru",
+            "text4": "Под влиянием Паши, Ани и Лены."
         },
         "Rules": {
             "bonus": "Если к концу игры сумма единичек, двоек, троек, четверок, пятерок и шестерок больше либо равна 64, вы получите дополнительные 35 очков."
@@ -127,7 +136,8 @@
             "name": "Имя:",
             "multiplayer": "Мультиплеер",
             "playerNumbers": "Количество игроков:",
-            "style": "Стиль:"
+            "style": "Стиль:",
+            "language": "Язык:"
         }
     };
     var deutchLanguage = {

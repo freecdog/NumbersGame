@@ -55,11 +55,12 @@ table {
   border: 0;
   margin: 0px;
   padding: 0px;
-  width: 100%;
-  padding-left: 5%;
-  padding-right: 5%;
+  width: 90%;
+  margin-left: 5%;
+  margin-right: 5%;
   border-spacing: 0;
   border-collapse: collapse;
+  font-size: 1em;
 }
 #pad1 {
   padding-left: 40px;
@@ -86,15 +87,19 @@ table {
   left: 0;
 }
 .restartGameButton {
+  float: right;
+  width: 50%;
   text-align: right;
-  font-size: 2em;
+  font-size: 1.5em;
   cursor: pointer;
   background-color: #ff362b;
   background-color: #ff362b;
 }
 .rerollButton {
+  float: left;
+  width: 50%;
   text-align: left;
-  font-size: 2em;
+  font-size: 1.5em;
   cursor: pointer;
   background-color: #fff;
   background-color: #fff;
@@ -158,7 +163,7 @@ table {
   display: block;
   margin: 0 auto;
   text-align: center;
-  width: 100%;
+  width: 90%;
   max-width: 512px;
   text-decoration: none !important;
 }
@@ -204,7 +209,7 @@ table {
   font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
   color: #000;
   background-color: #fff;
-  width: 100%;
+  width: 90%;
   max-width: 512px;
   text-align: center;
 }

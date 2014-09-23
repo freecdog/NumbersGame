@@ -440,7 +440,7 @@ app.get('/', function(req, res){
     removeExpiredConnections();
 
     var stats = collectOnlineStatistics();
-    res.render('index', { onlineStatistics: stats });
+    res.render('angIndex', { onlineStatistics: stats });
 });
 app.get('/ang',function(req,res){
     res.render('angNumbers');
@@ -487,7 +487,7 @@ app.get('/onlineStatistics', function(req, res){
         }
     }
 
-    res.render("onlineStatistics", {
+    res.render('angOnlineStatistics', {
         serverTime: new Date(),
         connected: cookiesToSend,
         games: gamesToSend
@@ -552,10 +552,10 @@ app.get("/reconfigure/:num", function(req, res){
     res.redirect("/");
 });
 app.get('/rules', function(req,res){
-    res.render("rules");
+    res.render('angRules');
 });
 app.get('/about', function(req,res){
-    res.render("about");
+    res.render('angAbout');
 });
 app.get('/restartServer', function(req, res){
     res.render('restartServer');

@@ -1,0 +1,72 @@
+//
+   Created by jaric on 24.06.2014.
+
+html(ng-app='jApp', ng-controller='jController')
+    head
+        meta(name="viewport", content="initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=yes")
+        title Numbers game #numbers_game (variation of Kniffel or Yahtzee)
+        meta(name="Description" content="Numbers game #numbers_game (variation of Kniffel or Yahtzee)")
+        link(rel='image_src', href='http://jaric.ru/dice_Visual_Pharm.png')
+
+        script(src='/javascripts/Localization.js')
+        script(src='/javascripts/angular.js')
+        script(src='/javascripts/angDefaultPack.js')
+        script(src='/javascripts/jAngLanguages.js')
+        script(src='/javascripts/jAngStyles.js')
+
+        link(rel='stylesheet', ng-href="{{css}}")
+
+    body
+        p
+
+        a(href="/ang", class="menuElement menuPad", onclick='setSearchPlayersCount(1);') {{localization.Menu.singleplayer}}
+        a(href="/ang", class="menuElement menuPad", onclick='setSearchPlayersForMultiplayer();') {{localization.Menu.multiplayer}}
+
+        p
+            div(class="menuElement") ({{localization.Menu.searching}} #{onlineStatistics ? onlineStatistics.playersSearching : '0'})
+        a(href="/onlineStatistics", class="menuElement menuPad") {{localization.Menu.onlineStatistics}}
+        a(href="/settings", class="menuElement menuPad") {{localization.Menu.settings}}
+        a(href="/rules", class="menuElement menuPad") {{localization.Menu.rules}}
+        a(href="/about", class="menuElement menuPad") {{localization.Menu.about}}
+
+        //- It looks like social buttons work only from real hosts (not localhost), and some of them got problems with port (address:port)
+        p
+        script(
+            type='text/javascript',
+            src='//yandex.st/share/share.js',
+            charset='utf-8'
+        )
+        div(
+            class='yashare-auto-init menuElement',
+            data-yashareL10n='ru',
+            data-yashareType='none',
+            data-yashareTheme='counter',
+            data-yashareQuickServices='vkontakte,odnoklassniki,twitter,facebook,gplus,moimir,pinterest',
+            data-yashareDescription='Welcome to #numbers_game (variation of Kniffel or Yahtzee)',
+            data-yashareLink='http://jaric.ru:33322/',
+            data-yashareImage='http://jaric.ru/dice_Visual_Pharm.png'
+        )
+
+        p
+            | &nbsp;
+
+        script.
+            function isNumber(n) {
+                return !isNaN(parseFloat(n)) && isFinite(n);
+            }
+            function setSearchPlayersCount(count){
+                 localStorage.setItem("searchPlayersCount", count.toString());
+            }
+            function getMultiplayerPlayersCount(){
+                var defaultCount = '2';
+                if (!localStorage) return defaultCount;
+                var searchPlayersCount = localStorage.getItem("multiplayerPlayersCount");
+                if (isNumber(searchPlayersCount)) {
+                    //searchPlayersCount = Math.floor(parseFloat(searchPlayersCount));
+                    return searchPlayersCount;
+                } else return defaultCount;
+            }
+            function setSearchPlayersForMultiplayer(){
+                var multiplayerPlayersCount = getMultiplayerPlayersCount();
+                setSearchPlayersCount(multiplayerPlayersCount);
+            }

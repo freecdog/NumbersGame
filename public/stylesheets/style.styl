@@ -15,7 +15,7 @@ $colorBackground = #343434;
 $colorInput = #999999;
 $transparency = 0.618;
 
-$elemWidth = 100%;
+$elemWidth = 90%;
 $elemWidthFixed = 89.5%;
 $elemMaxWidth = 512px;
 $elemMaxWidthFixed = 510px;
@@ -99,11 +99,12 @@ table
   border: 0;
   margin: 0px;
   padding: 0px;
-  width: 100%;
-  padding-left: 5%;
-  padding-right: 5%;
+  width: $elemWidth;
+  margin-left: 5%;
+  margin-right: 5%;
   border-spacing: 0;
   border-collapse: collapse;
+  font-size: 1.0em;
 
 #pad1
   padding-left: 40px;
@@ -123,13 +124,17 @@ table
   left: 0;
 
 .restartGameButton
+  float: right;
+  width: 50%;
   text-align: right;
-  font-size: 2em;
+  font-size: 1.5em;
   cursor: pointer;
   colorRestartButton();
 .rerollButton
+  float: left;
+  width: 50%;
   text-align: left;
-  font-size: 2em;
+  font-size: 1.5em;
   cursor: pointer;
   colorRerollButton();
 .rerollButton.used
