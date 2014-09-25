@@ -3,7 +3,7 @@
  */
 
 // TODO, leftPlayers isn't presented
-
+// TODO, if there are angular on most pages may be every page should be view (smooth page changes)
 (function (angular, window){
 
     "use strict";
