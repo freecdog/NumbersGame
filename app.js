@@ -162,8 +162,16 @@ var gamesCounter = 0;
 var games = {};
 var gamesInProgress = {};
 
+var randomNames = null, randomNamesLength = 0;
+readJSONFile(path.join(__dirname, 'enNamesArr.txt'), function(err, jsondata) {
+    if (!err){
+        randomNames = jsondata;
+        randomNamesLength = randomNames.length;
+    }
+});
 function generatePlayerName(){
-    return "player" + (10000 * Math.random()).toFixed(0);
+    if (randomNames != null) return randomNames[ (randomNamesLength * Math.random()).toFixed(0) ];
+    else return "player" + (10000 * Math.random()).toFixed(0);
 }
 function prepareIpToConsole(req){
     return 'ip:'+req.connection.remoteAddress;
@@ -1011,6 +1019,39 @@ app.get("/api/getName", function(req, res){
     }
 });
 
+app.get("/api/getRandomName", function(req, res) {
+    console.log(prepareIpToConsole(req) + ", getting random name");
+
+    var connectedCookie = connectedCookies[req.sessionID];
+    if (connectedCookie === undefined) {
+        connectedCookie = createPlayer();
+        connectedCookies[req.sessionID] = connectedCookie;
+    }
+
+    var ans = null;
+    if (connectedCookie !== undefined) {
+        ans = {};
+        ans.login = generatePlayerName();
+    }
+
+    res.send(ans);
+});
+
 http.createServer(app).listen(app.get('port'), function(){
     console.log('Express server listening on port ' + app.get('port'));
 });
+
+/*fs.readFile('./RussianNames.txt', {encoding: 'utf8'}, function(err, data){
+    //var alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmopqrstuvwxyz,.'";
+    var alphabet = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя,.'";
+    var ans = '';
+    for (var i = 0; i < data.length; i++) { if (alphabet.indexOf(data[i])!=-1) ans+=data[i];}
+    //console.log(err, data);
+    fs.writeFile('./rus.txt', ans, {encoding: "utf8"}, function (err) {
+        fs.readFile('./rus.txt', {encoding: 'utf8'}, function(err, data) {
+            var ans = data.split(',');
+            fs.writeFile('./ruNamesArr.txt', JSON.stringify(ans), {encoding: "utf8"}, function (err) {});
+        });
+
+    });
+});*/
