@@ -37,7 +37,7 @@ html(ng-app='jApp', ng-controller='jController')
                         | [{{localization.Play.Buttons.restart}}]
 
         div
-            span(ng-click='language = language=="ru" ? "en" : "ru"') {{game.status}}: {{localization.Play.Statuses[game.status.toString()]}}{{comment}}
+            span {{game.status}}: {{localization.Play.Statuses[game.status.toString()]}}{{comment}}
         div(class='namesView')
             span(ng-repeat='name in game.names track by $index',
                 class='playerName',
@@ -64,7 +64,7 @@ html(ng-app='jApp', ng-controller='jController')
             ) {{combo.name}}: {{combo.points}}
         div(ng-show='game.winner == null')
             div(ng-show='preparedCombos != null')
-                div(ng-click='language = language=="ru" ? "en" : "ru"') {{localization.Play.Other.total}} {{sums.total}}
+                div {{localization.Play.Other.total}} {{sums.total}}
 
 
         div(ng-show='game.winner != null')

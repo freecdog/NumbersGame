@@ -20,6 +20,8 @@ $elemWidthFixed = 89.5%;
 $elemMaxWidth = 512px;
 $elemMaxWidthFixed = 510px;
 
+$animationTime = 0.5s;
+
 /*mixins*/
 colorUsed() {
   background-color: #999999;
@@ -153,14 +155,15 @@ table
   /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
   cursor: default;
   colorCombinationUsed();
-//.combination.ng-enter,
-//.combination.ng-leave,
+
+.combination.ng-enter,
+.combination.ng-leave,
 .combination.ng-move
-  -webkit-transition:0.5s linear all;
-  -moz-transition:0.5s linear all;
-  -ms-transition:0.5s linear all;
-  -o-transition:0.5s linear all;
-  transition:0.5s linear all;
+  -webkit-transition: $animationTime linear all;
+  -moz-transition: $animationTime linear all;
+  -ms-transition: $animationTime linear all;
+  -o-transition: $animationTime linear all;
+  transition: $animationTime linear all;
 .combination.ng-enter,
 .combination.ng-move
   opacity: $transparency;
@@ -171,6 +174,13 @@ table
   opacity:1;
 .combination.ng-leave.ng-leave-active
   opacity: $transparency;
+
+div.dice
+  -webkit-transition: $animationTime linear all;
+  -moz-transition: $animationTime linear all;
+  -ms-transition: $animationTime linear all;
+  -o-transition: $animationTime linear all;
+  transition: $animationTime linear all;
 
 .playerName
   cursor: pointer;

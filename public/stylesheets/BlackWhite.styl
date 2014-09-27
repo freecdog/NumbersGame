@@ -21,6 +21,8 @@ $elemWidthFixed = 89.5%;
 $elemMaxWidth = 512px;
 $elemMaxWidthFixed = 510px;
 
+$animationTime = 0.5s;
+
 /*mixins*/
 colorUsed() {
   background-color: #000;
@@ -173,6 +175,13 @@ table
   opacity:1;
 .combination.ng-leave.ng-leave-active
   opacity: $transparency;
+
+div.dice
+  -webkit-transition: $animationTime linear all;
+  -moz-transition: $animationTime linear all;
+  -ms-transition: $animationTime linear all;
+  -o-transition: $animationTime linear all;
+  transition: $animationTime linear all;
 
 .playerName
   cursor: pointer;

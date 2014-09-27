@@ -321,10 +321,6 @@
             }
             //console.warn(preparedCombos);
 
-            lastRound.preparedCombos = preparedCombos;
-
-            $scope.currentRound = lastRound;
-
             if ($scope.preparedCombos == null){
                 $scope.preparedCombos = preparedCombos;
             } else {
@@ -346,6 +342,9 @@
                     }
                 }
             }
+            lastRound.preparedCombos = preparedCombos;
+
+            $scope.currentRound = lastRound;
 
             // sums
             var sums = {total: 0, sumNumbers: 0, sumBonus: 0, sumNames: 0};
@@ -409,7 +408,7 @@
         });
 
 
-        // Start!!!
+        // Start!!! Poehali!!!
         $scope.connect();
 
         // auto update

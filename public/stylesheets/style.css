@@ -130,6 +130,8 @@ table {
   background-color: #999;
   background-color: rgba(153,153,153,0.618);
 }
+.combination.ng-enter,
+.combination.ng-leave,
 .combination.ng-move {
   -webkit-transition: 0.5s linear all;
   -moz-transition: 0.5s linear all;
@@ -150,6 +152,13 @@ table {
 }
 .combination.ng-leave.ng-leave-active {
   opacity: 0.618;
+}
+div.dice {
+  -webkit-transition: 0.5s linear all;
+  -moz-transition: 0.5s linear all;
+  -ms-transition: 0.5s linear all;
+  -o-transition: 0.5s linear all;
+  transition: 0.5s linear all;
 }
 .playerName {
   cursor: pointer;

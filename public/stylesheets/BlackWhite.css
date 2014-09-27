@@ -153,6 +153,13 @@ table {
 .combination.ng-leave.ng-leave-active {
   opacity: 1;
 }
+div.dice {
+  -webkit-transition: 0.5s linear all;
+  -moz-transition: 0.5s linear all;
+  -ms-transition: 0.5s linear all;
+  -o-transition: 0.5s linear all;
+  transition: 0.5s linear all;
+}
 .playerName {
   cursor: pointer;
 }
