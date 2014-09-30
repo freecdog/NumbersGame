@@ -50,7 +50,7 @@
             "play": "Play",
             "singleplayer": "Singleplayer",
             "multiplayer": "Multiplayer",
-            "onlineStatistics": "Online Statistics",
+            "onlineStatistics": "Statistics",
             "rules": "Rules",
             "settings": "Settings",
             "about": "About",
@@ -203,6 +203,7 @@
     }
     var cloneElementsStopper = 100000, cloneTemplateIterator = 0;  // to prevent infinite recursion
     // clone element by template, obj1 is template, obj2 object with new values
+    // if obj2 has objects with same keys then obj1 values will be overwritten
     function cloneElementsByTemplate(level, obj1, obj2, parent1, parent2, parentElement, elementName){
         if (cloneElementsStopper-- < 0) return;
         cloneTemplateIterator++;

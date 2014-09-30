@@ -25,7 +25,7 @@ html(ng-app='jApp', ng-controller='jController')
             -var connection = connected[connectionIt];
             #pad1 #{JSON.stringify(connection)}
 
-        p Games, #{Math.min(10,games ? Object.keys(games).length : 0)} last is showed:
+        p Games, #{Math.min(10,games ? Object.keys(games).length : 0)} last #{Object.keys(games).length > 1 ? 'are' : 'is'} showed:
         -for(var gameIt in games)
             -var game = games[gameIt];
             #pad1 #{gameIt}:
