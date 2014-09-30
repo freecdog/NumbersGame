@@ -25,7 +25,7 @@ html(ng-app='jApp', ng-controller='jController')
             -var connection = connected[connectionIt];
             #pad1 #{JSON.stringify(connection)}
 
-        p Games, #{Math.min(10,games ? Object.keys(games).length : 0)} last #{Object.keys(games).length > 1 ? 'are' : 'is'} showed:
+        p Games, #{Math.min(10,games ? Object.keys(games).length : 0)} last are showed:
         -for(var gameIt in games)
             -var game = games[gameIt];
             #pad1 #{gameIt}:
@@ -33,6 +33,6 @@ html(ng-app='jApp', ng-controller='jController')
             -for(var playerIt in game.players)
                 -var player = game.players[playerIt];
                 #pad2 #{player.name}: #{player.result != null ? player.result : '?'};&nbsp;
-            #pad2 Duration: #{(game.duration / 1000 / 60).toFixed(3)} min
+            #pad2 Duration: #{game.duration > 0 ? ((game.duration / 1000 / 60).toFixed(3)) : '0'} min
 
         p

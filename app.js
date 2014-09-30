@@ -480,7 +480,10 @@ app.get('/onlineStatistics', function(req, res){
                 game.players.push({name: originalGame.names[j]});
             }
         }
-        game.duration = originalGame.duration;
+        if (originalGame.duration != null)
+            game.duration = originalGame.duration;
+        else
+            game.duration = (new Date()) - originalGame.startTime;
 
         addedGamesCounter++;
     }

@@ -140,7 +140,7 @@
             "language": "Язык:"
         }
     };
-    var deutchLanguage = {
+    var deutschLanguage = {
         "name": "de",
         "Play": {
             "Combinations": {
@@ -256,7 +256,7 @@
     }
     importLanguage(englishLanguage);
     importLanguage(russianLanguage);
-    importLanguage(deutchLanguage);
+    importLanguage(deutschLanguage);
 
     exports.importLanguage = importLanguage;
     exports.loadedPacks = loadedPacks;
