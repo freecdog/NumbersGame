@@ -1,0 +1,302 @@
+@font-face {
+/* http://webdesignerwall.com/general/font-face-solutions-suggestions */
+  font-family: 'Open Sans Light';
+  src: url("../fonts/open-sans.light.ttf") format('truetype');
+}
+/*
+    many thanks to
+    http://labs.tineye.com/multicolr
+    https://kuler.adobe.com/
+    http://www.materialpalette.com/deep-purple/green
+*/
+/*vars*/
+/*mixins*/
+::selection {
+  background: #a5d8a7;
+/* Safari */
+}
+::-moz-selection {
+  background: #a5d8a7;
+/* Firefox */
+}
+body {
+  margin: 0 auto;
+  padding: 0px;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #fff;
+  background-color: #673ab7;
+  max-width: 600px;
+  -webkit-background-size: cover !important;
+  -moz-background-size: cover !important;
+  -o-background-size: cover !important;
+  background-size: cover !important;
+}
+p {
+  padding-left: 5%;
+  padding-right: 5%;
+}
+input[type="checkbox"] + label span {
+  display: inline-block;
+  width: 20px;
+  height: 49px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+a {
+/*color: #00B7FF;*/
+  color: #fff;
+  font-size: 1.5em;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  text-decoration: none !important;
+  cursor: pointer;
+}
+table {
+  border: 0;
+  margin: 0px;
+  padding: 0px;
+  width: 90%;
+  margin-left: 5%;
+  margin-right: 5%;
+  border-spacing: 0;
+  border-collapse: collapse;
+  font-size: 1em;
+}
+#pad1 {
+  padding-left: 40px;
+}
+#pad2 {
+  padding-left: 80px;
+}
+#pad3 {
+  padding-left: 120px;
+}
+#pad4 {
+  padding-left: 160px;
+}
+#pad5 {
+  padding-left: 200px;
+}
+.beFixed {
+  position: fixed;
+}
+.beBottom {
+  bottom: 0;
+}
+.beLeft {
+  left: 0;
+}
+.restartGameButton {
+  float: right;
+  width: 50%;
+  text-align: right;
+  font-size: 1.5em;
+  cursor: pointer;
+  background-color: #727272;
+  background-color: #727272;
+}
+.rerollButton {
+  float: left;
+  width: 50%;
+  text-align: left;
+  font-size: 1.5em;
+  cursor: pointer;
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.rerollButton.used {
+  cursor: default;
+  background-color: #d1c4e9;
+  background-color: #d1c4e9;
+}
+.acceptCombinationButton {
+  text-align: center;
+  font-size: 2em;
+  cursor: pointer;
+  background-color: #68ffa3;
+  background-color: #68ffa3;
+}
+.combination {
+  cursor: pointer;
+}
+.combination.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.combination.used {
+/* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+  cursor: default;
+  background-color: #d1c4e9;
+  background-color: #d1c4e9;
+}
+.combination.ng-enter,
+.combination.ng-leave,
+.combination.ng-move {
+  -webkit-transition: 0.5s linear all;
+  -moz-transition: 0.5s linear all;
+  -ms-transition: 0.5s linear all;
+  -o-transition: 0.5s linear all;
+  transition: 0.5s linear all;
+}
+.combination.ng-enter,
+.combination.ng-move {
+  opacity: 1;
+}
+.combination.ng-enter.ng-enter-active,
+.combination.ng-move.ng-move-active {
+  opacity: 1;
+}
+.combination.ng-leave {
+  opacity: 1;
+}
+.combination.ng-leave.ng-leave-active {
+  opacity: 1;
+}
+div.dice,
+span {
+  -webkit-transition: 0.5s linear all;
+  -moz-transition: 0.5s linear all;
+  -ms-transition: 0.5s linear all;
+  -o-transition: 0.5s linear all;
+  transition: 0.5s linear all;
+}
+.playerName {
+  cursor: pointer;
+}
+.playerName.selected {
+  cursor: default;
+}
+.menuElement {
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: 90%;
+  max-width: 512px;
+  text-decoration: none !important;
+}
+.menuPad {
+/* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
+/*opacity: 0.618;
+  background: url("../images/pad2.jpg") no-repeat center center;*/
+  background-color: #727272;
+  background-color: #727272;
+}
+.inputView {
+  -moz-appearance: textfield;
+  -webkit-appearance: textfield;
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid #727272;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #fff;
+  background-color: #673ab7;
+  width: 89.5%;
+  max-width: 510px;
+  text-align: center;
+}
+.inputPasswordView {
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid #a9a9a9;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #fff;
+  background-color: #673ab7;
+  width: 89.5%;
+  max-width: 510px;
+  text-align: center;
+}
+.inputSubmitView {
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid #727272;
+  font: 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+  color: #727272;
+  background-color: #673ab7;
+  width: 90%;
+  max-width: 512px;
+  text-align: center;
+}
+.dicesHolder {
+  height: auto;
+  margin: 0 auto;
+  padding: 0px;
+  border: 0px;
+  text-align: center;
+}
+.dice {
+  display: inline-block;
+  background-size: 100% auto;
+  height: 100px;
+  width: 100px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  cursor: pointer;
+}
+.dice.d1 {
+  background: url("../images/dices/white/1.png");
+  background-size: 100% auto;
+}
+.dice.d1.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.dice.d2 {
+  background: url("../images/dices/white/2.png");
+  background-size: 100% auto;
+}
+.dice.d2.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.dice.d3 {
+  background: url("../images/dices/white/3.png");
+  background-size: 100% auto;
+}
+.dice.d3.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.dice.d4 {
+  background: url("../images/dices/white/4.png");
+  background-size: 100% auto;
+}
+.dice.d4.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.dice.d5 {
+  background: url("../images/dices/white/5.png");
+  background-size: 100% auto;
+}
+.dice.d5.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.dice.d6 {
+  background: url("../images/dices/white/6.png");
+  background-size: 100% auto;
+}
+.dice.d6.selected {
+  background-color: #4caf50;
+  background-color: #4caf50;
+}
+.dice.d0 {
+  background: url("../images/dices/white/0.png");
+  background-size: 100% auto;
+}
+.dice.d7 {
+  background: url("../images/dices/white/7.png");
+  background-size: 100% auto;
+}
+.dice.d8 {
+  background: url("../images/dices/white/8.png");
+  background-size: 100% auto;
+}
+.dice.d9 {
+  background: url("../images/dices/white/9.png");
+  background-size: 100% auto;
+}

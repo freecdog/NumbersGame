@@ -3,9 +3,23 @@
  */
 
 function jAngStlyes(window, $scope){
-    $scope.validStyles = ['style', 'BlackWhite']; // 0 index is default
+    $scope.validStyles = ['style', 'BlackWhite', 'materialDsgn']; // 0 index is default
+//    $scope.validStyles = [
+//        {
+//            name: 'style',
+//            filename: 'style'
+//        },
+//        {
+//            name: 'BlackWhite',
+//            filename: 'BlackWhite'
+//        },
+//        {
+//            name: 'materialDsgn',
+//            filename: 'materialDsgn'
+//        }
+//    ];
     function getStorageStyleValue(){
-        var param = 'style';
+        var param = $scope.validStyles[0];
         var localStorage = window.localStorage;
         if (localStorage){
             var alterParam = localStorage.getItem("style");

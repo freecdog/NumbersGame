@@ -1,0 +1,296 @@
+@font-face
+  /* http://webdesignerwall.com/general/font-face-solutions-suggestions */
+  font-family: 'Open Sans Light';
+  src: url('../fonts/open-sans.light.ttf') format('truetype');
+/*
+    many thanks to
+    http://labs.tineye.com/multicolr
+    https://kuler.adobe.com/
+    http://www.materialpalette.com/deep-purple/green
+*/
+
+/*vars*/
+$fonts = 1.5em "Open Sans Light", "Lucida Grande", Helvetica, Arial, sans-serif;
+$colorFont = #FFFFFF;
+$colorBackground = #673AB7;
+$colorInput = #727272;
+$transparency = 1;
+
+$elemWidth = 90%;
+$elemWidthFixed = 89.5%;
+$elemMaxWidth = 512px;
+$elemMaxWidthFixed = 510px;
+
+$animationTime = 0.5s;
+
+/*mixins*/
+colorMenuPad(){
+  background-color: #727272;
+  background-color: rgba(114, 114, 114, $transparency);
+}
+colorUsed() {
+  background-color: #D1C4E9;
+  background-color: rgba(209, 196, 233, $transparency);
+}
+colorSelected() {
+  background-color: #4CAF50;
+  background-color: rgba(76, 175, 80, $transparency);
+}
+
+$c1 = #727272;
+colorRestartButton(){
+  background-color: $c1;
+  background-color: rgba(114, 114, 114, $transparency);
+}
+$c2 = #4CAF50;
+colorRerollButton(){
+  background-color: $c2;
+  background-color: rgba(76, 175, 80, $transparency);
+}
+$c3 = #68ffa3;
+colorAcceptButton(){
+  background-color: $c3;
+  background-color: rgba(104, 255, 163, $transparency);
+}
+colorRerollButtonUsed(){
+  colorUsed();
+}
+colorDiceSelected() {
+  colorSelected();
+}
+colorCombinationSelected(){
+  colorSelected();
+}
+colorCombinationUsed(){
+  colorUsed();
+}
+
+::selection
+  background: lighten($c2, 50%); /* Safari */
+::-moz-selection
+  background: lighten($c2, 50%); /* Firefox */
+body
+  margin: 0 auto;
+  padding: 0px;
+  font: $fonts;
+  color: $colorFont;
+  background-color: $colorBackground;
+  max-width: 600px;
+  -webkit-background-size: cover !important;
+  -moz-background-size: cover !important;
+  -o-background-size: cover !important;
+  background-size: cover !important;
+p
+  padding-left: 5%;
+  padding-right: 5%;
+input[type="checkbox"] + label span
+  display:inline-block;
+  width:20px;
+  height:49px;
+  vertical-align:middle;
+  cursor: pointer;
+a
+  /*color: #00B7FF;*/
+  color: $colorFont;
+  font-size: 1.5em;
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  text-decoration: none !important;
+  cursor: pointer;
+table
+  border: 0;
+  margin: 0px;
+  padding: 0px;
+  width: $elemWidth;
+  margin-left: 5%;
+  margin-right: 5%;
+  border-spacing: 0;
+  border-collapse: collapse;
+  font-size: 1.0em;
+
+#pad1
+  padding-left: 40px;
+#pad2
+  padding-left: 80px;
+#pad3
+  padding-left: 120px;
+#pad4
+  padding-left: 160px;
+#pad5
+  padding-left: 200px;
+.beFixed
+  position: fixed;
+.beBottom
+  bottom: 0;
+.beLeft
+  left: 0;
+
+.restartGameButton
+  float: right;
+  width: 50%;
+  text-align: right;
+  font-size: 1.5em;
+  cursor: pointer;
+  colorRestartButton();
+.rerollButton
+  float: left;
+  width: 50%;
+  text-align: left;
+  font-size: 1.5em;
+  cursor: pointer;
+  colorRerollButton();
+.rerollButton.used
+  cursor: default;
+  colorRerollButtonUsed();
+.acceptCombinationButton
+  text-align: center;
+  font-size: 2em;
+  cursor: pointer;
+  colorAcceptButton();
+.combination
+  cursor: pointer;
+.combination.selected
+  colorCombinationSelected();
+.combination.used
+  /* http://stackoverflow.com/questions/637921/opacity-of-background-color-but-not-the-text */
+  cursor: default;
+  colorCombinationUsed();
+
+.combination.ng-enter,
+.combination.ng-leave,
+.combination.ng-move
+  -webkit-transition: $animationTime linear all;
+  -moz-transition: $animationTime linear all;
+  -ms-transition: $animationTime linear all;
+  -o-transition: $animationTime linear all;
+  transition: $animationTime linear all;
+.combination.ng-enter,
+.combination.ng-move
+  opacity: $transparency;
+.combination.ng-enter.ng-enter-active,
+.combination.ng-move.ng-move-active
+  opacity:1;
+.combination.ng-leave
+  opacity:1;
+.combination.ng-leave.ng-leave-active
+  opacity: $transparency;
+
+div.dice, span
+  -webkit-transition: $animationTime linear all;
+  -moz-transition: $animationTime linear all;
+  -ms-transition: $animationTime linear all;
+  -o-transition: $animationTime linear all;
+  transition: $animationTime linear all;
+
+.playerName
+  cursor: pointer;
+.playerName.selected
+  cursor: default;
+
+.menuElement
+  display: block;
+  margin: 0 auto;
+  text-align: center;
+  width: $elemWidth;
+  max-width: $elemMaxWidth;
+  text-decoration: none !important;
+.menuPad
+  /* http://stackoverflow.com/questions/6346372/css-input-transparent-background-image */
+  /*opacity: 0.618;
+  background: url("../images/pad2.jpg") no-repeat center center;*/
+  colorMenuPad();
+
+.inputView
+  -moz-appearance: textfield;
+  -webkit-appearance: textfield;
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid $colorInput;
+  font: $fonts;
+  color: $colorFont;
+  background-color: $colorBackground;
+  width: $elemWidthFixed;
+  max-width: $elemMaxWidthFixed;
+  text-align: center;
+.inputPasswordView
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid darkgray;
+  font: $fonts;
+  color: $colorFont;
+  background-color: $colorBackground;
+  width: $elemWidthFixed;
+  max-width: $elemMaxWidthFixed;
+  text-align: center;
+.inputSubmitView
+  display: block;
+  margin: 0 auto;
+  padding: 0px;
+  border: 1px solid $colorInput;
+  font: $fonts;
+  color: $colorInput;
+  background-color: $colorBackground;
+  width: $elemWidth;
+  max-width: $elemMaxWidth;
+  text-align: center;
+.dicesHolder
+  height: auto;
+  margin: 0 auto;
+  padding: 0px;
+  border: 0px;
+  text-align: center;
+.dice
+  display: inline-block;
+  background-size: 100% auto;
+  height: 100px;
+  width: 100px;
+  -moz-border-radius: 20px;
+  border-radius: 20px;
+  cursor: pointer;
+.dice.d1
+  background: url("../images/dices/white/1.png");
+  background-size: 100% auto;
+.dice.d1.selected
+  colorDiceSelected();
+.dice.d2
+  background: url("../images/dices/white/2.png");
+  background-size: 100% auto;
+.dice.d2.selected
+  colorDiceSelected();
+.dice.d3
+  background: url("../images/dices/white/3.png");
+  background-size: 100% auto;
+.dice.d3.selected
+  colorDiceSelected();
+.dice.d4
+  background: url("../images/dices/white/4.png");
+  background-size: 100% auto;
+.dice.d4.selected
+  colorDiceSelected();
+.dice.d5
+  background: url("../images/dices/white/5.png");
+  background-size: 100% auto;
+.dice.d5.selected
+  colorDiceSelected();
+.dice.d6
+  background: url("../images/dices/white/6.png");
+  background-size: 100% auto;
+.dice.d6.selected
+  colorDiceSelected();
+
+.dice.d0
+  background: url("../images/dices/white/0.png");
+  background-size: 100% auto;
+.dice.d7
+  background: url("../images/dices/white/7.png");
+  background-size: 100% auto;
+.dice.d8
+  background: url("../images/dices/white/8.png");
+  background-size: 100% auto;
+.dice.d9
+  background: url("../images/dices/white/9.png");
+  background-size: 100% auto;
+
