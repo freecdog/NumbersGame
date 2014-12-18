@@ -3,7 +3,7 @@
  */
 
 function jAngStlyes(window, $scope){
-    $scope.validStyles = ['style', 'BlackWhite', 'materialDsgn']; // 0 index is default
+    $scope.validStyles = ['materialDsgn', 'style', 'BlackWhite']; // 0 index is default
 //    $scope.validStyles = [
 //        {
 //            name: 'style',
